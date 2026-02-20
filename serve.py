@@ -360,8 +360,28 @@ async def ws_relay(request):
 
 # ===== App Setup =====
 
+# ===== Security: block sensitive paths =====
+
+BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules')
+
+
+async def handle_root(request):
+    """Serve index.html for the root URL."""
+    return web.FileResponse(os.path.join(os.getcwd(), 'index.html'))
+
+
+@web.middleware
+async def block_sensitive_paths(request, handler):
+    """Block access to sensitive directories and files."""
+    path = request.path.lstrip('/')
+    for prefix in BLOCKED_PREFIXES:
+        if path == prefix or path.startswith(prefix + '/'):
+            raise web.HTTPNotFound()
+    return await handler(request)
+
+
 def create_app():
-    app = web.Application(middlewares=[cors_middleware])
+    app = web.Application(middlewares=[block_sensitive_paths, cors_middleware])
 
     # API routes
     app.router.add_post('/api/config', handle_config)
@@ -372,11 +392,14 @@ def create_app():
     app.router.add_post('/api/entities', handle_entities)
     app.router.add_post('/api/intent-switch', handle_intent_switch)
 
-    # WebSocket relay — mounted at root (browser connects to /?scenario=...&phone=...)
+    # WebSocket relay — mounted at /ws (browser connects to /ws?scenario=...&phone=...)
     app.router.add_get('/ws', ws_relay)
 
-    # Static files — serve the entire Demos directory
-    app.router.add_static('/', path=os.getcwd(), show_index=True)
+    # Serve index.html at root
+    app.router.add_get('/', handle_root)
+
+    # Static files — serve the Demos directory (no directory listings)
+    app.router.add_static('/', path=os.getcwd(), show_index=False)
 
     return app
 
