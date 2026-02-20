@@ -1,0 +1,118 @@
+/* ===== Custom Scrollbar ===== */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+.custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+.dark .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #475569; }
+
+/* ===== Typing Indicator ===== */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #94a3b8;
+  display: inline-block;
+  animation: typingBounce 1.4s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ===== Message Animations ===== */
+@keyframes messageSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.chat-message { animation: messageSlideIn 0.3s ease-out; }
+
+/* ===== Panel Fade ===== */
+@keyframes panelFade {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+.panel-animate { animation: panelFade 0.4s ease-out; }
+
+/* ===== Suggestion Chips ===== */
+@keyframes chipFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.suggestion-chip {
+  animation: chipFadeIn 0.3s ease-out backwards;
+}
+.suggestion-chip:nth-child(2) { animation-delay: 0.1s; }
+.suggestion-chip:nth-child(3) { animation-delay: 0.2s; }
+
+/* ===== Collapsible Sections ===== */
+.collapsible-body {
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+.collapsible-body.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* ===== SQL Syntax Highlighting ===== */
+.sql-keyword { color: #60a5fa; font-weight: 600; }
+.sql-string { color: #fbbf24; }
+.sql-number { color: #34d399; }
+.sql-comment { color: #64748b; font-style: italic; }
+.dark .sql-keyword { color: #93bbfd; }
+.dark .sql-string { color: #fcd34d; }
+.dark .sql-number { color: #6ee7b7; }
+
+/* ===== Chart Grid ===== */
+.chart-container {
+  position: relative;
+}
+
+/* ===== Welcome State ===== */
+@keyframes welcomeFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.welcome-content { animation: welcomeFadeIn 0.5s ease-out; }
+
+/* ===== Confidence Ring ===== */
+.confidence-ring {
+  transform: rotate(-90deg);
+}
+
+/* ===== Pulse animation for Live badge ===== */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse-dot { animation: pulse-dot 2s infinite; }
+
+/* ===== History Panel Slide ===== */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.history-panel { animation: slideIn 0.25s ease-out; }
+
+/* ===== Table Striping ===== */
+.data-table tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+.dark .data-table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* ===== Copy/Export Button Feedback ===== */
+@keyframes copyFlash {
+  0% { background-color: #22c55e; color: white; }
+  100% { background-color: transparent; }
+}
+.copy-success { animation: copyFlash 0.6s ease-out; }
+
+/* ===== Textarea Auto-resize ===== */
+textarea {
+  field-sizing: content;
+}

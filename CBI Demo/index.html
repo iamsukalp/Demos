@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Conversational BI - AI Data Insights</title>
+<link rel="icon" href="../assets/exl-logo.svg" type="image/svg+xml">
+
+<!-- Dark mode anti-flash -->
+<script>
+  if (localStorage.getItem('exl-theme') !== 'light') document.documentElement.classList.add('dark');
+</script>
+
+<!-- CDN Libraries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<!-- Tailwind Config -->
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#137fec",
+          "background-light": "#f6f7f8",
+          "background-dark": "#101922",
+        },
+        fontFamily: {
+          "display": ["Inter", "sans-serif"]
+        },
+      },
+    },
+  }
+</script>
+
+<!-- Custom Styles -->
+<link href="css/app.css" rel="stylesheet"/>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Header Bar -->
+    <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <img src="../assets/exl-logo.svg" alt="EXL" class="h-7 mr-1" />
+        <h1 id="header-title" class="text-lg font-semibold text-slate-800 dark:text-white">Conversational BI</h1>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500 pulse-dot"></span>
+          Live Syncing
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="../index.html" class="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all" title="Back to Home">
+          <span class="material-icons text-xl">home</span>
+        </a>
+        <button id="btn-history" class="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer" title="Conversation History">
+          <span class="material-icons text-xl">history</span>
+        </button>
+        <button id="btn-dark-mode" class="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all cursor-pointer" title="Toggle Dark Mode">
+          <span class="material-icons text-xl dark-mode-icon">dark_mode</span>
+        </button>
+        <div class="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+        <button id="btn-new-chat" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+          <span class="material-icons text-sm">add</span>
+          New Chat
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Panels -->
+    <main class="flex-1 flex overflow-hidden">
+
+      <!-- ===== CHAT PANEL ===== -->
+      <section class="w-[40%] flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 relative">
+
+        <!-- Chat Messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+          <!-- Messages rendered by JS -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-6 border-t border-slate-100 dark:border-slate-800">
+          <div class="relative flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-xl p-2 border border-slate-200 dark:border-slate-700 shadow-sm focus-within:border-primary/50 transition-colors">
+            <textarea id="chat-input" class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 pl-2 resize-none custom-scrollbar text-slate-700 dark:text-slate-300 placeholder:text-slate-400" placeholder="Ask AI about your data..." rows="1" style="max-height: 128px;"></textarea>
+            <button id="btn-send" class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary/90 transition-all flex-shrink-0">
+              <span class="material-icons text-xl transform rotate-[-45deg] translate-x-0.5 -translate-y-0.5">send</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ANALYTICS PANEL ===== -->
+      <section id="analytics-panel" class="w-[60%] flex flex-col bg-background-light dark:bg-background-dark p-6 overflow-y-auto custom-scrollbar">
+
+        <!-- Welcome State (shown initially) -->
+        <div id="analytics-welcome" class="flex-1 flex flex-col items-center justify-center welcome-content">
+          <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-primary text-3xl">auto_awesome</span>
+          </div>
+          <h2 class="text-xl font-semibold text-slate-800 dark:text-white mb-2">Analytics Panel</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 text-center max-w-sm">Ask a question in the chat to see insights, visualizations, data tables, and the underlying SQL query appear here.</p>
+        </div>
+
+        <!-- Dynamic Content (hidden initially) -->
+        <div id="analytics-content" class="space-y-4 hidden">
+
+          <!-- Key Insights Card -->
+          <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <button onclick="toggleCollapsible('insights')" class="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-primary">lightbulb</span>
+                <span class="font-semibold text-sm">Key Insights</span>
+              </div>
+              <span class="material-icons text-slate-400 collapsible-chevron" data-target="insights">expand_less</span>
+            </button>
+            <div id="insights-body" class="collapsible-body border-t border-slate-100 dark:border-slate-800" style="max-height: 500px;">
+              <div class="p-5">
+                <div id="insights-cards" class="grid grid-cols-2 gap-4">
+                  <!-- Rendered by JS -->
+                </div>
+                <ul id="insights-bullets" class="mt-4 space-y-2">
+                  <!-- Rendered by JS -->
+                </ul>
+                <div id="insights-confidence" class="mt-4 flex items-center gap-2">
+                  <!-- Rendered by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visualization Card -->
+          <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <button onclick="toggleCollapsible('chart')" class="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-primary">insights</span>
+                <span class="font-semibold text-sm">Visualization</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div id="chart-legend" class="flex items-center gap-4">
+                  <!-- Rendered by JS -->
+                </div>
+                <span class="material-icons text-slate-400 collapsible-chevron" data-target="chart">expand_less</span>
+              </div>
+            </button>
+            <div id="chart-body" class="collapsible-body border-t border-slate-100 dark:border-slate-800" style="max-height: 600px;">
+              <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 id="chart-title" class="text-lg font-bold text-slate-800 dark:text-white"></h3>
+                    <p id="chart-subtitle" class="text-xs text-slate-500"></p>
+                  </div>
+                </div>
+                <div class="chart-container" style="height: 320px;">
+                  <canvas id="analytics-chart"></canvas>
+                </div>
+                <div id="chart-summary" class="mt-6 flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg">
+                  <!-- Rendered by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Table Card -->
+          <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <button onclick="toggleCollapsible('table')" class="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-primary">table_rows</span>
+                <span class="font-semibold text-sm">Data Preview</span>
+              </div>
+              <span class="material-icons text-slate-400 collapsible-chevron" data-target="table">expand_more</span>
+            </button>
+            <div id="table-body" class="collapsible-body collapsed border-t border-slate-100 dark:border-slate-800" style="max-height: 0;">
+              <div class="p-5">
+                <div id="data-table-container" class="overflow-x-auto">
+                  <!-- Rendered by JS -->
+                </div>
+                <div class="mt-3 flex justify-end">
+                  <button onclick="exportCSV()" class="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                    <span class="material-icons text-sm">download</span>
+                    Export CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SQL Query Card -->
+          <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <button onclick="toggleCollapsible('sql')" class="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
+              <div class="flex items-center gap-3">
+                <span class="material-icons text-primary">code</span>
+                <span class="font-semibold text-sm">SQL Query</span>
+              </div>
+              <span class="material-icons text-slate-400 collapsible-chevron" data-target="sql">expand_more</span>
+            </button>
+            <div id="sql-body" class="collapsible-body collapsed border-t border-slate-100 dark:border-slate-800" style="max-height: 0;">
+              <div class="p-5">
+                <div class="relative">
+                  <pre id="sql-content" class="bg-slate-900 dark:bg-slate-950 text-slate-300 p-4 rounded-lg text-xs leading-relaxed overflow-x-auto custom-scrollbar"></pre>
+                  <button onclick="copySQL()" id="btn-copy-sql" class="absolute top-3 right-3 px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-md transition-colors flex items-center gap-1">
+                    <span class="material-icons text-xs">content_copy</span>
+                    Copy
+                  </button>
+                </div>
+                <div id="sql-source" class="mt-3 text-[10px] text-slate-400 flex items-center gap-1">
+                  <span class="material-icons text-xs">database</span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generation Footer -->
+          <div id="generation-footer" class="mt-4 text-center text-[10px] text-slate-400 uppercase tracking-widest font-semibold">
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== HISTORY OVERLAY ===== -->
+  <div id="history-overlay" class="fixed inset-0 bg-black/30 z-[100] hidden" onclick="toggleHistory()">
+    <div id="history-panel" class="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-xl history-panel" onclick="event.stopPropagation()">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800">
+        <h2 class="text-sm font-semibold text-slate-800 dark:text-white">Conversation History</h2>
+      </div>
+      <div id="history-list" class="p-3 space-y-1 overflow-y-auto custom-scrollbar" style="max-height: calc(100vh - 60px);">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Application Scripts -->
+<script src="js/scenarios.js"></script>
+<script src="js/chat-engine.js"></script>
+<script src="js/analytics-panel.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,4677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luna IVR | Call Containment Demo</title>
+  <link rel="icon" href="../assets/exl-logo.svg" type="image/svg+xml">
+  <style>
+    /* ===== CSS Custom Properties ===== */
+    :root {
+      --orange: #FF5B35;
+      --orange-light: #FFF0EC;
+      --navy: #0F172A;
+      --dark: #1F2937;
+      --gray-700: #374151;
+      --gray-600: #4B5563;
+      --gray-500: #6B7280;
+      --gray-400: #9CA3AF;
+      --gray-300: #D1D5DB;
+      --gray-200: #E5E7EB;
+      --gray-100: #F3F4F6;
+      --gray-50: #F9FAFB;
+      --white: #FFFFFF;
+      --blue: #1E40AF;
+      --blue-light: #DBEAFE;
+      --green: #059669;
+      --green-light: #ECFDF5;
+      --green-bright: #22C55E;
+      --yellow: #EAB308;
+      --sky: #3B82F6;
+      --red: #EF4444;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font);
+      font-size: 16px;
+      color: var(--navy);
+      background: var(--gray-50);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      height: 60px;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .header__brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header__brand-logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--orange);
+      letter-spacing: -0.5px;
+    }
+    .header__brand-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--gray-300);
+    }
+    .header__brand-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .header__title {
+      font-size: 14px;
+      color: var(--gray-500);
+      font-weight: 500;
+    }
+    .header__badge {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--orange);
+      background: var(--orange-light);
+      padding: 4px 12px;
+      border-radius: 9999px;
+    }
+    .header__home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--gray-500);
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .header__home:hover {
+      background: var(--gray-100);
+      color: var(--navy);
+    }
+
+    /* ===== App Layout ===== */
+    .app {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      width: 0;
+      background: var(--white);
+      border-right: none;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+      transition: width 0.3s ease, border-right 0.3s ease;
+    }
+    .sidebar.open {
+      width: 300px;
+      border-right: 1px solid var(--gray-200);
+      overflow-y: auto;
+    }
+    .sidebar__section {
+      padding: 20px;
+    }
+    .sidebar__section--scenarios {
+      display: none;
+    }
+    /* ===== Profile Selector ===== */
+    .sidebar__section--profiles {
+      padding: 16px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .profile-card:last-child { margin-bottom: 0; }
+    .profile-card:hover { border-color: var(--gray-300); background: var(--gray-50); }
+    .profile-card.active {
+      border-color: var(--orange);
+      border-left: 3px solid var(--orange);
+      background: var(--orange-light);
+    }
+    .profile-card.disabled { opacity: 0.5; pointer-events: none; }
+    .profile-card__avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .profile-card__avatar--platinum { background: #EDE9FE; color: #5B21B6; }
+    .profile-card__avatar--gold { background: #FEF3C7; color: #92400E; }
+    .profile-card__avatar--silver { background: var(--gray-100); color: var(--gray-600); }
+    .profile-card__body { flex: 1; min-width: 0; }
+    .profile-card__name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .profile-card__meta {
+      font-size: 11px;
+      color: var(--gray-500);
+    }
+    .sidebar__heading {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-500);
+      margin-bottom: 12px;
+    }
+
+    /* ===== Scenario Cards ===== */
+    .scenario-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .scenario-card:hover {
+      border-color: var(--gray-300);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .scenario-card.active {
+      border-color: var(--orange);
+      border-left: 3px solid var(--orange);
+      background: var(--orange-light);
+    }
+    .scenario-card__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .scenario-card__icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .scenario-card__icon--blue { background: var(--blue-light); color: var(--blue); }
+    .scenario-card__icon--green { background: var(--green-light); color: var(--green); }
+    .scenario-card__icon--amber { background: #FEF3C7; color: #D97706; }
+    .scenario-card__icon--purple { background: #EDE9FE; color: #7C3AED; }
+    .scenario-card__icon--teal { background: #CCFBF1; color: #0D9488; }
+    .scenario-card__icon--sky { background: #E0F2FE; color: #0284C7; }
+    .scenario-card__icon--rose { background: #FFE4E6; color: #E11D48; }
+    .scenario-card__icon--indigo { background: #E0E7FF; color: #4338CA; }
+    .scenario-card__icon--orange { background: #FFEDD5; color: #EA580C; }
+    .scenario-card__icon--cyan { background: #CFFAFE; color: #0891B2; }
+    .scenario-card__body { flex: 1; min-width: 0; }
+    .scenario-card__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 2px;
+    }
+    .scenario-card__desc {
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+    }
+    .scenario-card__badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+    .badge--contained { background: #DCFCE7; color: #166534; }
+    .badge--escalated { background: #FEF3C7; color: #92400E; }
+
+    /* ===== Caller Info ===== */
+    .caller-info {
+      padding: 20px;
+      display: none;
+    }
+    .caller-info.visible { display: block; }
+    .caller-info__avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--orange-light);
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .caller-info__name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 2px;
+    }
+    .caller-info__tier {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #FEF3C7;
+      color: #92400E;
+      margin-bottom: 10px;
+    }
+    .caller-info__tier--gold { background: #FEF3C7; color: #92400E; }
+    .caller-info__tier--silver { background: var(--gray-100); color: var(--gray-600); }
+    .caller-info__tier--platinum { background: #EDE9FE; color: #5B21B6; }
+    .caller-info__detail {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .caller-info__detail svg { width: 14px; height: 14px; opacity: 0.6; }
+    .caller-info__verified {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+      margin-top: 8px;
+    }
+    .caller-info__verified svg { width: 14px; height: 14px; }
+
+    .caller-info__accounts {
+      margin-top: 16px;
+      border-top: 1px solid var(--gray-200);
+      padding-top: 12px;
+    }
+    .caller-info__accounts-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-400);
+      margin-bottom: 8px;
+    }
+    .caller-info__account-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 12px;
+    }
+    .caller-info__account-name {
+      color: var(--gray-600);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .caller-info__account-name .acct-num {
+      color: var(--gray-400);
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .caller-info__account-val {
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /* ===== Shimmer Loading ===== */
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: 200px 0; }
+    }
+    .shimmer {
+      background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s infinite ease-in-out;
+      border-radius: 4px;
+      color: transparent !important;
+    }
+    .shimmer * { visibility: hidden; }
+    .caller-info__avatar.shimmer {
+      background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s infinite ease-in-out;
+      color: transparent;
+    }
+    .caller-info__heading {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-400);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .caller-info__heading .spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--gray-300);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    html.dark .shimmer {
+      background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+      background-size: 400px 100%;
+    }
+    html.dark .caller-info__avatar.shimmer {
+      background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+      background-size: 400px 100%;
+    }
+    html.dark .caller-info__heading {
+      color: #64748B;
+    }
+
+    /* ===== Main Content ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ===== Call Status Bar ===== */
+    .call-status {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--white);
+      flex-shrink: 0;
+      transition: background 0.3s ease;
+    }
+    .call-status.state--ringing { background: #FEFCE8; }
+    .call-status.state--connected { background: #F0FDF4; }
+    .call-status.state--transferring { background: #EFF6FF; }
+    .call-status__left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gray-400);
+      transition: background 0.3s ease;
+    }
+    .status-dot--green { background: var(--green-bright); animation: pulse 1.5s ease-in-out infinite; }
+    .status-dot--yellow { background: var(--yellow); animation: pulse 1s ease-in-out infinite; }
+    .status-dot--blue { background: var(--sky); animation: pulse 1s ease-in-out infinite; }
+    .status-dot--gray { background: var(--gray-400); animation: none; }
+    .call-status__text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+    .call-status__timer {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+      font-variant-numeric: tabular-nums;
+    }
+    .call-status__handler {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+    .call-status__handler svg { width: 16px; height: 16px; }
+
+    /* ===== Transcript Area ===== */
+    .transcript {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .transcript__empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-400);
+      text-align: center;
+    }
+    .transcript__empty svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.3; }
+    .transcript__empty-text {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .transcript__empty-sub { font-size: 13px; }
+
+    /* ===== Message Bubbles ===== */
+    .message {
+      display: flex;
+      flex-direction: column;
+      animation: messageIn 0.3s ease-out;
+      max-width: 70%;
+    }
+    .message--system {
+      align-self: center;
+      max-width: 100%;
+    }
+    .message--bot, .message--agent {
+      align-self: flex-start;
+    }
+    .message--customer {
+      align-self: flex-end;
+    }
+    .message__label {
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .message__label svg { width: 12px; height: 12px; }
+    .message--bot .message__label { color: var(--gray-500); }
+    .message--agent .message__label { color: var(--green); }
+    .message--customer .message__label { color: var(--blue); text-align: right; justify-content: flex-end; }
+    .message__bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+    .message--bot .message__bubble {
+      background: var(--gray-100);
+      color: var(--navy);
+      border-bottom-left-radius: 4px;
+    }
+    .message--customer .message__bubble {
+      background: var(--blue);
+      color: var(--white);
+      border-bottom-right-radius: 4px;
+    }
+    .message--agent .message__bubble {
+      background: var(--green-light);
+      color: var(--navy);
+      border-bottom-left-radius: 4px;
+    }
+    .message--system .message__bubble {
+      background: transparent;
+      color: var(--gray-500);
+      font-size: 13px;
+      font-style: italic;
+      text-align: center;
+      padding: 8px 16px;
+    }
+
+    /* ===== Typing Indicator ===== */
+    .typing-indicator {
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      align-self: flex-start;
+      animation: messageIn 0.3s ease-out;
+    }
+    .typing-indicator__label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .typing-indicator__label svg { width: 12px; height: 12px; }
+    .typing-indicator__dots {
+      background: var(--gray-100);
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      padding: 12px 20px;
+      display: flex;
+      gap: 4px;
+    }
+    .typing-indicator--agent .typing-indicator__dots {
+      background: var(--green-light);
+    }
+    .typing-indicator--agent .typing-indicator__label {
+      color: var(--green);
+    }
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-400);
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+    /* ===== Transfer Summary Card ===== */
+    .transfer-card {
+      align-self: center;
+      width: 100%;
+      max-width: 500px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-left: 4px solid var(--sky);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 8px 0;
+      animation: messageIn 0.3s ease-out;
+    }
+    .transfer-card__title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--sky);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .transfer-card__title svg { width: 14px; height: 14px; }
+    .transfer-card__row {
+      display: flex;
+      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .transfer-card__label {
+      width: 130px;
+      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--gray-600);
+    }
+    .transfer-card__value {
+      color: var(--navy);
+    }
+
+    /* ===== Resolution Card ===== */
+    .resolution-card {
+      align-self: center;
+      width: 100%;
+      max-width: 500px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 12px 0;
+      animation: messageIn 0.3s ease-out;
+    }
+    .resolution-card.contained { border-left: 4px solid var(--green); }
+    .resolution-card.escalated { border-left: 4px solid #D97706; }
+    .resolution-card__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .resolution-card__icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .resolution-card__icon svg { width: 16px; height: 16px; }
+    .resolution-card.contained .resolution-card__icon { background: #DCFCE7; color: #166534; }
+    .resolution-card.escalated .resolution-card__icon { background: #FEF3C7; color: #92400E; }
+    .resolution-card__title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .resolution-card__row {
+      display: flex;
+      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .resolution-card__label {
+      width: 120px;
+      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--gray-500);
+    }
+    .resolution-card__value { color: var(--navy); }
+    .resolution-card__outcome {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      margin-top: 4px;
+    }
+    .resolution-card__outcome--contained { background: #DCFCE7; color: #166534; }
+    .resolution-card__outcome--escalated { background: #FEF3C7; color: #92400E; }
+
+    /* Collapsible call summary section */
+    .resolution-card__details {
+      border-top: 1px solid var(--gray-200);
+      margin-top: 12px;
+    }
+    .resolution-card__details summary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 10px 0 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-500);
+      list-style: none;
+      user-select: none;
+    }
+    .resolution-card__details summary::-webkit-details-marker { display: none; }
+    .resolution-card__details summary::before {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background: currentColor;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z' clip-rule='evenodd'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z' clip-rule='evenodd'/%3E%3C/svg%3E") center / contain no-repeat;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+    .resolution-card__details[open] summary::before {
+      transform: rotate(90deg);
+    }
+    .resolution-card__details summary:hover {
+      color: var(--navy);
+    }
+    .resolution-card__details-body {
+      padding: 8px 0 2px 22px;
+    }
+    .resolution-card__ai-summary {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--gray-200);
+    }
+    .resolution-card__summary-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+    }
+    .resolution-card__summary-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--navy);
+    }
+    .resolution-card__summary-shimmer {
+      height: 48px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ===== Call Action Bar ===== */
+    .call-actions {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border-top: 1px solid var(--gray-200);
+      background: var(--white);
+      flex-shrink: 0;
+    }
+    .btn {
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1.5px solid transparent;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn--danger {
+      background: var(--white);
+      color: var(--red);
+      border-color: var(--red);
+    }
+    .btn--danger:hover:not(:disabled) { background: #FEF2F2; }
+    .btn--secondary {
+      background: var(--white);
+      color: var(--gray-600);
+      border-color: var(--gray-300);
+    }
+    .btn--secondary:hover:not(:disabled) { background: var(--gray-50); border-color: var(--gray-400); }
+    .btn--text {
+      background: transparent;
+      color: var(--gray-500);
+      border: none;
+      padding: 8px 16px;
+    }
+    .btn--text:hover:not(:disabled) { color: var(--navy); background: var(--gray-50); }
+
+    /* ===== Footer Metrics ===== */
+    .footer {
+      height: 44px;
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-shrink: 0;
+    }
+    .metric {
+      font-size: 12px;
+      color: var(--gray-400);
+      font-weight: 500;
+    }
+    .metric__value {
+      color: var(--white);
+      font-weight: 700;
+    }
+
+    /* ===== Animations ===== */
+    @keyframes messageIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ===== Voice Recording UI ===== */
+    .mic-area {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--white);
+      border-top: 1px solid var(--gray-200);
+    }
+    .mic-area.visible {
+      display: flex;
+    }
+    .mic-area__prompt {
+      font-size: 13px;
+      color: var(--gray-500);
+      font-weight: 500;
+    }
+    .mic-area__controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .mic-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: var(--orange);
+      color: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .mic-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(255, 91, 53, 0.3); }
+    .mic-btn svg { width: 24px; height: 24px; }
+    .mic-btn.recording {
+      background: var(--red);
+      animation: micPulse 1.5s ease-in-out infinite;
+    }
+    .mic-btn.recording:hover { box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+    @keyframes micPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+    }
+    .waveform-canvas {
+      width: 240px;
+      height: 56px;
+      border-radius: 8px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+    }
+    .mic-area__status {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .mic-area__status-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--red);
+    }
+    .mic-area__status-text.idle { color: var(--gray-500); }
+    .mic-area__live-text {
+      font-size: 12px;
+      color: var(--gray-500);
+      font-style: italic;
+      max-width: 400px;
+      text-align: center;
+      min-height: 18px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mic-area__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Text Input Area */
+    .mic-area__text-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 520px;
+      margin-top: 4px;
+    }
+    .mic-area__text-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--gray-300);
+      border-radius: 24px;
+      font-size: 14px;
+      font-family: var(--font);
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .mic-area__text-input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 91, 53, 0.12);
+    }
+    .mic-area__text-input::placeholder {
+      color: var(--gray-400);
+    }
+    .mic-area__send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--orange);
+      color: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .mic-area__send-btn:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(255, 91, 53, 0.3); }
+    .mic-area__send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .mic-area__send-btn svg { width: 18px; height: 18px; }
+    .mic-area__or-divider {
+      font-size: 12px;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* Entity highlight in dynamic messages */
+    .entity-highlight {
+      border-bottom: 2px solid var(--orange);
+      background: rgba(255, 91, 53, 0.08);
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    /* Dynamic response badge */
+    .message__dynamic-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      color: var(--orange);
+      font-weight: 600;
+      margin-left: 6px;
+      opacity: 0.8;
+    }
+    .message__dynamic-badge svg { width: 10px; height: 10px; }
+
+    .voice-prompt {
+      align-self: center;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--orange-light);
+      border: 1px dashed var(--orange);
+      border-radius: 12px;
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 600;
+      animation: messageIn 0.3s ease-out;
+    }
+    .voice-prompt svg { width: 16px; height: 16px; }
+
+    .heard-label {
+      align-self: flex-end;
+      max-width: 70%;
+      font-size: 11px;
+      color: var(--gray-400);
+      font-style: italic;
+      margin-bottom: -2px;
+      padding: 0 4px;
+      animation: messageIn 0.3s ease-out;
+    }
+
+    /* ===== Start Call Button ===== */
+    .btn--start-call {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 12px 28px;
+      background: var(--orange);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn--start-call:hover {
+      background: #E5462B;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 91, 53, 0.3);
+    }
+    .btn--start-call svg { width: 18px; height: 18px; }
+
+    /* ===== AI Call Prompt ===== */
+    .ai-call-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      padding: 40px;
+    }
+    .ai-call-prompt__phone {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-top: 8px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* ===== Intent Detection Feedback ===== */
+    .intent-detected-label {
+      align-self: center;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #DCFCE7;
+      border: 1px solid #BBF7D0;
+      border-radius: 8px;
+      color: #166534;
+      font-size: 13px;
+      font-weight: 500;
+      animation: messageIn 0.3s ease-out;
+      margin: 4px 0;
+    }
+    .intent-detected-label svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .intent-detected-label strong { font-weight: 700; }
+
+    .no-match-feedback {
+      align-self: center;
+      max-width: 500px;
+      padding: 16px 20px;
+      background: #FEF3C7;
+      border: 1px solid #FDE68A;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      color: #92400E;
+      line-height: 1.5;
+      animation: messageIn 0.3s ease-out;
+      margin: 8px 0;
+    }
+
+    /* ===== Scrollbar ===== */
+    .transcript::-webkit-scrollbar { width: 6px; }
+    .transcript::-webkit-scrollbar-track { background: transparent; }
+    .transcript::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+    .transcript::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+    /* ===== Dark Mode ===== */
+    html.dark body {
+      background: #0F172A;
+      color: #E2E8F0;
+    }
+    html.dark .header {
+      background: #1E293B;
+      border-bottom-color: #334155;
+    }
+    html.dark .header__brand-name {
+      color: #F1F5F9;
+    }
+    html.dark .header__title {
+      color: #94A3B8;
+    }
+    html.dark .header__home {
+      color: #94A3B8;
+    }
+    html.dark .header__home:hover {
+      background: #334155;
+      color: #F1F5F9;
+    }
+    html.dark .header__badge {
+      background: rgba(255, 91, 53, 0.15);
+    }
+    html.dark .sidebar {
+      background: #1E293B;
+    }
+    html.dark .sidebar.open {
+      border-right-color: #334155;
+    }
+    html.dark .sidebar__heading {
+      color: #94A3B8;
+    }
+    html.dark .sidebar__section--profiles {
+      border-bottom-color: #334155;
+    }
+    html.dark .profile-card {
+      border-color: #334155;
+    }
+    html.dark .profile-card:hover {
+      border-color: #475569;
+      background: #1E293B;
+    }
+    html.dark .profile-card.active {
+      border-color: var(--orange);
+      background: rgba(255, 91, 53, 0.08);
+    }
+    html.dark .profile-card__name {
+      color: #F1F5F9;
+    }
+    html.dark .profile-card__meta {
+      color: #94A3B8;
+    }
+    html.dark .scenario-card {
+      border-color: #334155;
+      background: #1E293B;
+    }
+    html.dark .scenario-card:hover {
+      border-color: #475569;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    html.dark .scenario-card.active {
+      border-color: var(--orange);
+      background: rgba(255, 91, 53, 0.1);
+    }
+    html.dark .scenario-card__title {
+      color: #F1F5F9;
+    }
+    html.dark .scenario-card__desc {
+      color: #94A3B8;
+    }
+    html.dark .caller-info {
+      border-top-color: #334155;
+    }
+    html.dark .caller-info__name {
+      color: #F1F5F9;
+    }
+    html.dark .caller-info__detail {
+      color: #94A3B8;
+    }
+    html.dark .caller-info__accounts {
+      border-top-color: #334155;
+    }
+    html.dark .caller-info__account-name {
+      color: #94A3B8;
+    }
+    html.dark .caller-info__account-val {
+      color: #F1F5F9;
+    }
+    html.dark .call-status {
+      background: #1E293B;
+      border-bottom-color: #334155;
+    }
+    html.dark .call-status.state--ringing { background: rgba(254, 252, 232, 0.08); }
+    html.dark .call-status.state--connected { background: rgba(240, 253, 244, 0.08); }
+    html.dark .call-status.state--transferring { background: rgba(239, 246, 255, 0.08); }
+    html.dark .call-status__text {
+      color: #94A3B8;
+    }
+    html.dark .call-status__timer {
+      color: #F1F5F9;
+    }
+    html.dark .call-status__handler {
+      color: #94A3B8;
+    }
+    html.dark .transcript {
+      background: #0F172A;
+    }
+    html.dark .transcript__empty {
+      color: #64748B;
+    }
+    html.dark .message--bot .message__bubble {
+      background: #334155;
+      color: #E2E8F0;
+    }
+    html.dark .message--agent .message__bubble {
+      background: rgba(5, 150, 105, 0.15);
+      color: #E2E8F0;
+    }
+    html.dark .message--system .message__bubble {
+      color: #64748B;
+    }
+    html.dark .typing-indicator__dots {
+      background: #334155;
+    }
+    html.dark .typing-indicator--agent .typing-indicator__dots {
+      background: rgba(5, 150, 105, 0.15);
+    }
+    html.dark .typing-dot {
+      background: #64748B;
+    }
+    html.dark .transfer-card {
+      background: #1E293B;
+      border-color: #334155;
+    }
+    html.dark .transfer-card__label {
+      color: #94A3B8;
+    }
+    html.dark .transfer-card__value {
+      color: #E2E8F0;
+    }
+    html.dark .resolution-card {
+      background: #1E293B;
+      border-color: #334155;
+    }
+    html.dark .resolution-card__title {
+      color: #F1F5F9;
+    }
+    html.dark .resolution-card__label {
+      color: #94A3B8;
+    }
+    html.dark .resolution-card__value {
+      color: #E2E8F0;
+    }
+    html.dark .resolution-card__details {
+      border-top-color: #334155;
+    }
+    html.dark .resolution-card__details summary {
+      color: #94A3B8;
+    }
+    html.dark .resolution-card__details summary:hover {
+      color: #E2E8F0;
+    }
+    html.dark .resolution-card__ai-summary {
+      border-top-color: #334155;
+    }
+    html.dark .resolution-card__summary-label {
+      color: #94A3B8;
+    }
+    html.dark .resolution-card__summary-text {
+      color: #E2E8F0;
+    }
+    html.dark .resolution-card__summary-shimmer {
+      background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+    html.dark .call-actions {
+      background: #1E293B;
+      border-top-color: #334155;
+    }
+    html.dark .btn--danger {
+      background: #1E293B;
+      color: var(--red);
+      border-color: var(--red);
+    }
+    html.dark .btn--danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.1); }
+    html.dark .btn--secondary {
+      background: #1E293B;
+      color: #94A3B8;
+      border-color: #475569;
+    }
+    html.dark .btn--secondary:hover:not(:disabled) { background: #334155; border-color: #64748B; }
+    html.dark .btn--text {
+      color: #94A3B8;
+    }
+    html.dark .btn--text:hover:not(:disabled) { color: #F1F5F9; background: #334155; }
+    html.dark .footer {
+      background: #0B1120;
+    }
+    html.dark .mic-area {
+      background: #1E293B;
+      border-top-color: #334155;
+    }
+    html.dark .mic-area__prompt {
+      color: #94A3B8;
+    }
+    html.dark .mic-area__text-input {
+      background: #0F172A;
+      border-color: #475569;
+      color: #E2E8F0;
+    }
+    html.dark .mic-area__text-input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 91, 53, 0.15);
+    }
+    html.dark .mic-area__text-input::placeholder {
+      color: #64748B;
+    }
+    html.dark .mic-area__or-divider {
+      color: #64748B;
+    }
+    html.dark .entity-highlight {
+      background: rgba(255, 91, 53, 0.15);
+    }
+    html.dark .waveform-canvas {
+      background: #0F172A;
+      border-color: #334155;
+    }
+    html.dark .voice-prompt {
+      background: rgba(255, 91, 53, 0.1);
+      border-color: var(--orange);
+    }
+    html.dark .intent-detected-label {
+      background: rgba(220, 252, 231, 0.1);
+      border-color: rgba(187, 247, 208, 0.2);
+      color: #4ADE80;
+    }
+    html.dark .no-match-feedback {
+      background: rgba(254, 243, 199, 0.1);
+      border-color: rgba(253, 230, 138, 0.2);
+      color: #FBBF24;
+    }
+    html.dark .transcript::-webkit-scrollbar-thumb { background: #475569; }
+    html.dark .transcript::-webkit-scrollbar-thumb:hover { background: #64748B; }
+    html.dark .sidebar::-webkit-scrollbar-thumb { background: #475569; }
+
+    /* Dark mode toggle button */
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--gray-500);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover {
+      background: var(--gray-100);
+      color: var(--navy);
+    }
+    html.dark .theme-toggle {
+      color: #94A3B8;
+    }
+    html.dark .theme-toggle:hover {
+      background: #334155;
+      color: #F1F5F9;
+    }
+
+    /* ===== Settings Modal ===== */
+    .settings-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .settings-overlay.open { display: flex; }
+    .settings-modal {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      width: 440px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .settings-modal h2 {
+      margin: 0 0 4px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .settings-modal__sub {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-bottom: 20px;
+    }
+    .settings-modal label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    .settings-modal input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .settings-modal input[type="password"]:focus {
+      outline: none;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255,91,53,0.1);
+    }
+    .settings-status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .settings-status--disconnected {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    .settings-status--connected {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+    .settings-status--error {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+    .settings-status__dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .settings-status--disconnected .settings-status__dot { background: #F59E0B; }
+    .settings-status--connected .settings-status__dot { background: #10B981; }
+    .settings-status--error .settings-status__dot { background: #EF4444; }
+    .settings-modal__actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .settings-modal__actions button {
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn--settings-save {
+      background: var(--orange);
+      color: white;
+    }
+    .btn--settings-save:hover { background: #E54E2B; }
+    .btn--settings-close {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+    .btn--settings-close:hover { background: var(--gray-300); }
+    .btn--settings-clear {
+      background: transparent;
+      color: #EF4444;
+      margin-right: auto;
+    }
+    .btn--settings-clear:hover { background: #FEE2E2; }
+
+    /* Mode indicator badge in footer */
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .mode-badge--scripted {
+      background: var(--gray-200);
+      color: var(--gray-600);
+    }
+    .mode-badge--ai {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+    .mode-badge__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .mode-badge--scripted .mode-badge__dot { background: var(--gray-400); }
+    .mode-badge--ai .mode-badge__dot { background: #10B981; }
+
+    /* AI call active indicator */
+    .ai-call-indicator {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #D1FAE5;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #065F46;
+      font-weight: 600;
+    }
+    .ai-call-indicator.active { display: flex; }
+    .ai-call-indicator__pulse {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #10B981;
+      animation: pulse-ring 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+      70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+    .ai-mute-btn {
+      margin-left: auto;
+      background: transparent;
+      border: 1.5px solid #065F46;
+      color: #065F46;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ai-mute-btn:hover { background: rgba(6,95,70,0.1); }
+
+    /* Dark mode: settings modal */
+    html.dark .settings-modal {
+      background: #1E293B;
+    }
+    html.dark .settings-modal h2 { color: #F1F5F9; }
+    html.dark .settings-modal__sub { color: #94A3B8; }
+    html.dark .settings-modal label { color: #CBD5E1; }
+    html.dark .settings-modal input[type="password"] {
+      background: #0F172A;
+      border-color: #475569;
+      color: #E2E8F0;
+    }
+    html.dark .settings-modal input[type="password"]:focus {
+      border-color: var(--orange);
+    }
+    html.dark .settings-status--disconnected {
+      background: rgba(245,158,11,0.15);
+      color: #FBBF24;
+    }
+    html.dark .settings-status--connected {
+      background: rgba(16,185,129,0.15);
+      color: #6EE7B7;
+    }
+    html.dark .settings-status--error {
+      background: rgba(239,68,68,0.15);
+      color: #FCA5A5;
+    }
+    html.dark .btn--settings-close {
+      background: #334155;
+      color: #CBD5E1;
+    }
+    html.dark .btn--settings-close:hover { background: #475569; }
+    html.dark .btn--settings-clear:hover { background: rgba(239,68,68,0.15); }
+    html.dark .mode-badge--scripted {
+      background: #334155;
+      color: #94A3B8;
+    }
+    html.dark .mode-badge--ai {
+      background: rgba(16,185,129,0.15);
+      color: #6EE7B7;
+    }
+    html.dark .ai-call-indicator {
+      background: rgba(16,185,129,0.15);
+      color: #6EE7B7;
+    }
+    html.dark .ai-mute-btn {
+      border-color: #6EE7B7;
+      color: #6EE7B7;
+    }
+  </style>
+  <script>
+    // Anti-flash: apply dark mode before paint
+    if (localStorage.getItem('exl-theme') !== 'light') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header__brand">
+      <img src="../assets/exl-logo.svg" alt="EXL" class="header__brand-logo" style="height:24px" />
+      <span class="header__brand-divider"></span>
+      <span class="header__brand-name">Luna</span>
+    </div>
+    <span class="header__title">IVR Call Containment Simulator</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="theme-toggle" id="btnSettings" onclick="openSettings()" title="AI Settings">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.066z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+        <svg id="sunIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>
+        <svg id="moonIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <a href="../index.html" class="header__home" title="Back to Home">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Settings Modal -->
+  <div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+    <div class="settings-modal">
+      <h2>AI Settings</h2>
+      <div class="settings-modal__sub">Connect Luna to OpenAI for fully conversational AI mode</div>
+      <label for="apiKeyInput">OpenAI API Key</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off" />
+      <div class="settings-status settings-status--disconnected" id="settingsStatus">
+        <span class="settings-status__dot"></span>
+        <span id="settingsStatusText">Scripted mode — add API key for AI mode</span>
+      </div>
+      <div class="settings-modal__actions">
+        <button class="btn--settings-clear" id="btnClearKey" onclick="clearApiKey()">Clear Key</button>
+        <button class="btn--settings-close" onclick="closeSettings()">Close</button>
+        <button class="btn--settings-save" onclick="saveApiKey()">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Layout -->
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar__section sidebar__section--profiles" id="profileSection">
+        <div class="sidebar__heading">Customer Profiles</div>
+        <div id="profileList"></div>
+      </div>
+      <div class="sidebar__section sidebar__section--scenarios" id="scenarioSection">
+        <div class="sidebar__heading">Scenarios</div>
+
+        <div class="scenario-card" data-scenario="block-card" onclick="selectScenario('block-card')">
+          <div class="scenario-card__icon scenario-card__icon--blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Block My Credit Card</div>
+            <div class="scenario-card__desc">Customer reports unauthorized card use</div>
+            <span class="scenario-card__badge badge--contained">Bot Resolves</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="loan-balance" onclick="selectScenario('loan-balance')">
+          <div class="scenario-card__icon scenario-card__icon--green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Check Loan Balance</div>
+            <div class="scenario-card__desc">Customer asks about auto loan details</div>
+            <span class="scenario-card__badge badge--contained">Bot Resolves</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="dispute" onclick="selectScenario('dispute')">
+          <div class="scenario-card__icon scenario-card__icon--amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Dispute a Transaction</div>
+            <div class="scenario-card__desc">Fraudulent charges requiring investigation</div>
+            <span class="scenario-card__badge badge--escalated">Agent Escalation</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="restructure" onclick="selectScenario('restructure')">
+          <div class="scenario-card__icon scenario-card__icon--purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Account Restructuring</div>
+            <div class="scenario-card__desc">Joint account separation — complex request</div>
+            <span class="scenario-card__badge badge--escalated">Agent Escalation</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="reset-password" onclick="selectScenario('reset-password')">
+          <div class="scenario-card__icon scenario-card__icon--teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Reset Online Banking Password</div>
+            <div class="scenario-card__desc">Customer locked out of online banking</div>
+            <span class="scenario-card__badge badge--contained">Bot Resolves</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="activate-card" onclick="selectScenario('activate-card')">
+          <div class="scenario-card__icon scenario-card__icon--sky">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Activate New Card</div>
+            <div class="scenario-card__desc">Customer received replacement card</div>
+            <span class="scenario-card__badge badge--contained">Bot Resolves</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="transfer-funds" onclick="selectScenario('transfer-funds')">
+          <div class="scenario-card__icon scenario-card__icon--green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Transfer Between Accounts</div>
+            <div class="scenario-card__desc">Move funds between own accounts</div>
+            <span class="scenario-card__badge badge--contained">Bot Resolves</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="credit-limit" onclick="selectScenario('credit-limit')">
+          <div class="scenario-card__icon scenario-card__icon--indigo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><polyline points="18 15 22 15 22 19"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Credit Limit Increase</div>
+            <div class="scenario-card__desc">Request higher credit limit — underwriting review</div>
+            <span class="scenario-card__badge badge--escalated">Agent Escalation</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="mortgage-rate" onclick="selectScenario('mortgage-rate')">
+          <div class="scenario-card__icon scenario-card__icon--orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">Mortgage Rate Renegotiation</div>
+            <div class="scenario-card__desc">Customer seeks lower rate — agent review required</div>
+            <span class="scenario-card__badge badge--escalated">Agent Escalation</span>
+          </div>
+        </div>
+
+        <div class="scenario-card" data-scenario="wire-transfer" onclick="selectScenario('wire-transfer')">
+          <div class="scenario-card__icon scenario-card__icon--rose">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div class="scenario-card__body">
+            <div class="scenario-card__title">International Wire Transfer</div>
+            <div class="scenario-card__desc">Cross-border payment — compliance verification</div>
+            <span class="scenario-card__badge badge--escalated">Agent Escalation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="caller-info" id="callerInfo">
+        <div class="caller-info__heading" id="callerHeading">
+          <span class="spinner"></span> Fetching customer data...
+        </div>
+        <div class="caller-info__avatar" id="callerAvatar"></div>
+        <div class="caller-info__name" id="callerName"></div>
+        <div class="caller-info__tier" id="callerTier"></div>
+        <div class="caller-info__verified" id="callerVerified">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Identity Verified
+        </div>
+        <div class="caller-info__detail" id="callerPhone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__detail" id="callerEmail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__detail" id="callerMember">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__accounts" id="callerAccounts"></div>
+      </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Call Status Bar -->
+      <div class="call-status" id="callStatus">
+        <div class="call-status__left">
+          <div class="status-dot status-dot--gray" id="statusDot"></div>
+          <span class="call-status__text" id="statusText">Select a scenario to begin</span>
+        </div>
+        <span class="call-status__timer" id="callTimer">--:--</span>
+        <div class="call-status__handler" id="callHandler">
+          <span>—</span>
+        </div>
+      </div>
+
+      <!-- Transcript -->
+      <div class="transcript" id="transcript">
+        <div class="transcript__empty" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <div class="transcript__empty-text">Ready for demo</div>
+          <div class="transcript__empty-sub">Speak freely or select a scenario from the sidebar</div>
+          <button class="btn btn--start-call" id="btnStartCall" onclick="startFreeformCall()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Start Call
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Call Indicator -->
+      <div class="ai-call-indicator" id="aiCallIndicator">
+        <span class="ai-call-indicator__pulse"></span>
+        <span>AI Voice Call Active</span>
+        <span id="aiListeningStatus" style="opacity:0.7;font-weight:400;font-size:12px;">— Listening...</span>
+        <button class="ai-mute-btn" id="btnMute" onclick="toggleMute()">Mute</button>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="call-actions" id="callActions">
+        <button class="btn btn--danger" id="btnEnd" disabled onclick="endCall()">End Call</button>
+        <button class="btn btn--secondary" id="btnRestart" disabled onclick="restartScenario()">Restart</button>
+        <button class="btn btn--text" id="btnSkip" disabled onclick="skipAnimation()">Skip Animation</button>
+      </div>
+
+      <!-- Voice Recording Area -->
+      <div class="mic-area" id="micArea">
+        <div class="mic-area__prompt" id="micPrompt">Speak or type your response</div>
+        <div class="mic-area__text-row">
+          <input type="text" class="mic-area__text-input" id="textInput" placeholder="Type your response here..." autocomplete="off" />
+          <button class="mic-area__send-btn" id="btnSendText" onclick="submitTextInput()" title="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="mic-area__or-divider">or</div>
+        <div class="mic-area__controls">
+          <button class="mic-btn" id="micBtn" onclick="toggleRecording()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+          <canvas class="waveform-canvas" id="waveformCanvas" width="240" height="56"></canvas>
+          <div class="mic-area__status">
+            <div class="mic-area__status-text idle" id="micStatusText">Ready</div>
+            <div class="mic-area__live-text" id="micLiveText"></div>
+          </div>
+        </div>
+        <div class="mic-area__actions">
+          <button class="btn btn--secondary" id="btnDoneRecording" onclick="finishRecording()" style="display:none">Done Speaking</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="metric">Bot Contained <span class="metric__value" id="metricContained">0</span></div>
+    <div class="metric">Agent Escalated <span class="metric__value" id="metricEscalated">0</span></div>
+    <div class="metric">Containment Rate <span class="metric__value" id="metricRate">—</span></div>
+    <div class="metric">Avg Handle Time <span class="metric__value" id="metricTime">—</span></div>
+    <div class="metric">Dynamic Turns <span class="metric__value" id="metricDynamic">0 / 0</span></div>
+  </footer>
+
+<script>
+// ===== SVG Icons =====
+const ICONS = {
+  bot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>',
+  agent: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+  transfer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+};
+
+// ===== Intent Detection Config =====
+const INTENT_PATTERNS = {
+  'block-card': {
+    keywords: ['block', 'freeze', 'cancel', 'stolen', 'lost', 'unauthorized', 'credit card', 'debit card', 'compromised', 'suspicious'],
+    strongKeywords: ['block', 'freeze', 'credit card', 'debit card', 'stolen', 'lost'],
+    entities: {
+      cardLast4: { pattern: /\b(\d{4})\b/ }
+    }
+  },
+  'loan-balance': {
+    keywords: ['loan', 'balance', 'owe', 'auto loan', 'car loan', 'payment', 'payoff', 'remaining', 'how much'],
+    strongKeywords: ['loan', 'balance', 'auto loan', 'car loan', 'payoff'],
+    entities: {}
+  },
+  'dispute': {
+    keywords: ['dispute', 'charge', 'transaction', 'fraudulent', 'unauthorized', "didn't make", 'not mine', 'wrong charge', "don't recognize"],
+    strongKeywords: ['dispute', 'fraudulent', 'charge', 'transaction'],
+    entities: {
+      disputeAmount: { pattern: /\$?\s?(\d[\d,]*\.?\d{0,2})/, multiple: true },
+      disputeMerchant: { pattern: /(?:at|from|called)\s+([A-Z][A-Za-z']+(?:\s+[A-Z][A-Za-z']+){0,2})/g, multiple: true }
+    }
+  },
+  'restructure': {
+    keywords: ['joint account', 'separate', 'divorce', 'split', 'restructure', 'joint checking', 'joint savings', 'separation', 'wife', 'husband', 'spouse'],
+    strongKeywords: ['joint account', 'separate', 'divorce', 'restructure'],
+    entities: {}
+  },
+  'reset-password': {
+    keywords: ['password', 'reset', 'locked out', 'login', 'sign in', 'online banking', 'can\'t log in', 'forgot password', 'access', 'blocked'],
+    strongKeywords: ['password', 'reset', 'locked out', 'online banking', 'forgot password'],
+    entities: {}
+  },
+  'activate-card': {
+    keywords: ['activate', 'new card', 'received', 'activation', 'just got', 'enable', 'replacement card'],
+    strongKeywords: ['activate', 'new card', 'activation'],
+    entities: {
+      newCardLast4: { pattern: /\b(\d{4})\b/ }
+    }
+  },
+  'transfer-funds': {
+    keywords: ['transfer', 'move money', 'checking', 'savings', 'between accounts', 'send money', 'move funds'],
+    strongKeywords: ['transfer', 'move money', 'between accounts', 'move funds'],
+    entities: {
+      transferAmount: { pattern: /\$?\s?(\d[\d,]*\.?\d{0,2})/ }
+    }
+  },
+  'credit-limit': {
+    keywords: ['credit limit', 'increase', 'raise', 'higher limit', 'limit increase', 'bump up', 'more credit', 'credit line'],
+    strongKeywords: ['credit limit', 'limit increase', 'higher limit', 'credit line'],
+    entities: {}
+  },
+  'mortgage-rate': {
+    keywords: ['mortgage', 'rate', 'refinance', 'renegotiate', 'interest rate', 'home loan', 'lower rate', 'mortgage rate'],
+    strongKeywords: ['mortgage', 'refinance', 'renegotiate', 'mortgage rate'],
+    entities: {}
+  },
+  'wire-transfer': {
+    keywords: ['wire', 'wire transfer', 'international', 'send money abroad', 'overseas', 'foreign', 'remittance', 'send money to'],
+    strongKeywords: ['wire transfer', 'international', 'wire', 'overseas'],
+    entities: {
+      wireAmount: { pattern: /\$?\s?(\d[\d,]*\.?\d{0,2})/ }
+    }
+  }
+};
+
+const ENTITY_DEFAULTS = {
+  'block-card': { cardLast4: '4829' },
+  'loan-balance': {},
+  'dispute': { disputeAmount: ['847.53', '234.00'], disputeMerchant: ['TechVault', 'QuickFuel'] },
+  'restructure': {},
+  'reset-password': {},
+  'activate-card': { newCardLast4: '5531' },
+  'transfer-funds': { transferAmount: '2,500' },
+  'credit-limit': {},
+  'mortgage-rate': {},
+  'wire-transfer': { wireAmount: '12,000' }
+};
+
+// ===== Scenario Data =====
+let CALLER_PHONE = '+1-617-555-0142';  // Updated by profile selector
+
+// Phone number → customer database (IVR simulation — diverse profiles for fair lending demo)
+const CUSTOMER_DB = {
+  // ── Profile 1: South Asian Male, 37, Platinum, Boston ──
+  '+1-617-555-0142': {
+    name: 'Varun Khator', initials: 'VK',
+    tier: 'Platinum', tierClass: 'platinum',
+    phone: '+1-617-555-0142',
+    email: 'varun.khator@gmail.com',
+    dob: 'March 15, 1988',
+    address: '142 Oak Street, Apt 7B, Boston, MA 02108',
+    memberSince: 'June 2018',
+    jointHolder: 'Priya Khator',
+    creditScore: 695,
+    checking: { last4: '4829', balance: 8342.15, type: 'Platinum Checking' },
+    savings: { last4: '9088', balance: 45200.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '5531', type: 'Visa Platinum', limit: 25000, balance: 6200.00 },
+    autoLoan: { last4: '7712', balance: 14230.67, vehicle: '2023 Honda Accord' },
+    mortgage: { last4: '4401', balance: 287000, rate: '5.8%', address: '142 Oak Street, Boston, MA' },
+    accounts: {
+      'block-card': '5531', 'loan-balance': '7712', 'dispute': '5531',
+      'restructure': '4829', 'reset-password': '5531', 'activate-card': '5531',
+      'transfer-funds': '4829', 'credit-limit': '5531', 'mortgage-rate': '4401',
+      'wire-transfer': '4829',
+    }
+  },
+  // ── Profile 2: African American Male, 63, Gold, Atlanta ──
+  '+1-404-555-0278': {
+    name: 'Marcus Thompson', initials: 'MT',
+    tier: 'Gold', tierClass: 'gold',
+    phone: '+1-404-555-0278',
+    email: 'marcus.thompson@outlook.com',
+    dob: 'November 8, 1962',
+    address: '315 Peachtree Lane, Suite 2A, Atlanta, GA 30301',
+    memberSince: 'March 2015',
+    jointHolder: 'Denise Thompson',
+    creditScore: 748,
+    checking: { last4: '6103', balance: 12475.30, type: 'Gold Checking' },
+    savings: { last4: '8254', balance: 68900.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '3347', type: 'Visa Gold', limit: 20000, balance: 4850.00 },
+    autoLoan: { last4: '9981', balance: 18442.33, vehicle: '2024 Toyota Camry' },
+    mortgage: { last4: '2216', balance: 195000, rate: '5.5%', address: '315 Peachtree Lane, Atlanta, GA' },
+    accounts: {
+      'block-card': '3347', 'loan-balance': '9981', 'dispute': '3347',
+      'restructure': '6103', 'reset-password': '3347', 'activate-card': '3347',
+      'transfer-funds': '6103', 'credit-limit': '3347', 'mortgage-rate': '2216',
+      'wire-transfer': '6103',
+    }
+  },
+  // ── Profile 3: Hispanic/Latina Female, 29, Silver, Miami ──
+  '+1-305-555-0391': {
+    name: 'Sofia Ramirez', initials: 'SR',
+    tier: 'Silver', tierClass: 'silver',
+    phone: '+1-305-555-0391',
+    email: 'sofia.ramirez@yahoo.com',
+    dob: 'July 22, 1996',
+    address: '88 Coral Way, Apt 12C, Miami, FL 33145',
+    memberSince: 'January 2021',
+    jointHolder: null,
+    creditScore: 782,
+    checking: { last4: '7741', balance: 3215.88, type: 'Silver Checking' },
+    savings: { last4: '2059', balance: 12350.00, type: 'Standard Savings' },
+    creditCard: { last4: '8862', type: 'Visa Silver', limit: 8000, balance: 3400.00 },
+    autoLoan: { last4: '1537', balance: 22100.45, vehicle: '2025 Hyundai Tucson' },
+    mortgage: { last4: '6694', balance: 342000, rate: '6.2%', address: '88 Coral Way, Miami, FL' },
+    accounts: {
+      'block-card': '8862', 'loan-balance': '1537', 'dispute': '8862',
+      'restructure': '7741', 'reset-password': '8862', 'activate-card': '8862',
+      'transfer-funds': '7741', 'credit-limit': '8862', 'mortgage-rate': '6694',
+      'wire-transfer': '7741',
+    }
+  },
+  // ── Profile 4: East Asian Female, 46, Platinum, San Francisco ──
+  '+1-415-555-0534': {
+    name: 'Emily Chen', initials: 'EC',
+    tier: 'Platinum', tierClass: 'platinum',
+    phone: '+1-415-555-0534',
+    email: 'emily.chen@gmail.com',
+    dob: 'February 3, 1980',
+    address: '2201 Pacific Heights Blvd, San Francisco, CA 94115',
+    memberSince: 'September 2016',
+    jointHolder: 'David Chen',
+    creditScore: 812,
+    checking: { last4: '3285', balance: 24890.50, type: 'Platinum Checking' },
+    savings: { last4: '7463', balance: 128500.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '4178', type: 'Visa Platinum', limit: 35000, balance: 8750.00 },
+    autoLoan: { last4: '5624', balance: 9810.22, vehicle: '2022 Tesla Model 3' },
+    mortgage: { last4: '8937', balance: 625000, rate: '5.4%', address: '2201 Pacific Heights Blvd, San Francisco, CA' },
+    accounts: {
+      'block-card': '4178', 'loan-balance': '5624', 'dispute': '4178',
+      'restructure': '3285', 'reset-password': '4178', 'activate-card': '4178',
+      'transfer-funds': '3285', 'credit-limit': '4178', 'mortgage-rate': '8937',
+      'wire-transfer': '3285',
+    }
+  },
+  // ── Profile 5: Caucasian Male, 34, Gold, Chicago ──
+  '+1-312-555-0687': {
+    name: "James O'Brien", initials: 'JO',
+    tier: 'Gold', tierClass: 'gold',
+    phone: '+1-312-555-0687',
+    email: 'james.obrien@protonmail.com',
+    dob: 'September 14, 1991',
+    address: '450 North Michigan Ave, Unit 18D, Chicago, IL 60611',
+    memberSince: 'August 2019',
+    jointHolder: null,
+    creditScore: 731,
+    checking: { last4: '5498', balance: 6780.25, type: 'Gold Checking' },
+    savings: { last4: '1376', balance: 31200.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '2643', type: 'Visa Gold', limit: 18000, balance: 5100.00 },
+    autoLoan: { last4: '8815', balance: 11350.90, vehicle: '2023 Ford Bronco' },
+    mortgage: { last4: '3072', balance: 410000, rate: '5.9%', address: '450 North Michigan Ave, Chicago, IL' },
+    accounts: {
+      'block-card': '2643', 'loan-balance': '8815', 'dispute': '2643',
+      'restructure': '5498', 'reset-password': '2643', 'activate-card': '2643',
+      'transfer-funds': '5498', 'credit-limit': '2643', 'mortgage-rate': '3072',
+      'wire-transfer': '5498',
+    }
+  },
+};
+
+// Profile display order for the sidebar selector
+const CUSTOMER_PROFILES = [
+  { phone: '+1-617-555-0142', name: 'Varun Khator', initials: 'VK', tier: 'Platinum', tierClass: 'platinum', location: 'Boston, MA' },
+  { phone: '+1-404-555-0278', name: 'Marcus Thompson', initials: 'MT', tier: 'Gold', tierClass: 'gold', location: 'Atlanta, GA' },
+  { phone: '+1-305-555-0391', name: 'Sofia Ramirez', initials: 'SR', tier: 'Silver', tierClass: 'silver', location: 'Miami, FL' },
+  { phone: '+1-415-555-0534', name: 'Emily Chen', initials: 'EC', tier: 'Platinum', tierClass: 'platinum', location: 'San Francisco, CA' },
+  { phone: '+1-312-555-0687', name: "James O'Brien", initials: 'JO', tier: 'Gold', tierClass: 'gold', location: 'Chicago, IL' },
+];
+
+const SCENARIOS = {
+  'block-card': {
+    id: 'block-card',
+    title: 'Block My Credit Card',
+    flow: 'contained',
+    resolution: {
+      intent: 'Block Credit Card',
+      action: 'Card ***{{cardLast4}} blocked, replacement card ordered',
+      outcome: 'Contained by Bot',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "Hi, I need to block my credit card right away. I think someone's been using it without my permission.", delay: 2000 },
+      { type: 'bot', text: "I'm sorry to hear that. I can help you block your credit card immediately. For security, can you confirm the last four digits of the card you'd like to block?", delay: 1500, thinkingTime: 2000 },
+      { type: 'customer', text: 'It ends in 4829.', delay: 1500 },
+      { type: 'bot', text: "Thank you, Varun. I can see your Visa card ending in {{cardLast4}} on your account. I'm blocking this card now.\n\nDone — your card ending in {{cardLast4}} has been blocked effective immediately. No further transactions will be processed.\n\nHere's what happens next:\n• A replacement card will be mailed within 3–5 business days\n• Recurring payments will need to be updated with the new card\n• Any unauthorized transactions will be investigated automatically\n\nWould you like me to help with anything else?", delay: 1800, thinkingTime: 2500 },
+      { type: 'customer', text: "No, that's everything. Thank you for the quick help.", delay: 2000 },
+      { type: 'bot', text: "You're welcome, Varun. Your account security is our priority. Have a great day!", delay: 1200, thinkingTime: 1200 },
+      { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
+      { type: 'system', text: 'Call ended — Resolved by Luna AI', delay: 1000, state: 'ended' },
+    ],
+  },
+  'loan-balance': {
+    id: 'loan-balance',
+    title: 'Check Loan Balance',
+    flow: 'contained',
+    resolution: {
+      intent: 'Loan Balance Inquiry + Prepayment Policy',
+      action: 'Provided loan balance details and prepayment information',
+      outcome: 'Contained by Bot',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: 'Yeah, I need to check the balance on my auto loan. I want to see how much I still owe.', delay: 2000 },
+      { type: 'bot', text: "Of course! I can look that up for you. Let me pull up your auto loan details.\n\nHere's your auto loan summary:\n• Loan Account: ***7712\n• Original Amount: $28,500.00\n• Current Balance: $14,230.67\n• Monthly Payment: $485.00\n• Next Payment Due: March 15, 2026\n• Interest Rate: 4.9% APR\n• Remaining Term: 30 months\n\nYou're right on track with your payments. Is there anything else you'd like to know?", delay: 1500, thinkingTime: 2500 },
+      { type: 'customer', text: 'What happens if I want to pay it off early? Are there any penalties?', delay: 2500 },
+      { type: 'bot', text: "Great question. Your auto loan does not have a prepayment penalty, so you can pay it off early at any time without additional fees.\n\nIf you'd like to make an extra payment or a lump sum, you can do so through online banking, or I can help set one up. The current payoff amount as of today is $14,188.42, which reflects a small interest adjustment.\n\nWould you like to proceed with an early payoff, or is there anything else?", delay: 1500, thinkingTime: 2200 },
+      { type: 'customer', text: "No, I just wanted to know my options. Thanks a lot.", delay: 2000 },
+      { type: 'bot', text: "Anytime, Varun. If you decide to make extra payments in the future, just give us a call or log into your online banking. Have a wonderful day!", delay: 1200, thinkingTime: 1200 },
+      { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
+      { type: 'system', text: 'Call ended — Resolved by Luna AI', delay: 1000, state: 'ended' },
+    ],
+  },
+  'dispute': {
+    id: 'dispute',
+    title: 'Dispute a Transaction',
+    flow: 'escalated',
+    agentName: 'Marcus Rivera',
+    agentTeam: 'Fraud Resolution Team',
+    resolution: {
+      intent: 'Transaction Dispute (Fraudulent Charges)',
+      action: 'Filed disputes #FRD-2026-88421 & #FRD-2026-88422, provisional credits issued, replacement card ordered',
+      botAttempt: 'Identified transactions, confirmed customer did not authorize',
+      escalationReason: 'Formal fraud investigation requires agent authorization',
+      outcome: 'Escalated to Agent',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "I need to dispute a charge on my account. There's a transaction from two weeks ago that I definitely didn't make, and it looks like it was at a store in a city I've never been to.", delay: 2200 },
+      { type: 'bot', text: "I'm sorry to hear about that, Varun. I want to make sure we handle this properly. Let me look into the recent transactions on your account.\n\nCould you tell me the approximate amount or the merchant name so I can identify the specific charge?", delay: 1500, thinkingTime: 2000 },
+      { type: 'customer', text: "It was for $847.53 at some electronics store called TechVault in Phoenix. I live in Boston and I haven't traveled anywhere. Also, there's another one for $234.00 at a gas station in Phoenix on the same day. I think both are fraudulent.", delay: 3000 },
+      { type: 'bot', text: "I can see both transactions you're referring to:\n• ${{disputeAmount1}} at {{disputeMerchant1}} Electronics, Phoenix, AZ — Feb 4\n• ${{disputeAmount2}} at {{disputeMerchant2}} Gas Station, Phoenix, AZ — Feb 4\n\nSince this involves multiple potentially fraudulent transactions and may require a formal dispute investigation, I want to make sure you get the best help. Let me connect you with a specialist from our fraud resolution team.\n\nPlease hold for just a moment.", delay: 1800, thinkingTime: 2500 },
+      { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
+      {
+        type: 'transfer-summary',
+        delay: 1500,
+        data: {
+          customer: 'Varun Khator (Platinum)',
+          issue: 'Dispute of suspected fraudulent transactions',
+          transactions: '${{disputeAmount1}} {{disputeMerchant1}} + ${{disputeAmount2}} {{disputeMerchant2}} (Feb 4, Phoenix AZ)',
+          customerLocation: 'Boston, MA (no travel reported)',
+          botActions: 'Identified transactions, confirmed customer didn\'t authorize',
+          recommendation: 'Initiate formal fraud dispute, consider temporary card freeze',
+        },
+      },
+      { type: 'system', text: 'Connected to Agent Marcus Rivera — Fraud Resolution Team', delay: 2500, state: 'connected-agent', agentName: 'Marcus Rivera' },
+      { type: 'agent', text: "Hi Varun, this is Marcus from the fraud resolution team. I've reviewed the summary from Luna and I can see the two transactions in question. I'm sorry this happened to you. Let me get this sorted out right away.\n\nFirst, I've placed a temporary hold on your card ending in 3156 to prevent any further unauthorized charges.\n\nI'm now filing a formal dispute for both transactions:\n• Dispute #FRD-2026-88421 for ${{disputeAmount1}} at {{disputeMerchant1}}\n• Dispute #FRD-2026-88422 for ${{disputeAmount2}} at {{disputeMerchant2}}\n\nYou'll receive provisional credits for both amounts — ${{disputeTotal}} total — within 24 hours while we investigate.", delay: 1500, thinkingTime: 2500, agentName: 'Marcus Rivera' },
+      { type: 'customer', text: "Oh thank you, that's a relief. How long does the investigation take?", delay: 2500 },
+      { type: 'agent', text: "Typically 10 to 15 business days. We'll send you updates by email, and in most cases like this where the transactions are clearly out of pattern, the provisional credit becomes permanent.\n\nI've also flagged your account for enhanced security monitoring. Your replacement card will arrive in 2–3 business days via express shipping, since you're a Platinum member.\n\nIs there anything else I can help you with today?", delay: 1500, thinkingTime: 2200, agentName: 'Marcus Rivera' },
+      { type: 'customer', text: "No, that covers everything. I appreciate the help, Marcus.", delay: 2000 },
+      { type: 'agent', text: "Of course, Varun. We take fraud very seriously and we'll keep you updated on the investigation. Have a good evening.", delay: 1200, thinkingTime: 1200, agentName: 'Marcus Rivera' },
+      { type: 'system', text: 'Call ended — Resolved by Agent Marcus Rivera', delay: 1500, state: 'ended' },
+    ],
+  },
+  'restructure': {
+    id: 'restructure',
+    title: 'Account Restructuring',
+    flow: 'escalated',
+    agentName: 'Sandra Kim',
+    agentTeam: 'Relationship Management',
+    resolution: {
+      intent: 'Joint Account Separation (Divorce)',
+      action: 'Opened individual accounts, scheduled follow-up for documentation review',
+      botAttempt: 'Identified all accounts, recognized legal/regulatory complexity',
+      escalationReason: 'Multi-product restructuring with legal implications',
+      outcome: 'Escalated to Agent',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "Hi, I have kind of a complicated situation. My wife and I are going through a divorce and I need to figure out what to do with our joint accounts. We have a joint checking, a joint savings, and a joint mortgage. I need to separate everything.", delay: 3000 },
+      { type: 'bot', text: "I understand, Varun. I'm sorry to hear you're going through this. I want to make sure I understand your request correctly. You'd like to:\n\n• Separate your joint checking account\n• Separate your joint savings account\n• Address the joint mortgage arrangement\n\nIs that correct?", delay: 1500, thinkingTime: 2200 },
+      { type: 'customer', text: "Yes, and also we have a joint credit card and there are some automatic payments set up from the joint checking that need to be split between us too. My lawyer said I should get everything separated as soon as possible.", delay: 3000 },
+      { type: 'bot', text: "I understand the urgency. This involves changes across multiple account types including checking, savings, credit, and mortgage products, and may have legal implications related to your divorce proceedings.\n\nTo make sure this is handled correctly and in compliance with all regulations, I'd like to connect you with a relationship manager who specializes in account restructuring.\n\nLet me transfer you now. One moment please.", delay: 1500, thinkingTime: 2500 },
+      { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
+      {
+        type: 'transfer-summary',
+        delay: 1500,
+        data: {
+          customer: 'Varun Khator (Platinum)',
+          issue: 'Joint account separation due to divorce',
+          accountsAffected: 'Joint Checking (***9087), Joint Savings (***9088), Joint Mortgage (***4401), Joint Credit Card (***6620)',
+          additional: 'Automatic payments need redistribution, lawyer involved',
+          botActions: 'Confirmed account list, identified complexity beyond bot scope',
+          recommendation: 'Route to relationship manager for full account restructuring',
+        },
+      },
+      { type: 'system', text: 'Connected to Agent Sandra Kim — Relationship Management', delay: 2500, state: 'connected-agent', agentName: 'Sandra Kim' },
+      { type: 'agent', text: "Hello Varun, this is Sandra Kim, a relationship manager here at First National. I've reviewed the information from Luna about your situation. I understand this is a difficult time, and I want to help make the financial side as smooth as possible.\n\nI can see all four joint accounts on your profile. Here's what I'd recommend:\n\nFor your checking and savings, we can open individual accounts for you today and set up the transfers. However, to remove a joint account holder, we'll need written consent from both parties, or a court order.\n\nDo you have any documentation from your attorney that authorizes changes to the accounts?", delay: 1500, thinkingTime: 2500, agentName: 'Sandra Kim' },
+      { type: 'customer', text: "My lawyer is sending over the paperwork this week. Can we at least get started on setting up my individual accounts today?", delay: 2500 },
+      { type: 'agent', text: "Absolutely. Let's get your individual checking and savings accounts opened right now. I'll set them up with the same features as your current joint accounts.\n\nI'm also scheduling a follow-up appointment for next week so that once we receive the legal documentation, we can proceed with the joint account separation and discuss the mortgage and credit card options in detail.\n\nI'll send you a confirmation email with everything we've discussed today and the checklist of documents we'll need. Does Thursday or Friday work better for the follow-up call?", delay: 1500, thinkingTime: 2200, agentName: 'Sandra Kim' },
+      { type: 'customer', text: 'Thursday works great. Thank you for being so thorough, Sandra.', delay: 2000 },
+      { type: 'agent', text: "Of course, Varun. I've noted everything down. You'll receive the confirmation email within the hour. Take care, and we'll speak Thursday.", delay: 1200, thinkingTime: 1200, agentName: 'Sandra Kim' },
+      { type: 'system', text: 'Call ended — Resolved by Agent Sandra Kim', delay: 1500, state: 'ended' },
+    ],
+  },
+  'reset-password': {
+    id: 'reset-password',
+    title: 'Reset Online Banking Password',
+    flow: 'contained',
+    resolution: {
+      intent: 'Online Banking Password Reset',
+      action: 'Password reset link sent to registered email, temporary access granted',
+      outcome: 'Contained by Bot',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "Hi, I'm locked out of my online banking. I've tried my password a few times and now the account is blocked. I need to reset it.", delay: 2200 },
+      { type: 'bot', text: "I understand, Varun. It looks like your online banking access was temporarily locked after multiple login attempts. I can help you reset your password right now.\n\nFor security, I'll send a one-time password reset link to your registered email address on file. Can you confirm — is your email still varun.k@email.com?", delay: 1500, thinkingTime: 2000 },
+      { type: 'customer', text: "Yes, that's correct.", delay: 1500 },
+      { type: 'bot', text: "I've just sent the reset link to varun.k@email.com. Here's what to do:\n\n• Check your inbox (and spam folder) for an email from First National Bank\n• Click the \"Reset Password\" link — it's valid for 15 minutes\n• Create a new password (at least 12 characters, with a mix of letters, numbers, and symbols)\n• Once reset, your account will be unlocked automatically\n\nThe link has been sent. Is there anything else I can help with?", delay: 1800, thinkingTime: 2500 },
+      { type: 'customer', text: "No, that's all I needed. Thanks for the quick help.", delay: 2000 },
+      { type: 'bot', text: "You're welcome, Varun. If you have any trouble with the reset link, just call us back. Have a great day!", delay: 1200, thinkingTime: 1200 },
+      { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
+      { type: 'system', text: 'Call ended — Resolved by Luna AI', delay: 1000, state: 'ended' },
+    ],
+  },
+  'activate-card': {
+    id: 'activate-card',
+    title: 'Activate New Card',
+    flow: 'contained',
+    resolution: {
+      intent: 'New Card Activation',
+      action: 'Visa card ***{{newCardLast4}} activated, PIN set, contactless enabled',
+      outcome: 'Contained by Bot',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "Hi, I just received my new credit card in the mail and I need to activate it.", delay: 2000 },
+      { type: 'bot', text: "Of course! I can activate your new card right away. Could you please read me the last four digits of the new card number?", delay: 1500, thinkingTime: 2000 },
+      { type: 'customer', text: "Sure, it's 5531.", delay: 1500 },
+      { type: 'bot', text: "Thank you, Varun. I can see your new Visa Platinum card ending in {{newCardLast4}} on your account.\n\nActivating now... Done! Your card ending in {{newCardLast4}} is now active and ready to use.\n\nHere's a quick summary:\n• Card Status: Active\n• Contactless payments: Enabled\n• Online transactions: Enabled\n• Credit limit: $15,000\n• Your old card has been automatically deactivated\n\nWould you also like to set up a new PIN, or is there anything else?", delay: 1800, thinkingTime: 2500 },
+      { type: 'customer', text: "No, I'll set the PIN at the ATM. That's all I needed, thanks!", delay: 2000 },
+      { type: 'bot', text: "Sounds good, Varun. You can set your PIN at any First National ATM. Enjoy your new card and have a great day!", delay: 1200, thinkingTime: 1200 },
+      { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
+      { type: 'system', text: 'Call ended — Resolved by Luna AI', delay: 1000, state: 'ended' },
+    ],
+  },
+  'transfer-funds': {
+    id: 'transfer-funds',
+    title: 'Transfer Between Accounts',
+    flow: 'contained',
+    resolution: {
+      intent: 'Internal Fund Transfer',
+      action: '${{transferAmount}} transferred from checking (***4829) to savings (***7712)',
+      outcome: 'Contained by Bot',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "I need to transfer some money from my checking account to my savings. Can you help me with that?", delay: 2000 },
+      { type: 'bot', text: "Absolutely! I can help you transfer funds between your accounts. I can see you have:\n\n• Checking Account (***4829) — Balance: $8,342.15\n• Savings Account (***7712) — Balance: $22,580.00\n\nHow much would you like to transfer from checking to savings?", delay: 1500, thinkingTime: 2200 },
+      { type: 'customer', text: "Let's do $2,500 please.", delay: 1500 },
+      { type: 'bot', text: "Got it. Let me confirm the details:\n\n• From: Checking (***4829)\n• To: Savings (***7712)\n• Amount: ${{transferAmount}}\n\nAfter the transfer:\n• Checking balance: $5,842.15\n• Savings balance: $25,080.00\n\nShall I go ahead and process this transfer?", delay: 1500, thinkingTime: 2000 },
+      { type: 'customer', text: "Yes, go ahead.", delay: 1500 },
+      { type: 'bot', text: "Done! The transfer of ${{transferAmount}} from checking to savings has been processed successfully. The funds are available in your savings account immediately.\n\nA confirmation has been sent to your email. Is there anything else I can help with?", delay: 1500, thinkingTime: 2000 },
+      { type: 'customer', text: "No, that's perfect. Thank you!", delay: 2000 },
+      { type: 'bot', text: "You're welcome, Varun. Have a wonderful day!", delay: 1200, thinkingTime: 1200 },
+      { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
+      { type: 'system', text: 'Call ended — Resolved by Luna AI', delay: 1000, state: 'ended' },
+    ],
+  },
+  'credit-limit': {
+    id: 'credit-limit',
+    title: 'Credit Limit Increase',
+    flow: 'escalated',
+    agentName: 'David Park',
+    agentTeam: 'Credit Underwriting',
+    resolution: {
+      intent: 'Credit Limit Increase Request',
+      action: 'Credit limit increased from $15,000 to $25,000 after underwriting review',
+      botAttempt: 'Collected request details, verified account standing',
+      escalationReason: 'Credit limit increases over $5,000 require underwriting agent approval',
+      outcome: 'Escalated to Agent',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "Hi, I'd like to request a credit limit increase on my Visa card. My current limit is $15,000 and I'd like to get it bumped up to around $25,000. I've had the card for three years and I always pay on time.", delay: 2500 },
+      { type: 'bot', text: "Thank you for being a loyal customer, Varun. I can see your excellent payment history on your Visa Platinum card ending in 5531.\n\nHere's your current card profile:\n• Current Limit: $15,000\n• Average Monthly Spend: $6,200\n• Payment History: 36 months on-time\n• Credit Score on File: 782\n\nSince you're requesting an increase of more than $5,000, this will need a review by our credit underwriting team. Let me connect you with a specialist who can process this for you.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
+      { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
+      {
+        type: 'transfer-summary',
+        delay: 1500,
+        data: {
+          customer: 'Varun Khator (Platinum)',
+          issue: 'Credit limit increase request ($15K → $25K)',
+          currentLimit: '$15,000',
+          requestedLimit: '$25,000',
+          paymentHistory: '36 months on-time, credit score 695',
+          botActions: 'Verified account standing, confirmed increase exceeds auto-approval threshold',
+          recommendation: 'Strong candidate — excellent payment history and credit score',
+        },
+      },
+      { type: 'system', text: 'Connected to Agent David Park — Credit Underwriting', delay: 2500, state: 'connected-agent', agentName: 'David Park' },
+      { type: 'agent', text: "Hi Varun, this is David Park from the credit underwriting team. I've reviewed your account details from Luna and I have to say, your profile looks excellent.\n\nWith your credit score of 782 and perfect 36-month payment history, I'm happy to approve your request. I'm increasing your credit limit from $15,000 to $25,000 effective immediately.\n\nYou don't need a new card — the updated limit will reflect on your next statement and in your online banking within the hour.\n\nIs there anything else I can help with?", delay: 1500, thinkingTime: 2500, agentName: 'David Park' },
+      { type: 'customer', text: "That was fast! No, that's everything. Thank you so much, David.", delay: 2000 },
+      { type: 'agent', text: "You're very welcome, Varun. With your track record, it was an easy decision. Enjoy the increased flexibility, and don't hesitate to call if you need anything in the future. Have a great day!", delay: 1200, thinkingTime: 1200, agentName: 'David Park' },
+      { type: 'system', text: 'Call ended — Resolved by Agent David Park', delay: 1500, state: 'ended' },
+    ],
+  },
+  'mortgage-rate': {
+    id: 'mortgage-rate',
+    title: 'Mortgage Rate Renegotiation',
+    flow: 'escalated',
+    agentName: 'Rachel Torres',
+    agentTeam: 'Mortgage Services',
+    resolution: {
+      intent: 'Mortgage Rate Renegotiation',
+      action: 'Rate lock at 5.2% offered, refinancing application initiated, appraisal scheduled',
+      botAttempt: 'Retrieved current mortgage details, identified rate difference',
+      escalationReason: 'Mortgage modifications require licensed loan officer',
+      outcome: 'Escalated to Agent',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "Hi, I've been seeing that mortgage rates have come down recently and I'm wondering if I can renegotiate the rate on my current mortgage. I'm paying 6.1% right now and I think I should be able to do better.", delay: 2800 },
+      { type: 'bot', text: "I appreciate you reaching out about this, Varun. Let me pull up your mortgage details.\n\nHere's your current mortgage summary:\n• Mortgage Account: ***4401\n• Current Rate: 6.1% fixed\n• Original Amount: $420,000\n• Current Balance: $385,200\n• Monthly Payment: $2,548.00\n• Remaining Term: 27 years\n\nYou're right that current market rates are lower than your existing rate. Since mortgage rate modifications and refinancing require a detailed review by a licensed loan officer, let me connect you with our mortgage services team.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
+      { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
+      {
+        type: 'transfer-summary',
+        delay: 1500,
+        data: {
+          customer: 'Varun Khator (Platinum)',
+          issue: 'Mortgage rate renegotiation request',
+          currentRate: '6.1% fixed, 27 years remaining',
+          currentBalance: '$385,200 (original $420,000)',
+          monthlyPayment: '$2,548.00',
+          botActions: 'Retrieved mortgage details, confirmed rate is above current market',
+          recommendation: 'Customer has strong payment history — good candidate for rate reduction',
+        },
+      },
+      { type: 'system', text: 'Connected to Agent Rachel Torres — Mortgage Services', delay: 2500, state: 'connected-agent', agentName: 'Rachel Torres' },
+      { type: 'agent', text: "Hi Varun, this is Rachel Torres from mortgage services. I've reviewed your mortgage details from Luna and your account history.\n\nGood news — based on your excellent payment history and current market conditions, I can offer you a couple of options:\n\n• Option A: Rate reduction to 5.2% fixed — saves you approximately $215/month\n• Option B: Refinance to a 20-year term at 4.9% — slightly higher payment but saves over $78,000 in total interest\n\nBoth options would require a property appraisal, which we can schedule at no cost to you as a Platinum member.\n\nWhich option sounds more interesting to you?", delay: 1800, thinkingTime: 2800, agentName: 'Rachel Torres' },
+      { type: 'customer', text: "Option A sounds great. The lower monthly payment would really help. What do I need to do to get started?", delay: 2500 },
+      { type: 'agent', text: "Wonderful choice. Here's what I'll set up for you today:\n\n• I'm locking in the 5.2% rate for 60 days while we process everything\n• I'll schedule a property appraisal for next week\n• I'm sending you a refinancing application to your email — it's mostly pre-filled\n• Once the appraisal comes back and you submit the application, we should have everything finalized within 3 to 4 weeks\n\nYour new monthly payment will be approximately $2,333 — a savings of $215 per month. Is there anything else you'd like to know?", delay: 1500, thinkingTime: 2200, agentName: 'Rachel Torres' },
+      { type: 'customer', text: "No, that sounds perfect. Thanks for all the help, Rachel.", delay: 2000 },
+      { type: 'agent', text: "My pleasure, Varun. You'll receive the email within the hour and someone from our appraisal team will call to schedule. Congratulations on the rate reduction — have a great day!", delay: 1200, thinkingTime: 1200, agentName: 'Rachel Torres' },
+      { type: 'system', text: 'Call ended — Resolved by Agent Rachel Torres', delay: 1500, state: 'ended' },
+    ],
+  },
+  'wire-transfer': {
+    id: 'wire-transfer',
+    title: 'International Wire Transfer',
+    flow: 'escalated',
+    agentName: 'James Chen',
+    agentTeam: 'International Payments',
+    resolution: {
+      intent: 'International Wire Transfer',
+      action: 'Wire transfer of ${{wireAmount}} to India initiated, confirmation #WIR-2026-44210 issued',
+      botAttempt: 'Collected transfer details, flagged for compliance review',
+      escalationReason: 'International wire transfers require agent verification and compliance check',
+      outcome: 'Escalated to Agent',
+    },
+    messages: [
+      { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
+      { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
+      { type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'customer', text: "I need to send a wire transfer to India. It's $12,000 to my parents' bank account. I've done this once before through the branch but I was hoping I could do it over the phone this time.", delay: 2800 },
+      { type: 'bot', text: "I can certainly help you get started with an international wire transfer, Varun. I see you have a previous wire on file to HDFC Bank, India.\n\nSince international wire transfers require identity verification and compliance review, I'll need to connect you with our international payments team. They'll be able to process this quickly, especially since you have a prior transfer on record.\n\nLet me transfer you now.", delay: 1500, thinkingTime: 2200 },
+      { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
+      {
+        type: 'transfer-summary',
+        delay: 1500,
+        data: {
+          customer: 'Varun Khator (Platinum)',
+          issue: 'International wire transfer to India',
+          amount: '$12,000 to HDFC Bank, India',
+          sourceAccount: 'Checking (***4829) — Balance: $8,342.15',
+          priorHistory: '1 previous international wire to same recipient',
+          botActions: 'Identified transfer request, flagged for compliance review',
+          recommendation: 'Existing beneficiary on file — expedited processing eligible',
+        },
+      },
+      { type: 'system', text: 'Connected to Agent James Chen — International Payments', delay: 2500, state: 'connected-agent', agentName: 'James Chen' },
+      { type: 'agent', text: "Hi Varun, this is James Chen from the international payments team. I can see you'd like to send ${{wireAmount}} to your parents' account at HDFC Bank in India.\n\nSince we have the beneficiary details on file from your previous transfer, this should be straightforward. Let me just verify a few things:\n\n• Sending from: Checking (***4829)\n• Amount: ${{wireAmount}} USD\n• Recipient: HDFC Bank, Mumbai, India\n• Beneficiary: Same as previous wire\n\nI do want to mention that the current exchange rate is approximately 1 USD = 83.5 INR, so the recipient would receive roughly ₹10,02,000. There's a $35 wire transfer fee, waived for Platinum members.\n\nShall I proceed?", delay: 1800, thinkingTime: 2800, agentName: 'James Chen' },
+      { type: 'customer', text: "Yes, everything looks correct. Please go ahead.", delay: 2000 },
+      { type: 'agent', text: "The wire transfer has been initiated. Here are the details:\n\n• Confirmation Number: WIR-2026-44210\n• Amount Sent: ${{wireAmount}} USD\n• Wire Fee: Waived (Platinum member)\n• Estimated Arrival: 1–2 business days\n• Status: Processing\n\nYou'll receive an email confirmation shortly, and another notification when the funds are received by HDFC Bank. Is there anything else I can help with?", delay: 1500, thinkingTime: 2200, agentName: 'James Chen' },
+      { type: 'customer', text: "No, that's great. Much easier than going to the branch. Thanks, James!", delay: 2000 },
+      { type: 'agent', text: "Glad I could help, Varun. Next time, you can also initiate international wires through our online banking portal — just look under 'Transfers.' Have a great day!", delay: 1200, thinkingTime: 1200, agentName: 'James Chen' },
+      { type: 'system', text: 'Call ended — Resolved by Agent James Chen', delay: 1500, state: 'ended' },
+    ],
+  },
+};
+
+// ===== App State =====
+const state = {
+  currentScenario: null,
+  isPlaying: false,
+  callState: 'idle',
+  timerSeconds: 0,
+  timerInterval: null,
+  skipMode: false,
+  abortController: null,
+  stats: { scenariosRun: 0, botContained: 0, agentEscalated: 0, totalHandleTime: 0 },
+  completedScenarios: new Set(),
+  // Playback generation counter (incremented on each new scenario to invalidate old async flows)
+  playbackGeneration: 0,
+  // Intent detection
+  extractedEntities: {},
+  intentDetected: false,
+  detectedIntentId: null,
+  freeformMode: false,
+  // Voice recording
+  waitingForVoice: false,
+  voiceResolve: null,
+  recognition: null,
+  audioContext: null,
+  analyser: null,
+  mediaStream: null,
+  isRecording: false,
+  currentTranscript: '',
+  waveformAnimId: null,
+  hasSpeechSupport: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+  // Dynamic response tracking
+  dynamicTurns: 0,
+  totalCustomerTurns: 0,
+  conversationContext: {},
+  // AI mode (OpenAI Realtime)
+  aiMode: false,
+  aiConfigured: false,
+  wsPort: 8091,
+  ws: null,
+  aiAudioContext: null,
+  aiMicStream: null,
+  aiMicProcessor: null,
+  aiMuted: false,
+  aiEnding: null,
+  aiFunctionCalls: [],
+  aiTranscript: [],       // collected {role, text} for summarizer
+  aiEndCallData: null,
+  aiAudioQueue: [],
+  aiNextStartTime: 0,
+  aiCurrentResponseId: null,
+};
+
+// ===== DOM References =====
+const dom = {
+  transcript: document.getElementById('transcript'),
+  emptyState: document.getElementById('emptyState'),
+  statusDot: document.getElementById('statusDot'),
+  statusText: document.getElementById('statusText'),
+  callStatus: document.getElementById('callStatus'),
+  callTimer: document.getElementById('callTimer'),
+  callHandler: document.getElementById('callHandler'),
+  callerInfo: document.getElementById('callerInfo'),
+  callerAvatar: document.getElementById('callerAvatar'),
+  callerName: document.getElementById('callerName'),
+  callerTier: document.getElementById('callerTier'),
+  callerPhone: document.getElementById('callerPhone'),
+  callerEmail: document.getElementById('callerEmail'),
+  callerMember: document.getElementById('callerMember'),
+  callerAccounts: document.getElementById('callerAccounts'),
+  btnEnd: document.getElementById('btnEnd'),
+  btnRestart: document.getElementById('btnRestart'),
+  btnSkip: document.getElementById('btnSkip'),
+  metricContained: document.getElementById('metricContained'),
+  metricEscalated: document.getElementById('metricEscalated'),
+  metricRate: document.getElementById('metricRate'),
+  metricTime: document.getElementById('metricTime'),
+  callActions: document.getElementById('callActions'),
+  micArea: document.getElementById('micArea'),
+  micBtn: document.getElementById('micBtn'),
+  micPrompt: document.getElementById('micPrompt'),
+  micStatusText: document.getElementById('micStatusText'),
+  micLiveText: document.getElementById('micLiveText'),
+  waveformCanvas: document.getElementById('waveformCanvas'),
+  btnDoneRecording: document.getElementById('btnDoneRecording'),
+  btnStartCall: document.getElementById('btnStartCall'),
+  textInput: document.getElementById('textInput'),
+  btnSendText: document.getElementById('btnSendText'),
+  metricDynamic: document.getElementById('metricDynamic'),
+  // AI mode elements
+  settingsOverlay: document.getElementById('settingsOverlay'),
+  apiKeyInput: document.getElementById('apiKeyInput'),
+  settingsStatus: document.getElementById('settingsStatus'),
+  settingsStatusText: document.getElementById('settingsStatusText'),
+  aiCallIndicator: document.getElementById('aiCallIndicator'),
+  btnMute: document.getElementById('btnMute'),
+};
+
+// ===== Utility =====
+function sleep(ms) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(resolve, ms);
+    if (state.abortController) {
+      state.abortController.signal.addEventListener('abort', () => {
+        clearTimeout(timeout);
+        reject(new DOMException('Aborted', 'AbortError'));
+      });
+    }
+  });
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function scrollToBottom() {
+  dom.transcript.scrollTo({ top: dom.transcript.scrollHeight, behavior: 'smooth' });
+}
+
+// ===== Timer =====
+function startTimer() {
+  state.timerSeconds = 0;
+  dom.callTimer.textContent = '00:00';
+  state.timerInterval = setInterval(() => {
+    state.timerSeconds++;
+    dom.callTimer.textContent = formatTime(state.timerSeconds);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+}
+
+// ===== Call State =====
+function updateCallState(newState, agentName) {
+  state.callState = newState;
+  const dot = dom.statusDot;
+  const text = dom.statusText;
+  const bar = dom.callStatus;
+  const handler = dom.callHandler;
+
+  dot.className = 'status-dot';
+  bar.className = 'call-status';
+
+  switch (newState) {
+    case 'ringing':
+      dot.classList.add('status-dot--yellow');
+      bar.classList.add('state--ringing');
+      text.textContent = 'Ringing...';
+      handler.innerHTML = '<span>—</span>';
+      break;
+    case 'connected-bot':
+      dot.classList.add('status-dot--green');
+      bar.classList.add('state--connected');
+      text.textContent = 'Connected';
+      handler.innerHTML = ICONS.bot + '<span>Luna AI</span>';
+      startTimer();
+      break;
+    case 'transferring':
+      dot.classList.add('status-dot--blue');
+      bar.classList.add('state--transferring');
+      text.textContent = 'Transferring to agent...';
+      handler.innerHTML = ICONS.transfer + '<span>Transferring...</span>';
+      break;
+    case 'connected-agent':
+      dot.classList.add('status-dot--green');
+      bar.classList.add('state--connected');
+      text.textContent = 'Connected';
+      handler.innerHTML = ICONS.agent + '<span>Agent: ' + (agentName || 'Live Agent') + '</span>';
+      break;
+    case 'ended':
+      dot.classList.add('status-dot--gray');
+      text.textContent = 'Call Ended';
+      handler.innerHTML = '<span>—</span>';
+      stopTimer();
+      break;
+    default:
+      dot.classList.add('status-dot--gray');
+      text.textContent = 'Select a scenario to begin';
+      handler.innerHTML = '<span>—</span>';
+      dom.callTimer.textContent = '--:--';
+  }
+  // Disable profile switching during calls, re-enable when idle/ended
+  setProfilesDisabled(newState !== 'idle' && newState !== 'ended' && newState !== undefined);
+}
+
+// ===== Profile Selector =====
+function renderProfileSelector() {
+  const container = document.getElementById('profileList');
+  if (!container) return;
+  container.innerHTML = '';
+  CUSTOMER_PROFILES.forEach(function(p) {
+    const card = document.createElement('div');
+    card.className = 'profile-card' + (p.phone === CALLER_PHONE ? ' active' : '');
+    card.dataset.phone = p.phone;
+    card.onclick = function() { selectProfile(p.phone); };
+    card.innerHTML =
+      '<div class="profile-card__avatar profile-card__avatar--' + escapeHtml(p.tierClass) + '">' + escapeHtml(p.initials) + '</div>' +
+      '<div class="profile-card__body">' +
+        '<div class="profile-card__name">' + escapeHtml(p.name) + '</div>' +
+        '<div class="profile-card__meta">' + escapeHtml(p.tier) + ' &middot; ' + escapeHtml(p.location) + '</div>' +
+      '</div>';
+    container.appendChild(card);
+  });
+}
+
+function selectProfile(phone) {
+  // Don't allow profile switch during active call
+  if (state.callState !== 'idle' && state.callState !== 'ended') return;
+  CALLER_PHONE = phone;
+  // Update highlight
+  document.querySelectorAll('.profile-card').forEach(function(c) {
+    c.classList.toggle('active', c.dataset.phone === phone);
+  });
+}
+
+function setProfilesDisabled(disabled) {
+  document.querySelectorAll('.profile-card').forEach(function(c) {
+    c.classList.toggle('disabled', disabled);
+  });
+}
+
+// ===== Caller Info =====
+function showCallerInfoShimmer() {
+  const heading = document.getElementById('callerHeading');
+  heading.innerHTML = '<span class="spinner"></span> Fetching customer data...';
+  dom.callerAvatar.textContent = '';
+  dom.callerAvatar.classList.add('shimmer');
+  dom.callerName.textContent = '\u00A0';
+  dom.callerName.classList.add('shimmer');
+  dom.callerTier.textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
+  dom.callerTier.className = 'caller-info__tier shimmer';
+  dom.callerPhone.querySelector('span').textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
+  dom.callerPhone.classList.add('shimmer');
+  dom.callerEmail.querySelector('span').textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
+  dom.callerEmail.classList.add('shimmer');
+  dom.callerMember.querySelector('span').textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0';
+  dom.callerMember.classList.add('shimmer');
+  const verified = document.getElementById('callerVerified');
+  if (verified) verified.style.display = 'none';
+  dom.callerAccounts.innerHTML = '';
+  dom.callerInfo.classList.add('visible');
+  document.querySelector('.sidebar').classList.add('open');
+}
+
+function showCallerInfo(caller) {
+  const heading = document.getElementById('callerHeading');
+  heading.innerHTML = 'Caller Information';
+  dom.callerAvatar.classList.remove('shimmer');
+  dom.callerAvatar.textContent = caller.initials;
+  dom.callerName.classList.remove('shimmer');
+  dom.callerName.textContent = caller.name;
+  dom.callerTier.className = 'caller-info__tier caller-info__tier--' + caller.tierClass;
+  dom.callerTier.textContent = caller.tier + ' Member';
+  const verified = document.getElementById('callerVerified');
+  if (verified) verified.style.display = '';
+  dom.callerPhone.classList.remove('shimmer');
+  dom.callerPhone.querySelector('span').textContent = caller.phone;
+  dom.callerEmail.classList.remove('shimmer');
+  dom.callerEmail.querySelector('span').textContent = caller.email || '';
+  dom.callerMember.classList.remove('shimmer');
+  dom.callerMember.querySelector('span').textContent = caller.memberSince ? 'Member since ' + caller.memberSince : '';
+
+  // Build accounts summary
+  let html = '<div class="caller-info__accounts-title">Accounts</div>';
+  if (caller.checking) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Checking <span class="acct-num">****' + caller.checking.last4 + '</span></span><span class="caller-info__account-val">$' + caller.checking.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.savings) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Savings <span class="acct-num">****' + caller.savings.last4 + '</span></span><span class="caller-info__account-val">$' + caller.savings.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.creditCard) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">' + caller.creditCard.type + ' <span class="acct-num">****' + caller.creditCard.last4 + '</span></span><span class="caller-info__account-val">$' + caller.creditCard.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.autoLoan) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Auto Loan <span class="acct-num">****' + caller.autoLoan.last4 + '</span></span><span class="caller-info__account-val">$' + caller.autoLoan.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.mortgage) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Mortgage <span class="acct-num">****' + caller.mortgage.last4 + '</span></span><span class="caller-info__account-val">$' + caller.mortgage.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.creditScore) {
+    html += '<div class="caller-info__account-row" style="margin-top:4px;border-top:1px solid var(--gray-200);padding-top:6px;"><span class="caller-info__account-name">Credit Score</span><span class="caller-info__account-val">' + caller.creditScore + '</span></div>';
+  }
+  dom.callerAccounts.innerHTML = html;
+
+  dom.callerInfo.classList.add('visible');
+  document.querySelector('.sidebar').classList.add('open');
+}
+
+function hideCallerInfo() {
+  dom.callerInfo.classList.remove('visible');
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+// ===== Template Engine =====
+function resolveTemplate(text, scenarioId) {
+  if (!text || typeof text !== 'string') return text;
+
+  return text.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
+    // Handle indexed array entities (e.g., disputeAmount1 → disputeAmount[0])
+    const indexMatch = varName.match(/^(\w+?)(\d+)$/);
+    if (indexMatch) {
+      const baseName = indexMatch[1];
+      const index = parseInt(indexMatch[2]) - 1; // 1-based to 0-based
+
+      // Check extracted entities first
+      const extracted = state.extractedEntities[baseName];
+      if (Array.isArray(extracted) && extracted[index] !== undefined) {
+        return extracted[index];
+      }
+      // Check defaults
+      const defaults = ENTITY_DEFAULTS[scenarioId];
+      if (defaults && Array.isArray(defaults[baseName]) && defaults[baseName][index] !== undefined) {
+        return defaults[baseName][index];
+      }
+    }
+
+    // Handle disputeTotal (computed)
+    if (varName === 'disputeTotal') {
+      const amounts = state.extractedEntities.disputeAmount || (ENTITY_DEFAULTS[scenarioId] && ENTITY_DEFAULTS[scenarioId].disputeAmount) || [];
+      const sum = amounts.reduce((acc, val) => acc + parseFloat(String(val).replace(/,/g, '')), 0);
+      return sum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Direct match in extracted entities
+    if (state.extractedEntities[varName] !== undefined) {
+      const val = state.extractedEntities[varName];
+      return Array.isArray(val) ? val.join(', ') : val;
+    }
+    // Fallback to defaults
+    const defaults = ENTITY_DEFAULTS[scenarioId];
+    if (defaults && defaults[varName] !== undefined) {
+      const val = defaults[varName];
+      return Array.isArray(val) ? val.join(', ') : val;
+    }
+    return match;
+  });
+}
+
+// ===== Intent Detection =====
+function classifyIntent(transcript) {
+  const text = transcript.toLowerCase();
+  let bestMatch = null;
+  let bestScore = 0;
+
+  for (const [scenarioId, config] of Object.entries(INTENT_PATTERNS)) {
+    let score = 0;
+
+    for (const kw of config.keywords) {
+      if (text.includes(kw.toLowerCase())) {
+        score += 1;
+      }
+    }
+    for (const kw of config.strongKeywords) {
+      if (text.includes(kw.toLowerCase())) {
+        score += 1; // bonus point for strong keywords
+      }
+    }
+
+    // Extract entities
+    const entities = {};
+    for (const [entityName, entityConfig] of Object.entries(config.entities)) {
+      if (entityConfig.multiple) {
+        const regex = new RegExp(entityConfig.pattern.source, entityConfig.pattern.flags.includes('g') ? entityConfig.pattern.flags : entityConfig.pattern.flags + 'g');
+        const matches = [...transcript.matchAll(regex)];
+        if (matches.length > 0) {
+          entities[entityName] = matches.map(m => m[1]);
+          score += 0.5;
+        }
+      } else {
+        const match = transcript.match(entityConfig.pattern);
+        if (match) {
+          entities[entityName] = match[1];
+          score += 0.5;
+        }
+      }
+    }
+
+    if (score > bestScore && score >= 2) {
+      bestScore = score;
+      bestMatch = { scenarioId, score, entities };
+    }
+  }
+
+  return bestMatch;
+}
+
+function extractEntitiesFromTranscript(scenarioId, transcript) {
+  const config = INTENT_PATTERNS[scenarioId];
+  if (!config) return {};
+
+  const entities = {};
+  for (const [entityName, entityConfig] of Object.entries(config.entities)) {
+    if (entityConfig.multiple) {
+      const regex = new RegExp(entityConfig.pattern.source, entityConfig.pattern.flags.includes('g') ? entityConfig.pattern.flags : entityConfig.pattern.flags + 'g');
+      const matches = [...transcript.matchAll(regex)];
+      if (matches.length > 0) {
+        entities[entityName] = matches.map(m => m[1]);
+      }
+    } else {
+      const match = transcript.match(entityConfig.pattern);
+      if (match) {
+        entities[entityName] = match[1];
+      }
+    }
+  }
+  return entities;
+}
+
+function renderIntentDetectedLabel(scenarioId) {
+  const scenario = SCENARIOS[scenarioId];
+  if (!scenario) return;
+  const el = document.createElement('div');
+  el.className = 'intent-detected-label';
+  el.innerHTML = ICONS.check + ' Intent detected: <strong>' + escapeHtml(scenario.title) + '</strong>';
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function renderNoMatchFeedback() {
+  const el = document.createElement('div');
+  el.className = 'no-match-feedback';
+  el.innerHTML = "I wasn't able to match your request to a scenario. Please select one from the sidebar, or try again.";
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+// ===== Render Messages =====
+function renderMessage(msg) {
+  const el = document.createElement('div');
+
+  if (msg.type === 'system') {
+    el.className = 'message message--system';
+    el.innerHTML = '<div class="message__bubble">' + escapeHtml(msg.text) + '</div>';
+  } else if (msg.type === 'bot') {
+    el.className = 'message message--bot';
+    el.innerHTML =
+      '<div class="message__label">' + ICONS.bot + ' Luna AI</div>' +
+      '<div class="message__bubble">' + escapeHtml(msg.text) + '</div>';
+  } else if (msg.type === 'customer') {
+    el.className = 'message message--customer';
+    el.innerHTML =
+      '<div class="message__label">Customer</div>' +
+      '<div class="message__bubble">' + escapeHtml(msg.text) + '</div>';
+  } else if (msg.type === 'agent') {
+    el.className = 'message message--agent';
+    el.innerHTML =
+      '<div class="message__label">' + ICONS.agent + ' Agent: ' + escapeHtml(msg.agentName || 'Live Agent') + '</div>' +
+      '<div class="message__bubble">' + escapeHtml(msg.text) + '</div>';
+  }
+
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function renderTransferSummary(data) {
+  const el = document.createElement('div');
+  el.className = 'transfer-card';
+
+  let rows = '';
+  const labels = {
+    customer: 'Customer',
+    issue: 'Issue',
+    transactions: 'Transactions',
+    customerLocation: 'Location',
+    accountsAffected: 'Accounts',
+    additional: 'Additional',
+    botActions: 'Bot Actions',
+    recommendation: 'Recommendation',
+  };
+  for (const [key, label] of Object.entries(labels)) {
+    if (data[key]) {
+      rows += '<div class="transfer-card__row"><span class="transfer-card__label">' + label + '</span><span class="transfer-card__value">' + escapeHtml(data[key]) + '</span></div>';
+    }
+  }
+
+  el.innerHTML =
+    '<div class="transfer-card__title">' + ICONS.transfer + ' Transfer Summary — Sent to Agent</div>' +
+    rows;
+
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function renderResolutionCard(scenario) {
+  const el = document.createElement('div');
+  const isContained = scenario.flow === 'contained';
+  el.className = 'resolution-card ' + (isContained ? 'contained' : 'escalated');
+
+  const res = scenario.resolution;
+  const resolvedAction = resolveTemplate(res.action, scenario.id);
+  const badgeClass = isContained ? 'resolution-card__outcome--contained' : 'resolution-card__outcome--escalated';
+
+  let detailRows =
+    '<div class="resolution-card__row"><span class="resolution-card__label">Intent</span><span class="resolution-card__value">' + escapeHtml(res.intent) + '</span></div>' +
+    '<div class="resolution-card__row"><span class="resolution-card__label">Action Taken</span><span class="resolution-card__value">' + escapeHtml(resolvedAction) + '</span></div>';
+
+  if (res.botAttempt) {
+    detailRows += '<div class="resolution-card__row"><span class="resolution-card__label">Bot Attempt</span><span class="resolution-card__value">' + escapeHtml(res.botAttempt) + '</span></div>';
+  }
+  if (res.escalationReason) {
+    detailRows += '<div class="resolution-card__row"><span class="resolution-card__label">Escalation</span><span class="resolution-card__value">' + escapeHtml(res.escalationReason) + '</span></div>';
+  }
+
+  detailRows += '<div class="resolution-card__row"><span class="resolution-card__label">Duration</span><span class="resolution-card__value">' + formatTime(state.timerSeconds) + '</span></div>';
+
+  el.innerHTML =
+    '<div class="resolution-card__header">' +
+      '<div class="resolution-card__icon">' + ICONS.check + '</div>' +
+      '<div class="resolution-card__title">Call Resolution Summary</div>' +
+    '</div>' +
+    '<div class="resolution-card__row"><span class="resolution-card__label">Outcome</span><span class="resolution-card__outcome ' + badgeClass + '">' + escapeHtml(res.outcome) + '</span></div>' +
+    '<details class="resolution-card__details">' +
+      '<summary>Call Summary</summary>' +
+      '<div class="resolution-card__details-body">' + detailRows + '</div>' +
+    '</details>';
+
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function renderAiResolutionCard() {
+  const scenario = state.currentScenario;
+  const endData = state.aiEndCallData || {};
+  const isContained = (endData.outcome !== 'escalated');
+
+  const intent = endData.intent || (scenario ? scenario.title : 'General Inquiry');
+
+  let actionsTaken = endData.actions_taken || '';
+  if (!actionsTaken && state.aiFunctionCalls.length > 0) {
+    actionsTaken = state.aiFunctionCalls.map(fc => fc.name.replace(/_/g, ' ')).join(', ');
+  }
+  if (!actionsTaken) {
+    actionsTaken = 'Conversational assistance provided';
+  }
+
+  const outcomeText = isContained ? 'Contained by Bot' : 'Escalated to Agent';
+  const badgeClass = isContained ? 'resolution-card__outcome--contained' : 'resolution-card__outcome--escalated';
+
+  const el = document.createElement('div');
+  el.className = 'resolution-card ' + (isContained ? 'contained' : 'escalated');
+
+  let detailRows =
+    '<div class="resolution-card__row"><span class="resolution-card__label">Intent</span><span class="resolution-card__value">' + escapeHtml(intent) + '</span></div>' +
+    '<div class="resolution-card__row"><span class="resolution-card__label">Action Taken</span><span class="resolution-card__value">' + escapeHtml(actionsTaken) + '</span></div>';
+
+  if (state.aiFunctionCalls.length > 0) {
+    const funcList = state.aiFunctionCalls.map(fc => fc.name.replace(/_/g, ' ')).join(', ');
+    detailRows += '<div class="resolution-card__row"><span class="resolution-card__label">Bot Actions</span><span class="resolution-card__value">' + escapeHtml(funcList) + '</span></div>';
+  }
+
+  detailRows += '<div class="resolution-card__row"><span class="resolution-card__label">Duration</span><span class="resolution-card__value">' + formatTime(state.timerSeconds) + '</span></div>';
+
+  // Unique ID for the AI summary placeholder
+  const summaryId = 'ai-summary-' + Date.now();
+
+  el.innerHTML =
+    '<div class="resolution-card__header">' +
+      '<div class="resolution-card__icon">' + ICONS.check + '</div>' +
+      '<div class="resolution-card__title">Call Resolution Summary</div>' +
+    '</div>' +
+    '<div class="resolution-card__row"><span class="resolution-card__label">Outcome</span><span class="resolution-card__outcome ' + badgeClass + '">' + escapeHtml(outcomeText) + '</span></div>' +
+    '<details class="resolution-card__details">' +
+      '<summary>Call Summary</summary>' +
+      '<div class="resolution-card__details-body">' +
+        detailRows +
+        '<div id="' + summaryId + '" class="resolution-card__ai-summary">' +
+          '<div class="resolution-card__summary-shimmer"></div>' +
+        '</div>' +
+      '</div>' +
+    '</details>';
+
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+
+  // Fire off the AI summarizer
+  fetchAiSummary(summaryId);
+}
+
+async function fetchAiSummary(summaryElId) {
+  const placeholder = document.getElementById(summaryElId);
+  if (!placeholder) return;
+  try {
+    const resp = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript: state.aiTranscript }),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    placeholder.innerHTML =
+      '<div class="resolution-card__summary-label">AI Summary</div>' +
+      '<div class="resolution-card__summary-text">' + escapeHtml(data.summary || 'No summary available.') + '</div>';
+  } catch (e) {
+    console.error('[Luna] AI summary failed:', e);
+    placeholder.innerHTML =
+      '<div class="resolution-card__summary-label">AI Summary</div>' +
+      '<div class="resolution-card__summary-text" style="color:var(--gray-500)">Summary unavailable.</div>';
+  }
+  scrollToBottom();
+}
+
+function showTypingIndicator(type, agentName) {
+  const el = document.createElement('div');
+  el.className = 'typing-indicator' + (type === 'agent' ? ' typing-indicator--agent' : '');
+  el.id = 'typingIndicator';
+
+  let label;
+  if (type === 'agent') {
+    label = ICONS.agent + ' Agent: ' + escapeHtml(agentName || 'Live Agent');
+  } else {
+    label = ICONS.bot + ' Luna AI';
+  }
+
+  el.innerHTML =
+    '<div class="typing-indicator__label">' + label + '</div>' +
+    '<div class="typing-indicator__dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+  return el;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ===== Voice Recording =====
+function showMicArea() {
+  dom.micArea.classList.add('visible');
+  dom.micBtn.classList.remove('recording');
+  dom.micStatusText.textContent = 'Ready';
+  dom.micStatusText.className = 'mic-area__status-text idle';
+  dom.micLiveText.textContent = '';
+  dom.btnDoneRecording.style.display = 'none';
+  state.currentTranscript = '';
+  clearWaveform();
+  // Focus text input for immediate typing
+  dom.textInput.value = '';
+  setTimeout(() => dom.textInput.focus(), 100);
+}
+
+function hideMicArea() {
+  dom.micArea.classList.remove('visible');
+}
+
+function showVoicePrompt() {
+  const el = document.createElement('div');
+  el.className = 'voice-prompt';
+  el.id = 'voicePrompt';
+  el.innerHTML = ICONS.mic + ' Your turn — type or speak your response';
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function removeVoicePrompt() {
+  const el = document.getElementById('voicePrompt');
+  if (el) el.remove();
+}
+
+function waitForVoiceInput() {
+  return new Promise((resolve) => {
+    state.waitingForVoice = true;
+    state.voiceResolve = resolve;
+    showVoicePrompt();
+    showMicArea();
+  });
+}
+
+function toggleRecording() {
+  if (state.isRecording) {
+    finishRecording();
+  } else {
+    startRecording();
+  }
+}
+
+async function startRecording() {
+  state.isRecording = true;
+  state.currentTranscript = '';
+  dom.micBtn.classList.add('recording');
+  dom.micStatusText.textContent = 'Listening...';
+  dom.micStatusText.className = 'mic-area__status-text';
+  dom.micLiveText.textContent = '';
+  dom.btnDoneRecording.style.display = 'inline-block';
+
+  // Reuse existing mic stream, or request new one
+  try {
+    if (!state.mediaStream || !state.mediaStream.active) {
+      state.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
+    if (!state.audioContext || state.audioContext.state === 'closed') {
+      state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = state.audioContext.createMediaStreamSource(state.mediaStream);
+      state.analyser = state.audioContext.createAnalyser();
+      state.analyser.fftSize = 256;
+      source.connect(state.analyser);
+    } else if (state.audioContext.state === 'suspended') {
+      await state.audioContext.resume();
+    }
+    drawWaveform();
+  } catch (e) {
+    console.warn('Microphone access denied or unavailable, using simulated waveform:', e);
+    drawSimulatedWaveform();
+  }
+
+  // Start speech recognition
+  if (state.hasSpeechSupport) {
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      state.recognition = new SpeechRecognition();
+      state.recognition.continuous = true;
+      state.recognition.interimResults = true;
+      state.recognition.lang = 'en-US';
+
+      state.recognition.onresult = (event) => {
+        let interim = '';
+        let final = '';
+        for (let i = 0; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+        state.currentTranscript = final || interim;
+        dom.micLiveText.textContent = state.currentTranscript;
+      };
+
+      state.recognition.onerror = (event) => {
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          // Permission denied — prevent onend from restarting
+          state.recognition = null;
+        }
+        if (event.error !== 'aborted') {
+          console.warn('Speech recognition error:', event.error);
+        }
+      };
+
+      state.recognition.onend = () => {
+        // Auto-restart if still recording (Chrome stops after silence)
+        if (state.isRecording && state.recognition) {
+          try { state.recognition.start(); } catch (e) { /* ignore */ }
+        }
+      };
+
+      state.recognition.start();
+    } catch (e) {
+      console.warn('Speech recognition failed to start:', e);
+    }
+  }
+}
+
+function finishRecording() {
+  // Stop recording but keep mic stream alive for next use
+  if (state.isRecording) {
+    state.isRecording = false;
+
+    if (state.recognition) {
+      try { state.recognition.abort(); } catch (e) { /* ignore */ }
+      state.recognition = null;
+    }
+    if (state.waveformAnimId) {
+      cancelAnimationFrame(state.waveformAnimId);
+      state.waveformAnimId = null;
+    }
+    // Keep mediaStream and audioContext alive — no permission re-prompt
+  }
+
+  // If no voice promise pending, nothing to do
+  if (!state.voiceResolve) return;
+
+  const transcript = state.currentTranscript.trim() || (state.hasSpeechSupport ? '' : 'Voice captured');
+  dom.micBtn.classList.remove('recording');
+  dom.micStatusText.textContent = 'Done';
+  dom.micStatusText.className = 'mic-area__status-text idle';
+  dom.btnDoneRecording.style.display = 'none';
+  clearWaveform();
+
+  // Resolve the voice input promise
+  if (state.voiceResolve) {
+    state.waitingForVoice = false;
+    const resolve = state.voiceResolve;
+    state.voiceResolve = null;
+    removeVoicePrompt();
+    hideMicArea();
+    resolve(transcript);
+  }
+}
+
+// ===== Text Input =====
+function submitTextInput() {
+  const text = dom.textInput.value.trim();
+  if (!text) return;
+
+  // Clear input
+  dom.textInput.value = '';
+
+  // AI mode: send text as conversation item via WebSocket
+  if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+    renderMessage({ type: 'customer', text: text });
+    state.ws.send(JSON.stringify({
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: text }]
+      }
+    }));
+    state.ws.send(JSON.stringify({ type: 'response.create' }));
+    return;
+  }
+
+  // If no voice promise pending, nothing to do
+  if (!state.voiceResolve) return;
+
+  // Stop any active recording
+  if (state.isRecording) {
+    state.isRecording = false;
+    if (state.recognition) {
+      try { state.recognition.abort(); } catch (e) { /* ignore */ }
+      state.recognition = null;
+    }
+    if (state.waveformAnimId) {
+      cancelAnimationFrame(state.waveformAnimId);
+      state.waveformAnimId = null;
+    }
+    dom.micBtn.classList.remove('recording');
+    dom.btnDoneRecording.style.display = 'none';
+    clearWaveform();
+  }
+
+  // Resolve the voice input promise with typed text
+  state.waitingForVoice = false;
+  const resolve = state.voiceResolve;
+  state.voiceResolve = null;
+  removeVoicePrompt();
+  hideMicArea();
+  resolve(text);
+}
+
+// Enter key handler for text input
+document.getElementById('textInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    submitTextInput();
+  }
+});
+
+// ===== Dynamic Response Fetch =====
+async function fetchDynamicResponse(scenarioId, turnIndex, userInput, context) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    const response = await fetch('/api/respond', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenarioId: scenarioId,
+        turnIndex: turnIndex,
+        userInput: userInput,
+        context: context || {}
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeout);
+
+    if (!response.ok) return null;
+    const data = await response.json();
+
+    // If backend returned fallback with no text, treat as no dynamic response
+    if (!data.text || data.fallbackUsed) return null;
+
+    return data;
+  } catch (e) {
+    // Timeout, network error, or server down — gracefully degrade
+    return null;
+  }
+}
+
+function highlightEntities(text, entities) {
+  if (!entities || Object.keys(entities).length === 0) return escapeHtml(text);
+
+  let result = escapeHtml(text);
+  // Collect all entity values to highlight
+  const values = [];
+  for (const [key, val] of Object.entries(entities)) {
+    if (Array.isArray(val)) {
+      val.forEach(v => values.push(String(v)));
+    } else {
+      values.push(String(val));
+    }
+  }
+
+  // Sort by length descending so longer matches take priority
+  values.sort((a, b) => b.length - a.length);
+
+  for (const val of values) {
+    const escaped = escapeHtml(val);
+    if (escaped && result.includes(escaped)) {
+      result = result.replace(escaped, '<span class="entity-highlight">' + escaped + '</span>');
+    }
+  }
+  return result;
+}
+
+function drawWaveform() {
+  if (!state.analyser) return;
+  const canvas = dom.waveformCanvas;
+  const ctx = canvas.getContext('2d');
+  const bufferLength = state.analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  function draw() {
+    if (!state.isRecording) return;
+    state.waveformAnimId = requestAnimationFrame(draw);
+
+    state.analyser.getByteFrequencyData(dataArray);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const barCount = 32;
+    const barWidth = (canvas.width / barCount) - 2;
+    const step = Math.floor(bufferLength / barCount);
+
+    for (let i = 0; i < barCount; i++) {
+      const value = dataArray[i * step];
+      const barHeight = (value / 255) * canvas.height * 0.9;
+      const x = i * (barWidth + 2);
+      const y = (canvas.height - barHeight) / 2;
+
+      ctx.fillStyle = value > 128 ? '#FF5B35' : '#D1D5DB';
+      ctx.beginPath();
+      ctx.roundRect(x, y, barWidth, Math.max(barHeight, 3), 2);
+      ctx.fill();
+    }
+  }
+
+  draw();
+}
+
+function drawSimulatedWaveform() {
+  const canvas = dom.waveformCanvas;
+  const ctx = canvas.getContext('2d');
+  const barCount = 32;
+  const barWidth = (canvas.width / barCount) - 2;
+  // Smooth random targets for natural movement
+  const targets = Array.from({ length: barCount }, () => Math.random() * 0.6 + 0.1);
+  const current = Array.from({ length: barCount }, () => 0.1);
+
+  function draw() {
+    if (!state.isRecording) return;
+    state.waveformAnimId = requestAnimationFrame(draw);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < barCount; i++) {
+      // Smoothly approach target, then pick a new target
+      current[i] += (targets[i] - current[i]) * 0.12;
+      if (Math.abs(current[i] - targets[i]) < 0.02) {
+        targets[i] = Math.random() * 0.7 + 0.08;
+      }
+      const barHeight = current[i] * canvas.height * 0.85;
+      const x = i * (barWidth + 2);
+      const y = (canvas.height - barHeight) / 2;
+
+      ctx.fillStyle = current[i] > 0.35 ? '#FF5B35' : '#F9A08C';
+      ctx.beginPath();
+      ctx.roundRect(x, y, barWidth, Math.max(barHeight, 3), 2);
+      ctx.fill();
+    }
+  }
+
+  draw();
+}
+
+function clearWaveform() {
+  const canvas = dom.waveformCanvas;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw idle bars
+  const barCount = 32;
+  const barWidth = (canvas.width / barCount) - 2;
+  for (let i = 0; i < barCount; i++) {
+    const x = i * (barWidth + 2);
+    const y = (canvas.height - 3) / 2;
+    ctx.fillStyle = '#D1D5DB';
+    ctx.beginPath();
+    ctx.roundRect(x, y, barWidth, 3, 2);
+    ctx.fill();
+  }
+}
+
+function renderHeardLabel(transcript) {
+  if (!transcript) return;
+  const el = document.createElement('div');
+  el.className = 'heard-label';
+  el.textContent = 'Heard: "' + transcript + '"';
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function cleanupVoice() {
+  state.isRecording = false;
+  if (state.recognition) {
+    try { state.recognition.abort(); } catch (e) { /* ignore */ }
+    state.recognition = null;
+  }
+  if (state.waveformAnimId) {
+    cancelAnimationFrame(state.waveformAnimId);
+    state.waveformAnimId = null;
+  }
+  // Keep mediaStream and audioContext alive across scenarios — no re-prompt
+  state.waitingForVoice = false;
+  // Resolve pending promise so playConversation can exit
+  if (state.voiceResolve) {
+    const resolve = state.voiceResolve;
+    state.voiceResolve = null;
+    resolve('');
+  }
+  removeVoicePrompt();
+  hideMicArea();
+}
+
+// Release mic fully on page unload
+window.addEventListener('beforeunload', () => {
+  if (state.mediaStream) {
+    state.mediaStream.getTracks().forEach(t => t.stop());
+  }
+  if (state.audioContext) {
+    state.audioContext.close().catch(() => {});
+  }
+});
+
+// ===== Playback Engine =====
+async function playConversation() {
+  state.isPlaying = true;
+  state.abortController = new AbortController();
+  await playConversationFrom(0);
+}
+
+async function playConversationFrom(startIndex) {
+  const scenario = state.currentScenario;
+  const messages = scenario.messages;
+  const gen = state.playbackGeneration;
+  let pendingDynamic = null; // dynamic response for next bot message
+
+  try {
+    for (let i = startIndex; i < messages.length; i++) {
+      if (!state.isPlaying || gen !== state.playbackGeneration) break;
+      const msg = messages[i];
+
+      // Delay before message
+      if (msg.delay && !state.skipMode) {
+        await sleep(msg.delay);
+      }
+      if (gen !== state.playbackGeneration) break;
+
+      // State change
+      if (msg.state) {
+        updateCallState(msg.state, msg.agentName);
+      }
+
+      // Transfer summary — resolve templates in data fields
+      if (msg.type === 'transfer-summary') {
+        const resolvedData = {};
+        for (const [key, value] of Object.entries(msg.data)) {
+          resolvedData[key] = resolveTemplate(value, scenario.id);
+        }
+        renderTransferSummary(resolvedData);
+        continue;
+      }
+
+      // Voice/text input for customer messages
+      if (msg.type === 'customer' && !state.skipMode) {
+        const transcript = await waitForVoiceInput();
+        if (!state.isPlaying || gen !== state.playbackGeneration) break;
+        state.totalCustomerTurns++;
+
+        // Extract entities from voice/text input (client-side)
+        if (transcript) {
+          const newEntities = extractEntitiesFromTranscript(scenario.id, transcript);
+          Object.assign(state.extractedEntities, newEntities);
+        }
+
+        // Show user's actual text as the customer message
+        const customerText = transcript || msg.text;
+        renderHeardLabel(transcript);
+        renderMessage({ ...msg, text: customerText });
+
+        // Check if there's a next bot/agent message to potentially replace
+        let hasNextBotMsg = false;
+        for (let j = i + 1; j < messages.length; j++) {
+          if (messages[j].type === 'bot' || messages[j].type === 'agent') {
+            hasNextBotMsg = true;
+            break;
+          }
+        }
+
+        // Fetch dynamic response from backend using customer turn index
+        if (transcript && hasNextBotMsg) {
+          const dynResponse = await fetchDynamicResponse(
+            scenario.id,
+            i,  // customer turn index — response bank maps stages to customer turns
+            transcript,
+            {
+              extractedEntities: state.extractedEntities,
+              turnIndex: i,
+              customerTurnNumber: state.totalCustomerTurns
+            }
+          );
+          if (dynResponse && dynResponse.text) {
+            pendingDynamic = dynResponse;
+          }
+        }
+        continue;
+      }
+
+      // Bot/agent message — check for pending dynamic response
+      if ((msg.type === 'bot' || msg.type === 'agent')) {
+        let messageText;
+        let isDynamic = false;
+
+        if (pendingDynamic) {
+          // Use dynamic response from backend
+          messageText = pendingDynamic.text;
+          isDynamic = true;
+          state.dynamicTurns++;
+
+          // Merge backend-extracted entities
+          if (pendingDynamic.entitiesExtracted) {
+            Object.assign(state.extractedEntities, pendingDynamic.entitiesExtracted);
+          }
+
+          // Typing indicator with dynamic thinking time
+          if (!state.skipMode) {
+            showTypingIndicator(msg.type, msg.agentName);
+            await sleep(pendingDynamic.thinkingTime || msg.thinkingTime || 1500);
+            if (gen !== state.playbackGeneration) break;
+            removeTypingIndicator();
+          }
+
+          // Resolve templates in the dynamic text
+          messageText = resolveTemplate(messageText, scenario.id);
+
+          // Render with entity highlights
+          renderDynamicMessage(msg, messageText, pendingDynamic.entitiesExtracted, isDynamic);
+          pendingDynamic = null;
+        } else {
+          // Standard scripted response (fallback)
+          if (!state.skipMode) {
+            showTypingIndicator(msg.type, msg.agentName);
+            await sleep(msg.thinkingTime || 1500);
+            if (gen !== state.playbackGeneration) break;
+            removeTypingIndicator();
+          }
+          renderMessage({ ...msg, text: resolveTemplate(msg.text, scenario.id) });
+        }
+
+        // Update dynamic metric
+        updateDynamicMetric();
+        continue;
+      }
+
+      // Other message types (system, etc.)
+      renderMessage(msg);
+    }
+
+    // Scenario complete
+    if (state.isPlaying && gen === state.playbackGeneration) {
+      renderResolutionCard(scenario);
+      updateStats(scenario);
+    }
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    throw e;
+  } finally {
+    if (gen === state.playbackGeneration) {
+      state.isPlaying = false;
+      state.abortController = null;
+      state.freeformMode = false;
+      dom.btnEnd.disabled = true;
+      dom.btnSkip.disabled = true;
+    }
+  }
+}
+
+function renderDynamicMessage(msg, text, entities, isDynamic) {
+  const el = document.createElement('div');
+  const typeClass = msg.type === 'agent' ? 'message--agent' : 'message--bot';
+  el.className = 'message ' + typeClass;
+
+  const icon = msg.type === 'agent' ? ICONS.agent : ICONS.bot;
+  const label = msg.type === 'agent'
+    ? ' Agent: ' + escapeHtml(msg.agentName || 'Live Agent')
+    : ' Luna AI';
+  const badge = isDynamic
+    ? '<span class="message__dynamic-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Dynamic</span>'
+    : '';
+
+  // Use entity highlighting for dynamic messages
+  const renderedText = isDynamic ? highlightEntities(text, entities) : escapeHtml(text);
+
+  el.innerHTML =
+    '<div class="message__label">' + icon + label + badge + '</div>' +
+    '<div class="message__bubble">' + renderedText + '</div>';
+
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function updateDynamicMetric() {
+  dom.metricDynamic.textContent = state.dynamicTurns + ' / ' + state.totalCustomerTurns;
+}
+
+// ===== Freeform Call =====
+async function startFreeformCall() {
+  if (state.isPlaying) {
+    stopCurrentScenario();
+  }
+
+  // AI mode: start freeform AI call (no scenario)
+  if (state.aiMode && state.aiConfigured) {
+    state.freeformMode = true;
+    state.currentScenario = null;
+    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+
+    // Show calling experience with shimmer
+    if (dom.emptyState) dom.emptyState.style.display = 'none';
+    renderMessage({ type: 'system', text: 'Calling via ' + CALLER_PHONE + '...' });
+    updateCallState('ringing');
+    showCallerInfoShimmer();
+    dom.btnEnd.disabled = false;
+    startRingtone();
+
+    // Simulate fetching customer data (2s)
+    await new Promise(r => setTimeout(r, 2000));
+    if (state.callState === 'ended' || state.callState === 'idle') return;
+
+    // Reveal customer details
+    const customer = CUSTOMER_DB[CALLER_PHONE];
+    if (customer) {
+      showCallerInfo(customer);
+    }
+    renderMessage({ type: 'system', text: 'Customer identified — ' + (customer ? customer.name : 'Unknown') });
+
+    // Brief pause then connect
+    await new Promise(r => setTimeout(r, 500));
+    stopRingtone();
+    if (state.callState === 'ended' || state.callState === 'idle') return;
+
+    startAiCall(null);
+    return;
+  }
+
+  state.freeformMode = true;
+  state.intentDetected = false;
+  state.detectedIntentId = null;
+  state.extractedEntities = {};
+  state.skipMode = false;
+  state.isPlaying = true;
+  state.abortController = new AbortController();
+  state.playbackGeneration++;
+  state.dynamicTurns = 0;
+  state.totalCustomerTurns = 0;
+  state.conversationContext = {};
+  updateDynamicMetric();
+
+  // Clear UI
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+  hideCallerInfo();
+  dom.transcript.innerHTML = '';
+  dom.btnEnd.disabled = false;
+  dom.btnRestart.disabled = false;
+  dom.btnSkip.disabled = false;
+
+  const gen = state.playbackGeneration;
+
+  try {
+    // Ringing
+    await sleep(500);
+    if (gen !== state.playbackGeneration) return;
+    updateCallState('ringing');
+    renderMessage({ type: 'system', text: 'Initiating call...' });
+
+    await sleep(2000);
+    if (!state.isPlaying || gen !== state.playbackGeneration) return;
+    updateCallState('connected-bot');
+    renderMessage({ type: 'system', text: 'Call connected' });
+
+    // Bot greeting
+    if (!state.skipMode) {
+      showTypingIndicator('bot');
+      await sleep(1500);
+      if (gen !== state.playbackGeneration) return;
+      removeTypingIndicator();
+    }
+    renderMessage({ type: 'bot', text: 'Thank you for calling First National Bank. This is Luna, your AI assistant. How can I help you today?' });
+
+    // Wait for voice input
+    const transcript = await waitForVoiceInput();
+    if (!state.isPlaying || gen !== state.playbackGeneration) return;
+    renderHeardLabel(transcript);
+
+    // Classify intent
+    const result = classifyIntent(transcript);
+
+    if (result) {
+      const { scenarioId, entities } = result;
+      state.detectedIntentId = scenarioId;
+      state.intentDetected = true;
+      state.extractedEntities = { ...entities };
+
+      renderIntentDetectedLabel(scenarioId);
+
+      const scenario = SCENARIOS[scenarioId];
+      state.currentScenario = scenario;
+
+      // Highlight sidebar card
+      document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+      const card = document.querySelector('[data-scenario="' + scenarioId + '"]');
+      if (card) card.classList.add('active');
+
+      // Show caller info from active profile
+      showCallerInfo(CUSTOMER_DB[CALLER_PHONE]);
+
+      // Render the scripted first customer message (index 3 in all scenarios)
+      renderMessage(scenario.messages[3]);
+
+      // Continue from index 4 (first bot reply after customer opening)
+      await playConversationFrom(4);
+    } else {
+      // No intent matched
+      renderMessage({ type: 'bot', text: "I'm sorry, I didn't quite understand your request. Could you please try again, or select a scenario from the sidebar?" });
+      renderNoMatchFeedback();
+      state.isPlaying = false;
+      state.abortController = null;
+      state.freeformMode = false;
+      dom.btnSkip.disabled = true;
+    }
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    throw e;
+  }
+}
+
+// ===== Stats =====
+function updateStats(scenario) {
+  if (!state.completedScenarios.has(scenario.id)) {
+    state.completedScenarios.add(scenario.id);
+    state.stats.scenariosRun++;
+    if (scenario.flow === 'contained') {
+      state.stats.botContained++;
+    } else {
+      state.stats.agentEscalated++;
+    }
+  }
+  state.stats.totalHandleTime += state.timerSeconds;
+
+  dom.metricContained.textContent = state.stats.botContained;
+  dom.metricEscalated.textContent = state.stats.agentEscalated;
+
+  if (state.stats.scenariosRun > 0) {
+    const rate = Math.round((state.stats.botContained / state.stats.scenariosRun) * 100);
+    dom.metricRate.textContent = rate + '%';
+    const avg = Math.round(state.stats.totalHandleTime / state.stats.scenariosRun);
+    dom.metricTime.textContent = formatTime(avg);
+  }
+}
+
+// ===== Scenario Selection =====
+function selectScenario(scenarioId) {
+  // Stop any running scenario
+  if (state.isPlaying) {
+    stopCurrentScenario();
+  }
+
+  const scenario = SCENARIOS[scenarioId];
+  if (!scenario) return;
+
+  state.currentScenario = scenario;
+  state.skipMode = false;
+  state.extractedEntities = {};
+  state.intentDetected = false;
+  state.detectedIntentId = null;
+  state.freeformMode = false;
+  state.playbackGeneration++;
+  state.dynamicTurns = 0;
+  state.totalCustomerTurns = 0;
+  state.conversationContext = {};
+  updateDynamicMetric();
+
+  // Highlight active card
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+  document.querySelector('[data-scenario="' + scenarioId + '"]').classList.add('active');
+
+  // Clear transcript
+  dom.transcript.innerHTML = '';
+
+  // AI mode: show call prompt (caller info shown after user clicks Call)
+  if (state.aiMode && state.aiConfigured) {
+    console.log('[Luna] AI mode — showing call prompt for', scenarioId);
+    hideCallerInfo();
+    showAiCallPrompt(scenario);
+    return;
+  }
+
+  // Show caller info from active profile (scripted mode shows immediately)
+  showCallerInfo(CUSTOMER_DB[CALLER_PHONE]);
+
+  // Scripted mode: enable buttons and start playback
+  dom.btnEnd.disabled = false;
+  dom.btnRestart.disabled = false;
+  dom.btnSkip.disabled = false;
+
+  // Start playback
+  playConversation();
+}
+
+function stopCurrentScenario() {
+  stopRingtone();
+  state.isPlaying = false;
+  if (state.abortController) {
+    state.abortController.abort();
+    state.abortController = null;
+  }
+  // Clean up AI call if active
+  if (state.ws) {
+    state.ws.close();
+    state.ws = null;
+  }
+  stopMicStreaming();
+  stopAiAudio();
+  dom.aiCallIndicator.classList.remove('active');
+  lunaTranscriptBuffer = '';
+  lunaTranscriptMsgEl = null;
+  stopTimer();
+  removeTypingIndicator();
+  cleanupVoice();
+}
+
+function endCall() {
+  // AI mode: end AI call
+  if (state.ws) {
+    endAiCall();
+    return;
+  }
+  stopCurrentScenario();
+  updateCallState('ended');
+  renderMessage({ type: 'system', text: 'Call ended by user' });
+  dom.btnEnd.disabled = true;
+  dom.btnSkip.disabled = true;
+}
+
+function restartScenario() {
+  // End any active AI call first
+  if (state.ws) {
+    endAiCall();
+  }
+  if (state.freeformMode || state.detectedIntentId) {
+    startFreeformCall();
+  } else if (state.currentScenario) {
+    selectScenario(state.currentScenario.id);
+  }
+}
+
+function skipAnimation() {
+  if (!state.isPlaying || !state.currentScenario) return;
+
+  // Stop current playback
+  stopCurrentScenario();
+
+  // Clear and render all messages instantly
+  dom.transcript.innerHTML = '';
+  const scenario = state.currentScenario;
+
+  for (const msg of scenario.messages) {
+    if (msg.state) {
+      updateCallState(msg.state, msg.agentName);
+    }
+    if (msg.type === 'transfer-summary') {
+      const resolvedData = {};
+      for (const [key, value] of Object.entries(msg.data)) {
+        resolvedData[key] = resolveTemplate(value, scenario.id);
+      }
+      renderTransferSummary(resolvedData);
+    } else if (msg.type === 'bot' || msg.type === 'agent') {
+      renderMessage({ ...msg, text: resolveTemplate(msg.text, scenario.id) });
+    } else {
+      renderMessage(msg);
+    }
+  }
+
+  renderResolutionCard(scenario);
+  updateStats(scenario);
+  dom.btnEnd.disabled = true;
+  dom.btnSkip.disabled = true;
+}
+
+// ===== Settings Modal & API Key =====
+function openSettings() {
+  dom.settingsOverlay.classList.add('open');
+  const saved = localStorage.getItem('luna-openai-key') || '';
+  dom.apiKeyInput.value = saved;
+}
+
+function closeSettings() {
+  dom.settingsOverlay.classList.remove('open');
+}
+
+async function saveApiKey() {
+  const key = dom.apiKeyInput.value.trim();
+  if (!key) {
+    updateSettingsStatus('error', 'Please enter an API key');
+    return;
+  }
+  localStorage.setItem('luna-openai-key', key);
+  updateSettingsStatus('disconnected', 'Saving key to server...');
+
+  // Step 1: Send key to server
+  let wsPort = 8091;
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: key }),
+    });
+    const data = await res.json();
+    if (!data.success || !data.configured) {
+      updateSettingsStatus('error', 'Server rejected the key');
+      return;
+    }
+    wsPort = data.wsPort || 8091;
+    if (!data.wsAvailable) {
+      updateSettingsStatus('error', 'WebSocket relay not available — install websockets package');
+      return;
+    }
+  } catch (e) {
+    updateSettingsStatus('error', 'Server not reachable — is serve.py running?');
+    return;
+  }
+
+  // Step 2: Test API key against OpenAI
+  updateSettingsStatus('disconnected', 'Testing OpenAI API key...');
+  try {
+    const testRes = await fetch('/api/test-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: key }),
+    });
+    const testData = await testRes.json();
+    if (testData.valid) {
+      state.aiConfigured = true;
+      state.aiMode = true;
+      state.wsPort = wsPort;
+      updateSettingsStatus('connected', 'API key valid — AI mode active');
+      updateModeBadge(true);
+    } else {
+      updateSettingsStatus('error', testData.error || 'Invalid API key');
+      localStorage.removeItem('luna-openai-key');
+      state.aiConfigured = false;
+      state.aiMode = false;
+      updateModeBadge(false);
+    }
+  } catch (e) {
+    updateSettingsStatus('error', 'Key test failed: ' + e.message);
+  }
+}
+
+function clearApiKey() {
+  localStorage.removeItem('luna-openai-key');
+  dom.apiKeyInput.value = '';
+  state.aiConfigured = false;
+  state.aiMode = false;
+  // Tell server to clear key
+  fetch('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey: '' }),
+  }).catch(() => {});
+  updateSettingsStatus('disconnected', 'Scripted mode — add API key for AI mode');
+  updateModeBadge(false);
+}
+
+function updateSettingsStatus(type, text) {
+  dom.settingsStatus.className = 'settings-status settings-status--' + type;
+  dom.settingsStatusText.textContent = text;
+}
+
+function updateModeBadge(isAi) {
+  // Mode badge removed from UI
+}
+
+// Auto-detect AI mode on startup (works with hardcoded key or localStorage key)
+(async function initApiKey() {
+  const savedKey = localStorage.getItem('luna-openai-key');
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: savedKey || '' }),
+    });
+    const data = await res.json();
+    if (data.success && data.configured && data.wsAvailable) {
+      state.aiConfigured = true;
+      state.aiMode = true;
+      state.wsPort = data.wsPort || 8091;
+      updateModeBadge(true);
+    }
+  } catch (e) {
+    // Server not running — stay in scripted mode
+  }
+})();
+
+// ===== WebSocket Client & Audio Streaming =====
+
+function connectRealtime(scenarioId) {
+  return new Promise((resolve, reject) => {
+    const wsUrl = 'ws://localhost:' + state.wsPort + '/?scenario=' + (scenarioId || '') + '&phone=' + encodeURIComponent(CALLER_PHONE);
+    const ws = new WebSocket(wsUrl);
+    state.ws = ws;
+
+    ws.onopen = () => {
+      resolve(ws);
+    };
+
+    ws.onclose = (e) => {
+      if (state.ws === ws) {
+        state.ws = null;
+        if (state.callState !== 'idle' && state.callState !== 'ended') {
+          renderMessage({ type: 'system', text: 'Connection closed' });
+          endAiCall();
+        }
+      }
+    };
+
+    ws.onerror = (e) => {
+      reject(new Error('WebSocket connection failed'));
+    };
+
+    ws.onmessage = (event) => {
+      handleRealtimeMessage(JSON.parse(event.data));
+    };
+  });
+}
+
+function handleRealtimeMessage(data) {
+  const type = data.type;
+
+  // After end_call final response is done, ignore everything
+  if (state.aiEnding === 'done') {
+    return;
+  }
+
+  // Session created — just acknowledge
+  if (type === 'session.created') {
+    return;
+  }
+
+  // Session updated — config applied, server triggers greeting
+  if (type === 'session.updated') {
+    return;
+  }
+
+  // Error from server/OpenAI
+  if (type === 'error') {
+    const msg = data.error?.message || 'Unknown error';
+    renderMessage({ type: 'system', text: 'Error: ' + msg });
+    // Don't call endAiCall here — the onclose handler will clean up
+    return;
+  }
+
+  // User speech started
+  if (type === 'input_audio_buffer.speech_started') {
+    state.aiCurrentUserTranscript = '';
+    const el = document.getElementById('aiListeningStatus');
+    if (el) el.textContent = '— You are speaking...';
+    return;
+  }
+
+  // User speech stopped
+  if (type === 'input_audio_buffer.speech_stopped') {
+    const el = document.getElementById('aiListeningStatus');
+    if (el) el.textContent = '— Processing...';
+    return;
+  }
+
+  // User transcript (from Whisper)
+  if (type === 'conversation.item.input_audio_transcription.completed') {
+    const text = data.transcript?.trim();
+    // Filter out empty transcripts, punctuation-only, non-English, and common Whisper hallucinations
+    // Strip punctuation for matching — Whisper often adds "." or "!" to hallucinated phrases
+    const stripped = text ? text.toLowerCase().replace(/[.,!?…;:\-–—'"()]/g, '').replace(/\s+/g, ' ').trim() : '';
+    const WHISPER_NOISE = ['you', 'thank you', 'thanks', 'bye', 'bye bye', 'byebye', 'goodbye',
+      'good bye', 'the end', 'thanks for watching',
+      'subscribe', 'hmm', 'uh', 'um', 'ah', 'oh', 'huh', 'yeah', 'okay', 'so', 'and',
+      'thank you for watching', 'please subscribe', 'like and subscribe', 'see you next time',
+      'see you', 'see ya', 'music', 'applause', 'laughter', 'silence', 'mbc', 'sbs'];
+    // Reject non-Latin scripts (Korean, Arabic, Chinese, Japanese, Thai, Devanagari, etc.)
+    // These are Whisper hallucinations from background noise — caller speaks English
+    const NON_LATIN_RE = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\uAC00-\uD7AF\u0900-\u097F\u0E00-\u0E7F\u1000-\u109F]/;
+    if (text && stripped.length > 1 &&
+        !/^[\s.,!?…*\-–—]+$/.test(text) &&
+        !NON_LATIN_RE.test(text) &&
+        !WHISPER_NOISE.includes(stripped)) {
+      // Insert user message BEFORE any system messages and Luna bubble that belong
+      // to the response triggered by this user utterance.
+      // Whisper transcription arrives AFTER Luna has already started responding,
+      // so we walk backwards past system messages and the Luna bubble to find
+      // the correct insertion point.
+      state.aiTranscript.push({ role: 'customer', text: text });
+      const anchor = findUserInsertAnchor();
+      if (anchor) {
+        const userMsg = document.createElement('div');
+        userMsg.className = 'message message--customer';
+        userMsg.innerHTML = '<div class="message__label">Customer</div><div class="message__bubble">' + escapeHtml(text) + '</div>';
+        anchor.parentNode.insertBefore(userMsg, anchor);
+        dom.transcript.scrollTop = dom.transcript.scrollHeight;
+      } else {
+        renderMessage({ type: 'customer', text: text });
+      }
+    }
+    return;
+  }
+
+  // Luna audio playback
+  if (type === 'response.audio.delta') {
+    if (data.delta && !state.aiMuted) {
+      console.log('[Luna] Audio chunk received, length:', data.delta.length);
+      playAudioChunk(data.delta);
+    }
+    return;
+  }
+
+  // New response starting — finalize any in-progress transcript bubble
+  if (type === 'response.created') {
+    if (lunaTranscriptMsgEl) {
+      finalizeLunaTranscript();
+    }
+    state.aiCurrentResponseId = data.response?.id || null;
+    return;
+  }
+
+  // Luna transcript (word by word)
+  if (type === 'response.audio_transcript.delta') {
+    const el = document.getElementById('aiListeningStatus');
+    if (el) el.textContent = '— Luna is speaking...';
+    appendLunaTranscript(data.delta || '');
+    return;
+  }
+
+  // Luna response complete — finalize transcript
+  if (type === 'response.audio_transcript.done') {
+    finalizeLunaTranscript();
+    return;
+  }
+
+  // Response complete — back to listening, or end call if Luna said goodbye
+  if (type === 'response.done') {
+    if (state.aiEnding === 'pending') {
+      // Luna's closing words are done — disconnect after audio finishes playing
+      state.aiEnding = 'done';
+      const delay = state.aiAudioContext
+        ? Math.max(0, (state.aiNextStartTime - state.aiAudioContext.currentTime) * 1000) + 500
+        : 500;
+      setTimeout(() => endAiCall(), delay);
+    } else {
+      const el = document.getElementById('aiListeningStatus');
+      if (el) el.textContent = '— Listening...';
+    }
+    return;
+  }
+
+  // Function call events — handled server-side, but show in UI
+  if (type === 'response.function_call_arguments.done') {
+    const funcName = data.name || '';
+    let funcArgs = {};
+    try { funcArgs = JSON.parse(data.arguments || '{}'); } catch (e) {}
+
+    if (funcName === 'end_call') {
+      // Capture summary data for resolution card
+      state.aiEndCallData = {
+        reason: funcArgs.reason || 'completed',
+        intent: funcArgs.intent || '',
+        actions_taken: funcArgs.actions_taken || '',
+        outcome: funcArgs.outcome || 'contained',
+      };
+      // Luna wants to end the call — let her closing words play first
+      state.aiEnding = 'pending';
+      renderMessage({ type: 'system', text: 'Call completed' });
+    } else {
+      // Track function calls for resolution card and transcript
+      state.aiFunctionCalls.push({ name: funcName, args: funcArgs });
+      state.aiTranscript.push({ role: 'system', text: 'Luna executed: ' + funcName.replace(/_/g, ' ') });
+      renderMessage({ type: 'system', text: 'Luna executed: ' + funcName.replace(/_/g, ' ') });
+    }
+    return;
+  }
+
+  // Log all other events for debugging
+  console.log('[Luna] Event:', type);
+}
+
+// ── Message ordering helpers ──
+// Whisper transcription arrives AFTER Luna has already started responding
+// (and possibly after system messages like "Luna executed: ..." have been rendered).
+// findUserInsertAnchor() walks backwards from the current Luna bubble (or the end
+// of the transcript) past any system messages that were rendered as part of the
+// SAME response turn, so the user message gets placed in the correct chronological
+// position above them all.
+function findUserInsertAnchor() {
+  // Start from the in-progress Luna bubble if one exists
+  let anchor = lunaTranscriptMsgEl || null;
+  if (!anchor) {
+    // No active Luna bubble — check the last child in case it's a system message
+    // from a function call that was triggered by this user utterance
+    const last = dom.transcript.lastElementChild;
+    if (last && last.classList.contains('message--system')) {
+      anchor = last;
+    } else {
+      return null; // nothing to reorder around
+    }
+  }
+  // Walk backwards past consecutive system messages (e.g. "Luna executed: ...")
+  // that belong to the same response turn
+  while (anchor.previousElementSibling &&
+         anchor.previousElementSibling.classList.contains('message--system')) {
+    anchor = anchor.previousElementSibling;
+  }
+  return anchor;
+}
+
+// Luna transcript accumulation for word-by-word rendering
+let lunaTranscriptBuffer = '';
+let lunaTranscriptMsgEl = null;
+
+function appendLunaTranscript(delta) {
+  lunaTranscriptBuffer += delta;
+  if (!lunaTranscriptMsgEl) {
+    // Create a new bot message bubble
+    lunaTranscriptMsgEl = document.createElement('div');
+    lunaTranscriptMsgEl.className = 'message message--bot';
+    lunaTranscriptMsgEl.innerHTML =
+      '<div class="message__label">' + ICONS.bot + ' Luna AI</div>' +
+      '<div class="message__bubble"></div>';
+    dom.transcript.appendChild(lunaTranscriptMsgEl);
+  }
+  const textEl = lunaTranscriptMsgEl.querySelector('.message__bubble');
+  textEl.textContent = lunaTranscriptBuffer;
+  dom.transcript.scrollTop = dom.transcript.scrollHeight;
+}
+
+function finalizeLunaTranscript() {
+  if (lunaTranscriptBuffer.trim()) {
+    state.aiTranscript.push({ role: 'bot', text: lunaTranscriptBuffer.trim() });
+  }
+  lunaTranscriptBuffer = '';
+  lunaTranscriptMsgEl = null;
+}
+
+// ===== Audio Playback (PCM16 base64 → speaker) =====
+
+async function initAiAudioContext() {
+  if (!state.aiAudioContext) {
+    state.aiAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+  }
+  if (state.aiAudioContext.state === 'suspended') {
+    await state.aiAudioContext.resume();
+  }
+  console.log('[Luna] AudioContext state:', state.aiAudioContext.state, 'sampleRate:', state.aiAudioContext.sampleRate);
+  state.aiNextStartTime = 0;
+  state.aiAudioQueue = [];
+}
+
+function playAudioChunk(base64Data) {
+  if (!state.aiAudioContext) return;
+
+  const binaryStr = atob(base64Data);
+  const len = binaryStr.length;
+  const pcm16 = new Int16Array(len / 2);
+  for (let i = 0; i < len; i += 2) {
+    pcm16[i / 2] = binaryStr.charCodeAt(i) | (binaryStr.charCodeAt(i + 1) << 8);
+  }
+
+  // Convert Int16 to Float32
+  const float32 = new Float32Array(pcm16.length);
+  for (let i = 0; i < pcm16.length; i++) {
+    float32[i] = pcm16[i] / 32768;
+  }
+
+  const buffer = state.aiAudioContext.createBuffer(1, float32.length, 24000);
+  buffer.getChannelData(0).set(float32);
+
+  const source = state.aiAudioContext.createBufferSource();
+  source.buffer = buffer;
+  source.connect(state.aiAudioContext.destination);
+
+  const now = state.aiAudioContext.currentTime;
+  const startTime = Math.max(now, state.aiNextStartTime);
+  source.start(startTime);
+  state.aiNextStartTime = startTime + buffer.duration;
+}
+
+function stopAiAudio() {
+  if (state.aiAudioContext) {
+    state.aiAudioContext.close().catch(() => {});
+    state.aiAudioContext = null;
+  }
+  state.aiNextStartTime = 0;
+  state.aiAudioQueue = [];
+}
+
+// ===== Microphone Streaming (PCM16 → WebSocket) =====
+
+async function startMicStreaming() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    state.aiMicStream = stream;
+
+    // AudioContext at 24kHz — resamples mic input automatically
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+    const source = audioCtx.createMediaStreamSource(stream);
+    // Use ScriptProcessorNode for PCM access (deprecated but widely supported)
+    const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+    state.aiMicProcessor = { audioCtx, processor };
+
+    processor.onaudioprocess = (e) => {
+      if (!state.ws || state.ws.readyState !== WebSocket.OPEN) return;
+      const inputData = e.inputBuffer.getChannelData(0);
+      // Float32 → Int16
+      const pcm16 = new Int16Array(inputData.length);
+      for (let i = 0; i < inputData.length; i++) {
+        const s = Math.max(-1, Math.min(1, inputData[i]));
+        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+      // Int16 → base64
+      const bytes = new Uint8Array(pcm16.buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const base64 = btoa(binary);
+      state.ws.send(JSON.stringify({
+        type: 'input_audio_buffer.append',
+        audio: base64,
+      }));
+    };
+
+    source.connect(processor);
+    processor.connect(audioCtx.destination);
+  } catch (e) {
+    console.warn('Mic streaming failed:', e);
+    renderMessage({ type: 'system', text: 'Microphone unavailable — type your messages below instead.' });
+    // Show text input area as fallback (don't kill the call)
+    dom.micArea.style.display = '';
+    dom.micBtn.style.display = 'none';
+    if (document.getElementById('waveformCanvas')) document.getElementById('waveformCanvas').style.display = 'none';
+    if (document.getElementById('btnDoneRecording')) document.getElementById('btnDoneRecording').style.display = 'none';
+    dom.micPrompt.textContent = 'Type your message to Luna';
+  }
+}
+
+function stopMicStreaming() {
+  if (state.aiMicProcessor) {
+    state.aiMicProcessor.processor.disconnect();
+    state.aiMicProcessor.audioCtx.close().catch(() => {});
+    state.aiMicProcessor = null;
+  }
+  if (state.aiMicStream) {
+    state.aiMicStream.getTracks().forEach(t => t.stop());
+    state.aiMicStream = null;
+  }
+}
+
+// ===== Ringtone (Web Audio API) =====
+let ringtoneContext = null;
+let ringtoneInterval = null;
+
+function startRingtone() {
+  console.log('[Luna] Starting ringtone');
+  ringtoneContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playRingBurst() {
+    if (!ringtoneContext) return;
+    const now = ringtoneContext.currentTime;
+    const dur = 1.0;
+
+    const osc1 = ringtoneContext.createOscillator();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(440, now);
+
+    const osc2 = ringtoneContext.createOscillator();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(480, now);
+
+    const gain = ringtoneContext.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.12, now + 0.02);
+    gain.gain.setValueAtTime(0.12, now + dur - 0.02);
+    gain.gain.linearRampToValueAtTime(0, now + dur);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ringtoneContext.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + dur);
+    osc2.stop(now + dur);
+  }
+
+  playRingBurst();
+  ringtoneInterval = setInterval(playRingBurst, 3000);
+}
+
+function stopRingtone() {
+  if (ringtoneInterval) {
+    clearInterval(ringtoneInterval);
+    ringtoneInterval = null;
+  }
+  if (ringtoneContext) {
+    ringtoneContext.close().catch(() => {});
+    ringtoneContext = null;
+  }
+}
+
+// ===== AI Call Prompt & Initiation =====
+
+function showAiCallPrompt(scenario) {
+  console.log('[Luna] showAiCallPrompt:', scenario.id);
+  if (dom.emptyState) dom.emptyState.style.display = 'none';
+  dom.transcript.querySelectorAll('.message, .transfer-card, .resolution-card, .ai-call-prompt').forEach(el => el.remove());
+
+  const el = document.createElement('div');
+  el.className = 'ai-call-prompt';
+  el.id = 'aiCallPrompt';
+  el.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:var(--orange);margin-bottom:12px;">' +
+      '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' +
+    '</svg>' +
+    '<div style="font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;">' + escapeHtml(scenario.title) + '</div>' +
+    '<div style="font-size:13px;color:var(--gray-500);margin-bottom:4px;">AI Voice Call as ' + escapeHtml(CUSTOMER_DB[CALLER_PHONE]?.name || 'Customer') + '</div>' +
+    '<div class="ai-call-prompt__phone">' + escapeHtml(CALLER_PHONE) + '</div>' +
+    '<button class="btn btn--start-call" style="margin-top:20px;" onclick="initiateAiCall(\'' + scenario.id + '\')">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
+      'Call' +
+    '</button>';
+
+  dom.transcript.appendChild(el);
+}
+
+async function initiateAiCall(scenarioId) {
+  console.log('[Luna] initiateAiCall:', scenarioId);
+  const scenario = SCENARIOS[scenarioId];
+  if (!scenario) return;
+
+  // Remove call prompt
+  const prompt = document.getElementById('aiCallPrompt');
+  if (prompt) prompt.remove();
+
+  // Show calling message
+  renderMessage({ type: 'system', text: 'Calling via ' + CALLER_PHONE + '...' });
+
+  // Show ringing state + shimmer loading in sidebar
+  updateCallState('ringing');
+  showCallerInfoShimmer();
+
+  // Play ringtone
+  startRingtone();
+
+  // Enable End button during ringing so user can cancel
+  dom.btnEnd.disabled = false;
+
+  // Simulate fetching customer data (2s) then reveal
+  await new Promise(r => setTimeout(r, 2000));
+  if (state.callState === 'ended' || state.callState === 'idle') return;
+
+  // Reveal customer details
+  const customer = CUSTOMER_DB[CALLER_PHONE];
+  if (customer) {
+    showCallerInfo(customer);
+  }
+  renderMessage({ type: 'system', text: 'Customer identified — ' + (customer ? customer.name : 'Unknown') });
+
+  // Brief pause after reveal before connecting
+  await new Promise(r => setTimeout(r, 500));
+
+  // Stop ringtone
+  stopRingtone();
+
+  // Check if user cancelled during ringing
+  if (state.callState === 'ended' || state.callState === 'idle') return;
+
+  // Connect the AI call
+  startAiCall(scenarioId);
+}
+
+// ===== AI Call Flow =====
+
+async function startAiCall(scenarioId) {
+  // Reset state
+  state.aiMuted = false;
+  state.aiEnding = null;
+  state.aiFunctionCalls = [];
+  state.aiTranscript = [];
+  state.aiEndCallData = null;
+  state.isPlaying = true;
+  lunaTranscriptBuffer = '';
+  lunaTranscriptMsgEl = null;
+
+  // Hide empty state, clear old messages (keep system messages from initiateAiCall)
+  if (dom.emptyState) dom.emptyState.style.display = 'none';
+  dom.transcript.querySelectorAll('.message:not(.message--system), .transfer-summary, .resolution-card, .ai-call-prompt').forEach(el => el.remove());
+  dom.btnEnd.disabled = false;
+  dom.btnRestart.disabled = false;
+  dom.btnSkip.disabled = true; // Skip doesn't apply to AI mode
+
+  // Show ringing (skip if already ringing from initiateAiCall)
+  if (state.callState !== 'ringing') {
+    updateCallState('ringing');
+  }
+  renderMessage({ type: 'system', text: 'Connecting...' });
+
+  try {
+    // Init audio context for playback (must await for Chrome autoplay policy)
+    await initAiAudioContext();
+
+    // Connect WebSocket
+    await connectRealtime(scenarioId);
+
+    // Wait a moment for session setup
+    await new Promise(r => setTimeout(r, 1000));
+
+    // Update call state
+    updateCallState('connected-bot');
+    renderMessage({ type: 'system', text: 'AI call connected — speak naturally' });
+
+    // Show AI call indicator, hide mic area
+    dom.aiCallIndicator.classList.add('active');
+    dom.micArea.style.display = 'none';
+
+    // Start mic streaming
+    await startMicStreaming();
+  } catch (e) {
+    renderMessage({ type: 'system', text: 'Failed to connect: ' + e.message });
+    endAiCall();
+  }
+}
+
+function endAiCall() {
+  stopRingtone();
+
+  // Close WebSocket
+  if (state.ws) {
+    state.ws.close();
+    state.ws = null;
+  }
+
+  // Stop audio
+  state.isPlaying = false;
+  state.aiEnding = null;
+  stopMicStreaming();
+  stopAiAudio();
+
+  // Reset UI
+  dom.aiCallIndicator.classList.remove('active');
+  lunaTranscriptBuffer = '';
+  lunaTranscriptMsgEl = null;
+
+  // Restore mic area to default state
+  dom.micArea.style.display = '';
+  dom.micBtn.style.display = '';
+  if (document.getElementById('waveformCanvas')) document.getElementById('waveformCanvas').style.display = '';
+  dom.micPrompt.textContent = 'Speak or type your response';
+
+  // Update call state
+  stopTimer();
+  updateCallState('ended');
+  renderMessage({ type: 'system', text: 'AI call ended' });
+
+  // Show resolution card if the call completed normally
+  if (state.aiEndCallData) {
+    renderAiResolutionCard();
+    if (state.currentScenario) {
+      const aiFlow = state.aiEndCallData.outcome === 'escalated' ? 'escalated' : 'contained';
+      updateStats({ ...state.currentScenario, flow: aiFlow });
+    }
+  }
+
+  dom.btnEnd.disabled = true;
+  dom.btnSkip.disabled = true;
+  dom.btnRestart.disabled = false;
+
+  // Collapse sidebar
+  hideCallerInfo();
+}
+
+function toggleMute() {
+  state.aiMuted = !state.aiMuted;
+  dom.btnMute.textContent = state.aiMuted ? 'Unmute' : 'Mute';
+}
+
+// ===== Dark Mode =====
+function updateThemeIcons() {
+  const isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+  document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+}
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('exl-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  updateThemeIcons();
+}
+// Init icons on load
+updateThemeIcons();
+
+// Init profile selector and open sidebar
+renderProfileSelector();
+document.querySelector('.sidebar').classList.add('open');
+
+</script>
+</body>
+</html>

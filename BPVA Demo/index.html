@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntelliRetrieve - Intelligent Knowledge Retrieval</title>
+  <link rel="icon" href="../assets/exl-logo.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style type="text/tailwindcss">
+    @custom-variant dark (&:where(.dark, .dark *));
+
+    @theme {
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    @keyframes bounce-dot {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-8px); }
+    }
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.5); }
+      100% { box-shadow: 0 0 0 12px rgba(79, 70, 229, 0); }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes toast-in {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes draw-check {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes count-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes typing-cursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .animate-slide-up { animation: slide-up 0.3s ease-out; }
+    .animate-fade-in { animation: fade-in 0.3s ease-out; }
+    .animate-toast { animation: toast-in 0.3s ease-out; }
+    .animate-pulse-ring { animation: pulse-ring 1.5s infinite; }
+    .animate-spin { animation: spin 1s linear infinite; }
+    .animate-count { animation: count-up 0.5s ease-out; }
+
+    .dot-bounce { animation: bounce-dot 1.4s infinite ease-in-out both; }
+    .dot-bounce:nth-child(1) { animation-delay: -0.32s; }
+    .dot-bounce:nth-child(2) { animation-delay: -0.16s; }
+    .dot-bounce:nth-child(3) { animation-delay: 0s; }
+
+    .typing-cursor::after {
+      content: '|';
+      animation: typing-cursor 0.7s infinite;
+      color: #4F46E5;
+      font-weight: 700;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+
+    /* Markdown in chat */
+    .chat-markdown p { margin-bottom: 0.5rem; }
+    .chat-markdown ul, .chat-markdown ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+    .chat-markdown li { margin-bottom: 0.25rem; }
+    .chat-markdown strong { font-weight: 600; }
+    .chat-markdown code { background: #e5e7eb; padding: 0.1rem 0.3rem; border-radius: 0.25rem; font-size: 0.875rem; }
+    .dark .chat-markdown code { background: #374151; }
+    .chat-markdown h3 { font-weight: 600; margin: 0.75rem 0 0.25rem; }
+
+    /* Pipeline connector line */
+    .pipeline-connector {
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      width: 100%;
+      height: 2px;
+      background: #d1d5db;
+    }
+    .pipeline-connector.completed { background: #22c55e; }
+  </style>
+</head>
+<body class="font-sans bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 transition-colors duration-300 h-screen overflow-hidden">
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="h-14 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 z-50 relative">
+    <div class="flex items-center gap-3">
+      <button id="sidebar-toggle" class="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <!-- Logo -->
+      <div class="flex items-center gap-2">
+        <img src="../assets/exl-logo.svg" alt="EXL" class="h-6" />
+        <span class="font-bold text-lg text-gray-900 dark:text-white">Intelli<span class="text-indigo-600">Retrieve</span></span>
+      </div>
+    </div>
+    <div id="view-title" class="hidden sm:block text-sm font-medium text-gray-500 dark:text-gray-400">Knowledge Base Chat</div>
+    <div class="flex items-center gap-2">
+      <!-- Home button -->
+      <a href="../index.html" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Back to Home">
+        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+      </a>
+      <!-- Dark mode toggle -->
+      <button id="dark-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Toggle dark mode">
+        <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="flex h-[calc(100vh-3.5rem)]">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-60 bg-gray-900 text-gray-300 flex-shrink-0 flex flex-col transition-transform duration-300 fixed lg:relative z-40 h-[calc(100vh-3.5rem)] -translate-x-full lg:translate-x-0">
+      <!-- Nav Items -->
+      <div class="p-3 space-y-1">
+        <button onclick="switchView('chat')" data-view="chat" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-gray-800 text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          Chat
+        </button>
+        <button onclick="switchView('docs')" data-view="docs" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-800 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Documents
+        </button>
+        <button onclick="switchView('analytics')" data-view="analytics" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-800 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Analytics
+        </button>
+      </div>
+
+      <div class="border-t border-gray-800 mx-3 my-2"></div>
+
+      <!-- Conversation History -->
+      <div class="flex-1 overflow-y-auto px-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">History</span>
+          <button onclick="newChat()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">+ New Chat</button>
+        </div>
+        <div id="conv-history" class="space-y-1">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-t border-gray-800">
+        <p class="text-xs text-gray-600">Powered by IntelliRetrieve v2.1</p>
+      </div>
+    </aside>
+
+    <!-- Sidebar overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-hidden">
+
+      <!-- CHAT VIEW -->
+      <section id="view-chat" class="h-full flex flex-col">
+        <!-- Messages area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-6">
+          <!-- Welcome screen -->
+          <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
+            <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to IntelliRetrieve</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md">Ask questions about insurance policies, claims processing, coverage details, and more. Our AI searches through your knowledge base to find accurate answers.</p>
+            <div class="flex flex-wrap gap-2 justify-center" id="starter-chips">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+          <!-- Messages go here -->
+          <div id="messages-container" class="max-w-3xl mx-auto space-y-6 hidden"></div>
+        </div>
+
+        <!-- Input area -->
+        <div class="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3">
+          <div class="max-w-3xl mx-auto">
+            <div id="followup-chips" class="flex flex-wrap gap-2 mb-2 hidden"></div>
+            <div class="flex gap-2">
+              <input id="chat-input" type="text" placeholder="Ask a question about insurance claims..." class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm" />
+              <button id="send-btn" onclick="handleSend()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOCUMENTS VIEW -->
+      <section id="view-docs" class="h-full overflow-y-auto hidden">
+        <div class="max-w-5xl mx-auto px-6 py-6">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Document Ingestion</h2>
+
+          <!-- Upload Zone -->
+          <div id="upload-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors cursor-pointer mb-6" onclick="document.getElementById('file-input').click()">
+            <svg class="w-10 h-10 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Drag & drop files here, or <span class="text-indigo-600 dark:text-indigo-400">click to upload</span></p>
+            <p class="text-xs text-gray-500 mt-1">Supports PDF, DOCX, TXT (Max 50MB)</p>
+          </div>
+          <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.doc,.txt" />
+
+          <!-- Pipeline Visualization (hidden until upload) -->
+          <div id="pipeline-area" class="hidden mb-6">
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Processing Pipeline</h3>
+              <!-- File info -->
+              <div id="pipeline-file-info" class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-gray-800"></div>
+              <!-- Steps -->
+              <div id="pipeline-steps" class="grid grid-cols-4 gap-4 mb-4"></div>
+              <!-- Console log -->
+              <div id="pipeline-log" class="bg-gray-950 rounded-lg p-4 font-mono text-xs text-green-400 h-36 overflow-y-auto mt-4"></div>
+            </div>
+          </div>
+
+          <!-- Success banner (hidden) -->
+          <div id="upload-success" class="hidden mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 flex items-center gap-3 animate-slide-up">
+            <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-green-800 dark:text-green-300">Document processed successfully!</p>
+              <p id="success-detail" class="text-xs text-green-600 dark:text-green-400"></p>
+            </div>
+          </div>
+
+          <!-- Knowledge Base Table -->
+          <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Knowledge Base Documents</h3>
+              <span id="doc-count-badge" class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full font-medium">8 documents</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th class="text-left px-5 py-3 font-medium">Document</th>
+                    <th class="text-left px-5 py-3 font-medium">Type</th>
+                    <th class="text-left px-5 py-3 font-medium">Pages</th>
+                    <th class="text-left px-5 py-3 font-medium">Chunks</th>
+                    <th class="text-left px-5 py-3 font-medium">Ingested</th>
+                    <th class="text-left px-5 py-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="doc-table-body" class="divide-y divide-gray-100 dark:divide-gray-800">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS VIEW -->
+      <section id="view-analytics" class="h-full overflow-y-auto hidden">
+        <div class="max-w-6xl mx-auto px-6 py-6">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Analytics Dashboard</h2>
+
+          <!-- Metric Cards -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Queries</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 counter" data-target="1247">0</p>
+              <p class="text-xs text-green-600 mt-1">+12% from last week</p>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Response Time</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 counter" data-target="1.3" data-decimal="true">0</p>
+              <p class="text-xs text-green-600 mt-1">-0.2s improvement</p>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Confidence</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1"><span class="counter" data-target="89">0</span>%</p>
+              <p class="text-xs text-green-600 mt-1">+3% from last week</p>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Documents Indexed</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 counter" data-target="8" id="analytics-doc-count">0</p>
+              <p class="text-xs text-gray-500 mt-1">1,402 total vectors</p>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Queries Over Time</h3>
+              <canvas id="chart-queries"></canvas>
+            </div>
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Top Topics</h3>
+              <canvas id="chart-topics"></canvas>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Confidence Distribution</h3>
+              <div class="max-w-[250px] mx-auto">
+                <canvas id="chart-confidence"></canvas>
+              </div>
+            </div>
+            <!-- Recent Queries -->
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+              <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Recent Queries</h3>
+              </div>
+              <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      <th class="text-left px-4 py-2 font-medium">Question</th>
+                      <th class="text-left px-4 py-2 font-medium">Conf.</th>
+                      <th class="text-left px-4 py-2 font-medium">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-queries-body" class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- SOURCE DOCUMENT MODAL -->
+  <div id="source-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSourceModal()"></div>
+    <div class="absolute inset-4 sm:inset-10 lg:inset-y-10 lg:inset-x-40 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slide-up">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div>
+          <h3 id="modal-doc-title" class="text-sm font-semibold text-gray-900 dark:text-white"></h3>
+          <p id="modal-section-title" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"></p>
+        </div>
+        <button onclick="closeSourceModal()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="modal-content" class="flex-1 overflow-y-auto px-6 py-4 text-sm leading-relaxed text-gray-700 dark:text-gray-300"></div>
+      <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-800 flex items-center gap-4">
+        <span class="text-xs text-gray-500">Relevance Score:</span>
+        <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div id="modal-relevance-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-500"></div>
+        </div>
+        <span id="modal-relevance-text" class="text-xs font-semibold text-indigo-600"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+<script>
+// ===== DATA LAYER =====
+
+const KNOWLEDGE_BASE = {
+  documents: [
+    {
+      id: "doc-001", name: "Claims Processing Guidelines v4.2", type: "PDF", pages: 47, chunks: 156, dateIngested: "2026-01-15", status: "active",
+      sections: [
+        { id: "doc-001-s1", title: "Section 3.1 - First Notice of Loss (FNOL)", content: "The First Notice of Loss (FNOL) is the initial report made to an insurance provider following a loss, theft, or damage to an insured asset. The FNOL process requires the following information: policyholder name and policy number, date and time of incident, location of incident, description of loss or damage, contact information for involved parties, and any immediate actions taken. Claims must be reported within 30 days of the incident for standard policies, and within 72 hours for catastrophic events. Late reporting may result in reduced benefits or claim denial. The FNOL can be submitted via phone (1-800-555-CLAIM), online portal, mobile app, or through an authorized agent.", keywords: ["fnol", "first notice", "loss", "report", "initial"] },
+        { id: "doc-001-s2", title: "Section 4.2 - Claims Investigation Process", content: "Upon receiving an FNOL, a claims adjuster is assigned within 24 hours. The investigation process includes: initial contact with the policyholder within 48 hours, damage assessment and documentation review, witness interviews if applicable, police report verification for liability claims, and medical record review for injury claims. The adjuster will create a detailed claims file including photographs, repair estimates, and all correspondence. Investigation timelines vary: simple property claims (5-10 business days), auto claims (10-15 business days), complex liability claims (30-60 business days).", keywords: ["investigation", "adjuster", "assessment", "timeline"] },
+        { id: "doc-001-s3", title: "Section 5.1 - Claims Settlement Options", content: "Settlement can be reached through several methods: direct payment to the policyholder based on the assessed damage value, payment to approved repair facilities or service providers, replacement of the damaged item with an equivalent, or a combination of these methods. For property claims over $10,000, an independent appraisal may be required. Policyholders have the right to dispute the settlement amount through the internal appeals process or external arbitration.", keywords: ["settlement", "payment", "repair", "resolution"] }
+      ]
+    },
+    {
+      id: "doc-002", name: "Policy Coverage Manual 2026", type: "PDF", pages: 82, chunks: 234, dateIngested: "2026-01-10", status: "active",
+      sections: [
+        { id: "doc-002-s1", title: "Chapter 2 - Types of Coverage", content: "Standard insurance policies include several types of coverage: Dwelling Coverage (Coverage A) protects the physical structure of the insured property. Personal Property Coverage (Coverage B) covers belongings within the property. Liability Coverage (Coverage C) protects against lawsuits for bodily injury or property damage. Additional Living Expenses (Coverage D) covers temporary housing if the insured property becomes uninhabitable. Each coverage type has specific limits and deductibles outlined in the policy declarations page.", keywords: ["coverage", "types", "dwelling", "property", "liability"] },
+        { id: "doc-002-s2", title: "Chapter 3 - Policy Exclusions", content: "Standard policies typically exclude: flood damage (requires separate flood insurance), earthquake damage (available as an endorsement), intentional damage by the policyholder, normal wear and tear, pest infestations, nuclear hazards, acts of war, and government actions. Business-related losses are excluded from personal policies and require separate commercial coverage. Policyholders should review exclusions carefully and consider additional endorsements for comprehensive protection.", keywords: ["exclusions", "not covered", "excluded", "limitations"] },
+        { id: "doc-002-s3", title: "Chapter 4 - Deductibles Explained", content: "A deductible is the amount the policyholder must pay out-of-pocket before insurance coverage applies. Types of deductibles include: Fixed Dollar Deductible (e.g., $500, $1,000, $2,500) - a set amount per claim. Percentage Deductible - calculated as a percentage of the insured value (common for wind/hail damage, typically 1-5%). Annual Aggregate Deductible - once the total deductibles paid in a year reach the aggregate amount, the insurer covers remaining claims in full. Higher deductibles result in lower premium costs but increase out-of-pocket expenses during a claim.", keywords: ["deductible", "out of pocket", "premium", "cost"] }
+      ]
+    },
+    {
+      id: "doc-003", name: "Auto Insurance Claims Handbook", type: "PDF", pages: 35, chunks: 112, dateIngested: "2026-01-12", status: "active",
+      sections: [
+        { id: "doc-003-s1", title: "Section 1 - Auto Claim Filing", content: "To file an auto insurance claim: 1) Ensure safety and call emergency services if needed. 2) Document the scene with photographs from multiple angles. 3) Exchange information with other drivers (name, insurance, license plate, driver's license). 4) Obtain a police report number if officers respond. 5) Contact your insurance provider within 24 hours. 6) Provide the claim representative with all documentation. Auto claims require additional information: vehicle identification number (VIN), driver's license of the insured driver, and description of how the accident occurred. Rental car coverage activates automatically for comprehensive and collision claims if included in the policy.", keywords: ["auto", "car", "vehicle", "accident", "filing"] },
+        { id: "doc-003-s2", title: "Section 3 - Auto Damage Assessment", content: "Auto damage is assessed through: visual inspection by a licensed adjuster, repair estimate from an approved body shop, and for total loss determination, comparison of repair cost vs. actual cash value (ACV). A vehicle is typically declared a total loss when repair costs exceed 70-75% of its ACV. In total loss cases, the insurer pays the ACV minus the deductible. Policyholders may retain the salvage vehicle by accepting a reduced settlement. Gap insurance covers the difference between ACV and any outstanding loan balance.", keywords: ["damage", "assessment", "total loss", "repair", "value"] }
+      ]
+    },
+    {
+      id: "doc-004", name: "Fraud Detection & Prevention Guide", type: "DOCX", pages: 28, chunks: 89, dateIngested: "2026-01-18", status: "active",
+      sections: [
+        { id: "doc-004-s1", title: "Chapter 1 - Common Fraud Indicators", content: "Red flags for potential insurance fraud include: claims filed shortly after policy inception or coverage increase, multiple claims in a short period, claimant is overly pushy about quick settlement, inconsistent or changing account of events, injuries inconsistent with the described accident, claimant has financial difficulties, witnesses are friends or family members, damage pattern inconsistent with described incident, and reluctance to provide recorded statements. The Special Investigations Unit (SIU) should be notified when two or more red flags are present.", keywords: ["fraud", "red flags", "indicators", "suspicious", "detection"] },
+        { id: "doc-004-s2", title: "Chapter 3 - Fraud Investigation Protocol", content: "When fraud is suspected: 1) Document all red flags in the claim file. 2) Refer the case to the SIU within 5 business days. 3) Continue normal claims processing while investigation proceeds (do not alert the claimant). 4) SIU will conduct background checks, recorded statements, surveillance if warranted, and expert analysis. 5) If fraud is confirmed, the claim is denied and reported to the National Insurance Crime Bureau (NICB). 6) Criminal prosecution may be pursued in cases exceeding $5,000 in fraudulent claims.", keywords: ["investigation", "siu", "protocol", "suspected fraud"] }
+      ]
+    },
+    {
+      id: "doc-005", name: "Subrogation & Recovery Procedures", type: "PDF", pages: 22, chunks: 68, dateIngested: "2026-01-20", status: "active",
+      sections: [
+        { id: "doc-005-s1", title: "Section 1 - Subrogation Overview", content: "Subrogation is the process by which an insurance company seeks reimbursement from a third party responsible for a loss after paying a claim. The insurer \"steps into the shoes\" of the policyholder to recover the paid amount. Subrogation rights are established in the policy contract. The process begins once the insurer pays the claim and determines a third party is at fault. Recovery amounts are split between the insurer (claim amount) and the policyholder (deductible). Successful subrogation may result in the policyholder receiving their deductible back.", keywords: ["subrogation", "recovery", "third party", "reimbursement", "at fault"] }
+      ]
+    },
+    {
+      id: "doc-006", name: "Customer Communication Templates", type: "DOCX", pages: 15, chunks: 45, dateIngested: "2026-01-22", status: "active",
+      sections: [
+        { id: "doc-006-s1", title: "Template 1 - Claim Acknowledgment", content: "Standard claim acknowledgment communications should include: confirmation of the claim number, name of the assigned adjuster with contact information, outline of the next steps in the claims process, estimated timeline for initial review, list of any additional documents needed from the policyholder, and information about the policyholder's rights and responsibilities during the claims process.", keywords: ["communication", "acknowledgment", "template", "letter"] }
+      ]
+    },
+    {
+      id: "doc-007", name: "Regulatory Compliance Handbook", type: "PDF", pages: 64, chunks: 198, dateIngested: "2026-01-25", status: "active",
+      sections: [
+        { id: "doc-007-s1", title: "Chapter 5 - Claims Handling Timeframes", content: "Regulatory requirements for claims handling timeframes vary by state but generally include: Acknowledgment of claim within 15 days of receipt. Decision on claim within 30 days of receiving all necessary documentation. Payment within 30 days of claim approval. Written explanation required for any claim denial, including the specific policy provisions relied upon. Policyholders must be informed of their right to appeal. Failure to meet these timeframes may result in regulatory penalties and interest payments to the policyholder.", keywords: ["regulatory", "timeframe", "deadline", "compliance", "requirement"] }
+      ]
+    },
+    {
+      id: "doc-008", name: "Appeals & Dispute Resolution Guide", type: "PDF", pages: 19, chunks: 58, dateIngested: "2026-01-28", status: "active",
+      sections: [
+        { id: "doc-008-s1", title: "Section 2 - Internal Appeals Process", content: "Policyholders may appeal a claim decision through the following process: 1) Submit a written appeal within 60 days of the claim decision. 2) Include any additional documentation or evidence supporting the appeal. 3) The appeal is reviewed by a senior adjuster not involved in the original decision. 4) A response is provided within 30 days of receiving the appeal. 5) If the internal appeal is denied, the policyholder may pursue external arbitration or file a complaint with the state Department of Insurance. 6) Policyholders may also seek independent appraisal for property damage disputes.", keywords: ["appeal", "dispute", "resolution", "deny", "denied", "overturn", "review"] }
+      ]
+    }
+  ]
+};
+
+const QA_PAIRS = [
+  {
+    id: "qa-001",
+    keywords: ["fnol", "first notice", "loss", "report claim", "file claim", "new claim", "start claim", "how to claim", "initiate claim", "submit claim", "make a claim", "open claim"],
+    answer: "To file a **First Notice of Loss (FNOL)**, follow these steps:\n\n1. **Contact your insurance provider** within 30 days of the incident (72 hours for catastrophic events)\n2. **Provide required information**: policyholder name, policy number, date/time of incident, location, and description of loss\n3. **Document the damage** with photographs and written descriptions\n4. **Obtain a claim reference number** from the representative\n5. **Follow up** with any additional documentation requested\n\nThe FNOL can be submitted via:\n- **Phone**: 1-800-555-CLAIM\n- **Online portal**\n- **Mobile app**\n- **Through an authorized agent**\n\nProcessing typically begins within 24-48 hours of submission.",
+    confidence: 96,
+    sources: [{ docId: "doc-001", sectionId: "doc-001-s1", relevance: 95 }, { docId: "doc-003", sectionId: "doc-003-s1", relevance: 78 }],
+    category: "Claims Processing"
+  },
+  {
+    id: "qa-002",
+    keywords: ["deductible", "out of pocket", "pay before", "how much pay", "deductible amount", "what is deductible", "deductible work", "deductible mean"],
+    answer: "A **deductible** is the amount you pay out-of-pocket before your insurance coverage applies.\n\n### Types of Deductibles:\n\n- **Fixed Dollar Deductible**: A set amount per claim (e.g., $500, $1,000, $2,500)\n- **Percentage Deductible**: Calculated as a percentage of insured value (typically 1-5%, common for wind/hail damage)\n- **Annual Aggregate Deductible**: Once your total deductibles in a year reach the aggregate amount, the insurer covers all remaining claims in full\n\n### Key Points:\n- Higher deductibles = **lower premium costs** but more out-of-pocket during a claim\n- The deductible is subtracted from your claim payment\n- Different coverage types may have different deductible amounts\n\nReview your policy declarations page for your specific deductible amounts.",
+    confidence: 94,
+    sources: [{ docId: "doc-002", sectionId: "doc-002-s3", relevance: 92 }],
+    category: "Policy Coverage"
+  },
+  {
+    id: "qa-003",
+    keywords: ["coverage", "what is covered", "types of coverage", "policy cover", "insurance cover", "what does my policy", "dwelling", "personal property", "liability"],
+    answer: "Standard insurance policies include several types of coverage:\n\n- **Dwelling Coverage (A)**: Protects the physical structure of your insured property\n- **Personal Property Coverage (B)**: Covers your belongings within the property\n- **Liability Coverage (C)**: Protects against lawsuits for bodily injury or property damage you cause\n- **Additional Living Expenses (D)**: Covers temporary housing if your property becomes uninhabitable\n\nEach coverage type has **specific limits and deductibles** outlined in your policy declarations page. You can often adjust these limits based on your needs and budget.\n\nNote: Some perils require additional endorsements (e.g., flood, earthquake).",
+    confidence: 92,
+    sources: [{ docId: "doc-002", sectionId: "doc-002-s1", relevance: 94 }, { docId: "doc-002", sectionId: "doc-002-s2", relevance: 72 }],
+    category: "Policy Coverage"
+  },
+  {
+    id: "qa-004",
+    keywords: ["exclusion", "not covered", "excluded", "what isn't covered", "what is not covered", "limitation", "doesn't cover", "won't cover"],
+    answer: "Standard policies typically **exclude** the following:\n\n- **Flood damage** (requires separate flood insurance)\n- **Earthquake damage** (available as an endorsement)\n- **Intentional damage** by the policyholder\n- **Normal wear and tear**\n- **Pest infestations** (termites, rodents, etc.)\n- **Nuclear hazards**\n- **Acts of war**\n- **Government actions**\n- **Business-related losses** (requires commercial coverage)\n\nIt is strongly recommended that policyholders review exclusions carefully and consider **additional endorsements** for comprehensive protection. Speak with your agent about coverage gaps specific to your situation.",
+    confidence: 91,
+    sources: [{ docId: "doc-002", sectionId: "doc-002-s2", relevance: 96 }],
+    category: "Policy Coverage"
+  },
+  {
+    id: "qa-005",
+    keywords: ["claim status", "how long", "timeline", "when will", "claim take", "processing time", "waiting", "update on claim", "claim progress"],
+    answer: "Claims processing timelines vary by complexity:\n\n| Claim Type | Typical Timeline |\n|---|---|\n| Simple Property Claims | 5-10 business days |\n| Auto Claims | 10-15 business days |\n| Complex Liability Claims | 30-60 business days |\n\n### Regulatory Requirements:\n- **Acknowledgment** of claim: within 15 days of receipt\n- **Decision** on claim: within 30 days of receiving all documentation\n- **Payment**: within 30 days of claim approval\n\nAn adjuster is assigned within **24 hours** of FNOL and will make initial contact within **48 hours**. You can check your claim status through the online portal or by contacting your assigned adjuster directly.",
+    confidence: 93,
+    sources: [{ docId: "doc-001", sectionId: "doc-001-s2", relevance: 88 }, { docId: "doc-007", sectionId: "doc-007-s1", relevance: 85 }],
+    category: "Claims Processing"
+  },
+  {
+    id: "qa-006",
+    keywords: ["appeal", "dispute", "denied", "deny", "rejected", "disagree", "overturn", "challenge", "fight", "unfair"],
+    answer: "If your claim has been denied, you have several options:\n\n### Internal Appeals Process:\n1. **Submit a written appeal** within 60 days of the claim decision\n2. **Include additional documentation** or evidence supporting your case\n3. A **senior adjuster** (not involved in the original decision) reviews the appeal\n4. **Response within 30 days** of receiving the appeal\n\n### If Internal Appeal is Denied:\n- Pursue **external arbitration**\n- File a complaint with your **state Department of Insurance**\n- Request an **independent appraisal** for property damage disputes\n\nA written explanation of any denial must include the **specific policy provisions** relied upon, and you must be informed of your right to appeal.",
+    confidence: 95,
+    sources: [{ docId: "doc-008", sectionId: "doc-008-s1", relevance: 96 }, { docId: "doc-007", sectionId: "doc-007-s1", relevance: 70 }],
+    category: "Claims Processing"
+  },
+  {
+    id: "qa-007",
+    keywords: ["fraud", "suspicious", "red flag", "fake claim", "fraudulent", "scam", "dishonest"],
+    answer: "Insurance fraud red flags include:\n\n- Claims filed **shortly after policy inception** or coverage increase\n- **Multiple claims** in a short period\n- Claimant is **overly pushy** about quick settlement\n- **Inconsistent or changing** account of events\n- Injuries **inconsistent** with the described accident\n- Claimant has **financial difficulties**\n- Witnesses are **friends or family** members\n- **Damage pattern** inconsistent with described incident\n- **Reluctance** to provide recorded statements\n\nWhen **two or more** red flags are present, the case is referred to the **Special Investigations Unit (SIU)**. Confirmed fraud cases are reported to the **National Insurance Crime Bureau (NICB)**, and criminal prosecution may be pursued for claims exceeding $5,000.",
+    confidence: 90,
+    sources: [{ docId: "doc-004", sectionId: "doc-004-s1", relevance: 94 }, { docId: "doc-004", sectionId: "doc-004-s2", relevance: 82 }],
+    category: "Fraud Detection"
+  },
+  {
+    id: "qa-008",
+    keywords: ["subrogation", "recovery", "third party", "someone else fault", "other driver", "at fault", "reimbursement", "get money back", "deductible back"],
+    answer: "**Subrogation** is the process where your insurance company seeks reimbursement from a responsible third party after paying your claim.\n\n### How It Works:\n1. Your insurer pays your claim\n2. The insurer determines a **third party is at fault**\n3. The insurer pursues the third party (or their insurer) for **recovery**\n4. Recovery amounts are split: insurer gets the claim amount, you may get your **deductible back**\n\n### Key Points:\n- Subrogation rights are established in your **policy contract**\n- You should **not sign any releases** with the at-fault party without consulting your insurer\n- Successful subrogation can result in your **deductible being refunded**\n- The process can take several months depending on complexity",
+    confidence: 88,
+    sources: [{ docId: "doc-005", sectionId: "doc-005-s1", relevance: 95 }],
+    category: "Subrogation"
+  },
+  {
+    id: "qa-009",
+    keywords: ["auto claim", "car accident", "vehicle claim", "car claim", "auto accident", "car crash", "fender bender", "collision claim"],
+    answer: "To file an **auto insurance claim** after an accident:\n\n1. **Ensure safety** and call emergency services if needed\n2. **Document the scene** with photographs from multiple angles\n3. **Exchange information** with other drivers (name, insurance, license plate, driver's license)\n4. **Obtain a police report** number if officers respond\n5. **Contact your insurance** provider within 24 hours\n6. **Provide documentation**: VIN, driver's license, description of how the accident occurred\n\n### Additional Info:\n- **Rental car coverage** activates automatically if included in your policy\n- **Total loss** is typically declared when repair costs exceed 70-75% of the vehicle's actual cash value (ACV)\n- **Gap insurance** covers the difference between ACV and any outstanding loan balance\n\nAuto claims typically take **10-15 business days** to process.",
+    confidence: 95,
+    sources: [{ docId: "doc-003", sectionId: "doc-003-s1", relevance: 96 }, { docId: "doc-003", sectionId: "doc-003-s2", relevance: 84 }],
+    category: "Auto Claims"
+  },
+  {
+    id: "qa-010",
+    keywords: ["total loss", "totaled", "car totaled", "write off", "total loss car", "vehicle total loss"],
+    answer: "A vehicle is declared a **total loss** when repair costs exceed **70-75% of its Actual Cash Value (ACV)**.\n\n### Total Loss Process:\n1. Licensed adjuster performs a **visual inspection**\n2. **Repair estimate** obtained from an approved body shop\n3. Repair cost compared to the vehicle's **ACV**\n4. If total loss is declared, insurer pays **ACV minus your deductible**\n\n### Your Options:\n- **Accept the settlement**: Receive ACV minus deductible, insurer takes the vehicle\n- **Retain the salvage**: Accept a reduced settlement and keep the vehicle\n- **Dispute the value**: Request an independent appraisal if you disagree with the ACV\n\n**Gap insurance** is important here \u2014 it covers the difference between the ACV payout and any remaining loan/lease balance.",
+    confidence: 93,
+    sources: [{ docId: "doc-003", sectionId: "doc-003-s2", relevance: 96 }],
+    category: "Auto Claims"
+  },
+  {
+    id: "qa-011",
+    keywords: ["document", "paperwork", "what do i need", "required documents", "documentation", "evidence", "submit documents", "proof"],
+    answer: "Here are the **documents typically required** for different claim types:\n\n### All Claims:\n- Policy number and policyholder identification\n- Completed claim form\n- Photographs of damage\n- Written description of the incident\n\n### Property Claims:\n- Inventory of damaged/lost items with estimated values\n- Receipts or proof of purchase (if available)\n- Repair estimates from licensed contractors\n\n### Auto Claims:\n- Police report number\n- Other driver's information and insurance details\n- Vehicle identification number (VIN)\n- Repair estimates from approved body shops\n\n### Injury Claims:\n- Medical records and bills\n- Documentation of lost wages\n- Witness statements\n\nSubmit all documents promptly \u2014 claims processing cannot begin until documentation is complete.",
+    confidence: 89,
+    sources: [{ docId: "doc-001", sectionId: "doc-001-s1", relevance: 80 }, { docId: "doc-003", sectionId: "doc-003-s1", relevance: 76 }, { docId: "doc-006", sectionId: "doc-006-s1", relevance: 65 }],
+    category: "Documentation"
+  },
+  {
+    id: "qa-012",
+    keywords: ["settlement", "how much", "payout", "receive", "compensation", "claim worth", "payment", "get paid"],
+    answer: "Claims settlement depends on the type and extent of the loss:\n\n### Settlement Methods:\n- **Direct payment** to the policyholder based on assessed damage value\n- **Payment to repair facilities** or service providers\n- **Replacement** of the damaged item with an equivalent\n- **Combination** of the above methods\n\n### Key Factors:\n- Settlement = **Assessed Value - Deductible**\n- For property claims over **$10,000**, an independent appraisal may be required\n- Payment is issued within **30 days** of claim approval\n\n### If You Disagree:\n- Request a **detailed breakdown** of the assessment\n- Submit an **internal appeal** within 60 days\n- Request an **independent appraisal** for property disputes\n- Pursue **external arbitration** if needed",
+    confidence: 91,
+    sources: [{ docId: "doc-001", sectionId: "doc-001-s3", relevance: 94 }, { docId: "doc-008", sectionId: "doc-008-s1", relevance: 68 }],
+    category: "Claims Processing"
+  }
+];
+
+const FOLLOW_UP_PAIRS = {
+  "qa-001": [
+    { keywords: ["auto", "car", "vehicle", "accident"], answer: "For **auto claims** specifically, the FNOL process includes additional requirements:\n\n- **Police report number** (if applicable)\n- **Other driver's insurance information**\n- Photos of **vehicle damage and accident scene**\n- **Witness contact information**\n- **Vehicle Identification Number (VIN)**\n\nAuto claims typically have a faster initial review (**24 hours**) due to rental car urgency. Rental car coverage activates automatically if included in your policy.", confidence: 91, sources: [{ docId: "doc-003", sectionId: "doc-003-s1", relevance: 89 }] },
+    { keywords: ["step 3", "document", "more detail", "explain", "elaborate", "photos", "photograph"], answer: "Regarding **documenting the damage**:\n\n- Take photos from **multiple angles** in good lighting\n- Include **wide shots** showing context and **close-ups** of damage\n- Note **serial numbers** of damaged items\n- Keep **damaged items** until the adjuster has reviewed them\n- Create a **written inventory** with approximate values and purchase dates\n- Keep **receipts** for any emergency repairs or temporary fixes\n\nThis documentation is critical as it directly impacts your claim valuation. Digital photos with timestamps are preferred.", confidence: 88, sources: [{ docId: "doc-001", sectionId: "doc-001-s1", relevance: 85 }] }
+  ],
+  "qa-005": [
+    { keywords: ["speed up", "faster", "expedite", "hurry", "urgent", "rush"], answer: "To **speed up** your claims process:\n\n1. **Submit complete documentation** upfront \u2014 incomplete docs are the #1 cause of delays\n2. **Respond promptly** to adjuster requests (within 24 hours)\n3. **Use the online portal** for document uploads (faster than mail)\n4. **Get multiple repair estimates** proactively\n5. **Keep a claims journal** with dates, names, and conversation notes\n\nFor urgent situations (uninhabitable home, no transportation), ask about **expedited processing** \u2014 emergency claims may qualify for faster timelines.", confidence: 86, sources: [{ docId: "doc-007", sectionId: "doc-007-s1", relevance: 72 }] }
+  ],
+  "qa-009": [
+    { keywords: ["rental", "rental car", "loaner", "transportation", "get around"], answer: "Regarding **rental car coverage** after an auto accident:\n\n- Coverage activates **automatically** for comprehensive and collision claims (if included in your policy)\n- Typical daily limit: **$30-$50/day** with a maximum of **30 days**\n- You can rent from any company, but **approved providers** offer direct billing\n- If the other driver is at fault, their insurer may cover your rental costs through **subrogation**\n\nCheck your policy declarations page for your specific rental coverage limits.", confidence: 87, sources: [{ docId: "doc-003", sectionId: "doc-003-s1", relevance: 80 }] }
+  ]
+};
+
+const FALLBACK_RESPONSE = {
+  answer: "I wasn't able to find a specific answer to your question in the current knowledge base. Here are some things you can ask me about:\n\n- **Filing a claim** (FNOL process)\n- **Policy coverage** types and limits\n- **Deductibles** and how they work\n- **Claims timelines** and status\n- **Auto claims** and total loss\n- **Appeals** and dispute resolution\n- **Fraud** detection indicators\n- **Subrogation** and recovery\n- **Required documents** for claims\n\nTry rephrasing your question or select one of the suggested topics below.",
+  confidence: 0,
+  sources: []
+};
+
+const UPLOADABLE_DOCS = [
+  { name: "Catastrophe_Response_Protocol_2026.pdf", type: "PDF", size: "2.4 MB", pages: 32, estimatedChunks: 98 },
+  { name: "Auto_Claims_Handbook_v3.docx", type: "DOCX", size: "1.8 MB", pages: 28, estimatedChunks: 84 },
+  { name: "Fraud_Investigation_Manual.pdf", type: "PDF", size: "3.1 MB", pages: 56, estimatedChunks: 167 }
+];
+
+const ANALYTICS_DATA = {
+  recentQueries: [
+    { question: "How do I file an FNOL?", confidence: 96, responseTime: "1.1s", feedback: "positive", timestamp: "2 min ago" },
+    { question: "What's my deductible for wind damage?", confidence: 94, responseTime: "1.3s", feedback: "positive", timestamp: "5 min ago" },
+    { question: "Timeline for auto claims?", confidence: 93, responseTime: "0.9s", feedback: "positive", timestamp: "12 min ago" },
+    { question: "Can I appeal a denied claim?", confidence: 95, responseTime: "1.4s", feedback: "positive", timestamp: "18 min ago" },
+    { question: "What is subrogation?", confidence: 88, responseTime: "1.2s", feedback: "none", timestamp: "25 min ago" },
+    { question: "Documents needed for property claim", confidence: 89, responseTime: "1.5s", feedback: "positive", timestamp: "32 min ago" },
+    { question: "Is flood damage covered?", confidence: 91, responseTime: "0.8s", feedback: "negative", timestamp: "41 min ago" },
+    { question: "How long for settlement payment?", confidence: 91, responseTime: "1.1s", feedback: "positive", timestamp: "55 min ago" },
+    { question: "Fraud red flags to watch for", confidence: 90, responseTime: "1.6s", feedback: "positive", timestamp: "1 hr ago" },
+    { question: "Total loss vehicle process", confidence: 93, responseTime: "1.0s", feedback: "positive", timestamp: "1 hr ago" }
+  ]
+};
+
+const STARTER_QUESTIONS = [
+  "How do I file a claim?",
+  "What does my policy cover?",
+  "How do deductibles work?",
+  "How long does a claim take?",
+  "What if my claim is denied?",
+  "What is subrogation?"
+];
+
+// ===== STATE =====
+let currentView = 'chat';
+let lastQAId = null;
+let isProcessing = false;
+let conversations = [{ id: 'conv-1', title: 'New conversation', messages: [], timestamp: 'Just now' }];
+let activeConvId = 'conv-1';
+let uploadDocIndex = 0;
+let chartsInitialized = false;
+let chartInstances = {};
+
+// ===== UTILITY FUNCTIONS =====
+
+function calculateKeywordScore(input, keywords) {
+  // Strip punctuation and normalize input
+  const inputLower = input.toLowerCase().trim().replace(/[?!.,;:'"()]/g, '');
+  const inputWords = inputLower.split(/\s+/).filter(w => w.length > 2);
+  let score = 0;
+  const maxPossible = keywords.length;
+
+  // Track which input words have been "used" to avoid one word inflating score across many keywords
+  const usedWords = new Set();
+
+  for (const keyword of keywords) {
+    if (inputLower.includes(keyword)) {
+      // Exact substring match — strongest signal
+      score += keyword.split(" ").length * 2;
+    } else {
+      // For multi-word keywords, check if ALL keyword words appear in input
+      const kwWords = keyword.split(/\s+/);
+      if (kwWords.length > 1) {
+        const allPresent = kwWords.every(kw => inputLower.includes(kw));
+        if (allPresent) {
+          score += kwWords.length * 1.5;
+          continue;
+        }
+      }
+      // Partial: only count if there's a NEW input word matching (not already used)
+      for (const word of inputWords) {
+        if (!usedWords.has(word) && (keyword.includes(word) || word.includes(keyword))) {
+          score += 0.5;
+          usedWords.add(word);
+          break;
+        }
+      }
+    }
+  }
+  return score / maxPossible;
+}
+
+function findBestMatch(userInput) {
+  const input = userInput.toLowerCase().trim();
+  let bestMatch = null;
+  let bestScore = 0;
+
+  // Check follow-ups first — give them a context boost since user is continuing a conversation
+  if (lastQAId && FOLLOW_UP_PAIRS[lastQAId]) {
+    for (const followUp of FOLLOW_UP_PAIRS[lastQAId]) {
+      const score = calculateKeywordScore(input, followUp.keywords);
+      if (score > 0.2) {
+        const boostedScore = score + 0.3; // Context boost for follow-ups
+        if (boostedScore > bestScore) {
+          bestScore = boostedScore;
+          bestMatch = { ...followUp, isFollowUp: true, parentId: lastQAId };
+        }
+      }
+    }
+  }
+
+  // Check main QA pairs
+  for (const qa of QA_PAIRS) {
+    const score = calculateKeywordScore(input, qa.keywords);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = qa;
+    }
+  }
+
+  if (bestScore < 0.15) return { ...FALLBACK_RESPONSE, id: null };
+  return bestMatch;
+}
+
+function getDocById(docId) {
+  return KNOWLEDGE_BASE.documents.find(d => d.id === docId);
+}
+
+function getSectionById(docId, sectionId) {
+  const doc = getDocById(docId);
+  if (!doc) return null;
+  return doc.sections.find(s => s.id === sectionId);
+}
+
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'animate-toast bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-4 py-2.5 rounded-lg shadow-lg text-sm font-medium';
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 2000);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===== VIEW SWITCHING =====
+
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('[id^="view-"]').forEach(el => {
+    el.classList.toggle('hidden', el.id !== `view-${view}`);
+  });
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const isActive = btn.dataset.view === view;
+    btn.classList.toggle('bg-gray-800', isActive);
+    btn.classList.toggle('text-white', isActive);
+    btn.classList.toggle('hover:bg-gray-800', !isActive);
+    btn.classList.toggle('hover:text-white', !isActive);
+  });
+  const titles = { chat: 'Knowledge Base Chat', docs: 'Document Ingestion', analytics: 'Analytics Dashboard' };
+  document.getElementById('view-title').textContent = titles[view];
+
+  if (view === 'analytics' && !chartsInitialized) {
+    initCharts();
+    animateCounters();
+    chartsInitialized = true;
+  }
+
+  // Close mobile sidebar
+  if (window.innerWidth < 1024) {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('sidebar-overlay').classList.add('hidden');
+  }
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+}
+
+// ===== CHAT =====
+
+function renderUserMessage(text) {
+  const container = document.getElementById('messages-container');
+  const div = document.createElement('div');
+  div.className = 'flex justify-end animate-slide-up';
+  div.innerHTML = `<div class="max-w-[75%] bg-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-br-md text-sm">${escapeHtml(text)}</div>`;
+  container.appendChild(div);
+  scrollChat();
+}
+
+function renderThinking() {
+  const container = document.getElementById('messages-container');
+  const div = document.createElement('div');
+  div.id = 'thinking-indicator';
+  div.className = 'flex gap-3 animate-slide-up';
+  div.innerHTML = `
+    <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+      <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
+    </div>
+    <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3">
+      <div class="flex items-center gap-1.5 mb-1">
+        <div class="w-2 h-2 bg-indigo-500 rounded-full dot-bounce"></div>
+        <div class="w-2 h-2 bg-indigo-500 rounded-full dot-bounce"></div>
+        <div class="w-2 h-2 bg-indigo-500 rounded-full dot-bounce"></div>
+      </div>
+      <p id="thinking-status" class="text-xs text-gray-500 dark:text-gray-400">Searching knowledge base...</p>
+    </div>`;
+  container.appendChild(div);
+  scrollChat();
+}
+
+async function animateThinking() {
+  const statuses = ["Searching knowledge base...", "Retrieving relevant chunks...", "Generating answer..."];
+  for (let i = 0; i < statuses.length; i++) {
+    const el = document.getElementById('thinking-status');
+    if (el) el.textContent = statuses[i];
+    await sleep(700 + Math.random() * 400);
+  }
+}
+
+function removeThinking() {
+  const el = document.getElementById('thinking-indicator');
+  if (el) el.remove();
+}
+
+async function typeText(element, text) {
+  const words = text.split(' ');
+  let displayed = '';
+  element.innerHTML = '<span class="typing-cursor"></span>';
+
+  for (let i = 0; i < words.length; i++) {
+    displayed += (i > 0 ? ' ' : '') + words[i];
+    element.innerHTML = marked.parse(displayed) + '<span class="typing-cursor"></span>';
+    scrollChat();
+    await sleep(30 + Math.random() * 20);
+  }
+  element.innerHTML = marked.parse(text);
+}
+
+function renderBotMessage(match) {
+  const container = document.getElementById('messages-container');
+  const div = document.createElement('div');
+  div.className = 'flex gap-3 animate-slide-up';
+
+  const confidenceColor = match.confidence >= 80 ? 'green' : match.confidence >= 60 ? 'amber' : 'red';
+  const confidenceClass = `bg-${confidenceColor}-100 text-${confidenceColor}-700 dark:bg-${confidenceColor}-900/30 dark:text-${confidenceColor}-400`;
+
+  let sourcesHtml = '';
+  if (match.sources && match.sources.length > 0) {
+    sourcesHtml = `<div class="sources-area hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+      <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Sources</p>
+      <div class="space-y-2">
+        ${match.sources.map(s => {
+          const doc = getDocById(s.docId);
+          const section = getSectionById(s.docId, s.sectionId);
+          if (!doc || !section) return '';
+          return `<div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/50 rounded-lg px-3 py-2">
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">${doc.name}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${section.title}</p>
+            </div>
+            <div class="flex items-center gap-2 ml-3">
+              <span class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">${s.relevance}%</span>
+              <button onclick="openSourceModal('${s.docId}','${s.sectionId}',${s.relevance})" class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">View</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  div.innerHTML = `
+    <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+      <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
+    </div>
+    <div class="max-w-[85%]">
+      <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3">
+        <div class="chat-markdown text-sm text-gray-800 dark:text-gray-200" id="bot-answer-${Date.now()}"></div>
+        ${match.confidence > 0 ? `
+        <div class="meta-area hidden mt-3 flex items-center gap-3">
+          <span class="text-xs px-2 py-0.5 rounded-full font-medium ${confidenceClass}">${match.confidence}% confidence</span>
+          ${match.sources && match.sources.length > 0 ? `<button onclick="toggleSources(this)" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Show sources (${match.sources.length})</button>` : ''}
+        </div>` : ''}
+        ${sourcesHtml}
+      </div>
+      ${match.confidence > 0 ? `
+      <div class="feedback-area hidden flex items-center gap-1 mt-1.5 ml-1">
+        <button onclick="handleFeedback(this, 'positive')" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-green-600" title="Helpful">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
+        </button>
+        <button onclick="handleFeedback(this, 'negative')" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-red-600" title="Not helpful">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/></svg>
+        </button>
+      </div>` : ''}
+    </div>`;
+
+  container.appendChild(div);
+  return div;
+}
+
+function toggleSources(btn) {
+  const sourcesArea = btn.closest('.bg-gray-100, .dark\\:bg-gray-800').querySelector('.sources-area') ||
+                      btn.closest('[class*="bg-gray"]').querySelector('.sources-area');
+  if (sourcesArea) {
+    sourcesArea.classList.toggle('hidden');
+    btn.textContent = sourcesArea.classList.contains('hidden') ?
+      `Show sources (${sourcesArea.querySelectorAll('.flex.items-center.justify-between').length})` : 'Hide sources';
+  }
+}
+
+function handleFeedback(btn, type) {
+  const feedbackArea = btn.closest('.feedback-area');
+  feedbackArea.querySelectorAll('button').forEach(b => {
+    b.classList.add('opacity-40');
+    b.classList.remove('hover:text-green-600', 'hover:text-red-600');
+    b.disabled = true;
+  });
+  btn.classList.remove('opacity-40', 'text-gray-400');
+  btn.classList.add(type === 'positive' ? 'text-green-600' : 'text-red-600');
+  showToast(type === 'positive' ? 'Thanks for your feedback!' : 'Thanks, we\'ll work on improving this.');
+}
+
+async function handleSend(text) {
+  const input = document.getElementById('chat-input');
+  const question = text || input.value.trim();
+  if (!question || isProcessing) return;
+
+  isProcessing = true;
+  input.value = '';
+  document.getElementById('send-btn').disabled = true;
+
+  // Hide welcome, show messages
+  document.getElementById('welcome-screen').classList.add('hidden');
+  document.getElementById('messages-container').classList.remove('hidden');
+  document.getElementById('followup-chips').classList.add('hidden');
+
+  // Render user message
+  renderUserMessage(question);
+
+  // Update conversation
+  const conv = conversations.find(c => c.id === activeConvId);
+  if (conv) {
+    conv.messages.push({ role: 'user', text: question });
+    if (conv.messages.length === 1) conv.title = question.slice(0, 40) + (question.length > 40 ? '...' : '');
+    conv.timestamp = 'Just now';
+    renderConversationHistory();
+  }
+
+  // Show thinking
+  renderThinking();
+  await animateThinking();
+
+  // Find match
+  const match = findBestMatch(question);
+  removeThinking();
+
+  // Render bot message
+  const botDiv = renderBotMessage(match);
+  const answerId = botDiv.querySelector('[id^="bot-answer-"]').id;
+
+  // Type the answer
+  await typeText(document.getElementById(answerId), match.answer);
+
+  // Reveal meta (confidence, sources, feedback)
+  await sleep(200);
+  const metaArea = botDiv.querySelector('.meta-area');
+  if (metaArea) { metaArea.classList.remove('hidden'); metaArea.classList.add('animate-fade-in'); }
+  await sleep(150);
+  const feedbackArea = botDiv.querySelector('.feedback-area');
+  if (feedbackArea) { feedbackArea.classList.remove('hidden'); feedbackArea.classList.add('animate-fade-in'); }
+
+  // Update state
+  if (match.id) lastQAId = match.id;
+  if (conv) conv.messages.push({ role: 'bot', text: match.answer });
+
+  // Show follow-up chips
+  showFollowUpChips(match);
+
+  isProcessing = false;
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+function showFollowUpChips(match) {
+  const container = document.getElementById('followup-chips');
+  container.innerHTML = '';
+  let chips = [];
+
+  const qaId = match.id || match.parentId;
+  if (qaId && FOLLOW_UP_PAIRS[qaId]) {
+    chips = FOLLOW_UP_PAIRS[qaId].map(f => f.keywords[0]).map(k => {
+      if (k === 'auto') return 'What about auto claims?';
+      if (k === 'step 3' || k === 'elaborate') return 'Can you elaborate?';
+      if (k === 'speed up') return 'How can I speed this up?';
+      if (k === 'rental') return 'What about rental cars?';
+      return `Tell me about ${k}`;
+    });
+  }
+
+  if (chips.length === 0 && match.confidence > 0) {
+    chips = ['What documents do I need?', 'How long does it take?', 'What if I disagree?'];
+  }
+
+  if (chips.length > 0) {
+    chips.forEach(text => {
+      const chip = document.createElement('button');
+      chip.className = 'text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-indigo-300 transition-colors';
+      chip.textContent = text;
+      chip.onclick = () => handleSend(text);
+      container.appendChild(chip);
+    });
+    container.classList.remove('hidden');
+    container.classList.add('animate-fade-in');
+  }
+}
+
+function scrollChat() {
+  const area = document.getElementById('chat-messages');
+  area.scrollTop = area.scrollHeight;
+}
+
+function newChat() {
+  const convId = 'conv-' + Date.now();
+  conversations.unshift({ id: convId, title: 'New conversation', messages: [], timestamp: 'Just now' });
+  activeConvId = convId;
+  lastQAId = null;
+
+  document.getElementById('messages-container').innerHTML = '';
+  document.getElementById('messages-container').classList.add('hidden');
+  document.getElementById('welcome-screen').classList.remove('hidden');
+  document.getElementById('followup-chips').classList.add('hidden');
+  document.getElementById('chat-input').value = '';
+
+  renderConversationHistory();
+  if (currentView !== 'chat') switchView('chat');
+}
+
+function renderConversationHistory() {
+  const container = document.getElementById('conv-history');
+  container.innerHTML = '';
+  conversations.forEach(conv => {
+    const btn = document.createElement('button');
+    btn.className = `w-full text-left px-3 py-2 rounded-lg text-sm transition-colors truncate ${conv.id === activeConvId ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-300'}`;
+    btn.innerHTML = `<p class="truncate text-xs font-medium">${escapeHtml(conv.title)}</p><p class="text-xs text-gray-600 mt-0.5">${conv.timestamp}</p>`;
+    btn.onclick = () => loadConversation(conv.id);
+    container.appendChild(btn);
+  });
+}
+
+function loadConversation(convId) {
+  activeConvId = convId;
+  const conv = conversations.find(c => c.id === convId);
+  const msgContainer = document.getElementById('messages-container');
+  msgContainer.innerHTML = '';
+
+  if (!conv || conv.messages.length === 0) {
+    msgContainer.classList.add('hidden');
+    document.getElementById('welcome-screen').classList.remove('hidden');
+  } else {
+    document.getElementById('welcome-screen').classList.add('hidden');
+    msgContainer.classList.remove('hidden');
+    // Re-render messages (simplified - no typing animation on reload)
+    conv.messages.forEach(msg => {
+      if (msg.role === 'user') {
+        renderUserMessage(msg.text);
+      } else {
+        const div = document.createElement('div');
+        div.className = 'flex gap-3';
+        div.innerHTML = `
+          <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
+          </div>
+          <div class="max-w-[85%] bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3">
+            <div class="chat-markdown text-sm text-gray-800 dark:text-gray-200">${marked.parse(msg.text)}</div>
+          </div>`;
+        msgContainer.appendChild(div);
+      }
+    });
+  }
+  renderConversationHistory();
+  if (currentView !== 'chat') switchView('chat');
+}
+
+// ===== SOURCE MODAL =====
+
+function openSourceModal(docId, sectionId, relevance) {
+  const doc = getDocById(docId);
+  const section = getSectionById(docId, sectionId);
+  if (!doc || !section) return;
+
+  document.getElementById('modal-doc-title').textContent = doc.name;
+  document.getElementById('modal-section-title').textContent = section.title;
+
+  // Highlight some key sentences
+  let content = section.content;
+  const highlights = section.keywords.slice(0, 3);
+  highlights.forEach(kw => {
+    const regex = new RegExp(`(${kw})`, 'gi');
+    content = content.replace(regex, '<mark class="bg-amber-200 dark:bg-amber-800 px-0.5 rounded">$1</mark>');
+  });
+  document.getElementById('modal-content').innerHTML = `<p class="leading-7">${content}</p>`;
+
+  document.getElementById('modal-relevance-bar').style.width = relevance + '%';
+  document.getElementById('modal-relevance-text').textContent = relevance + '%';
+  document.getElementById('source-modal').classList.remove('hidden');
+}
+
+function closeSourceModal() {
+  document.getElementById('source-modal').classList.add('hidden');
+}
+
+// ===== DOCUMENT INGESTION =====
+
+function renderDocTable() {
+  const tbody = document.getElementById('doc-table-body');
+  tbody.innerHTML = '';
+  KNOWLEDGE_BASE.documents.forEach(doc => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors';
+    const typeColors = { PDF: 'red', DOCX: 'blue', TXT: 'gray' };
+    const c = typeColors[doc.type] || 'gray';
+    tr.innerHTML = `
+      <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-${c}-100 dark:bg-${c}-900/30 rounded-lg flex items-center justify-center"><svg class="w-4 h-4 text-${c}-600 dark:text-${c}-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><span class="text-sm font-medium text-gray-900 dark:text-white">${doc.name}</span></div></td>
+      <td class="px-5 py-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium bg-${c}-100 dark:bg-${c}-900/30 text-${c}-700 dark:text-${c}-400">${doc.type}</span></td>
+      <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">${doc.pages}</td>
+      <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">${doc.chunks}</td>
+      <td class="px-5 py-3 text-sm text-gray-600 dark:text-gray-400">${doc.dateIngested}</td>
+      <td class="px-5 py-3">
+        <button onclick="toggleDocStatus('${doc.id}')" class="relative inline-flex items-center w-10 h-5 rounded-full transition-colors duration-200 cursor-pointer ${doc.status === 'active' ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}" title="${doc.status === 'active' ? 'Active — click to deactivate' : 'Inactive — click to activate'}">
+          <span class="inline-block w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-200 ${doc.status === 'active' ? 'translate-x-5' : 'translate-x-0.5'}"></span>
+        </button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('doc-count-badge').textContent = KNOWLEDGE_BASE.documents.length + ' documents';
+}
+
+function toggleDocStatus(docId) {
+  const doc = KNOWLEDGE_BASE.documents.find(d => d.id === docId);
+  if (doc) {
+    doc.status = doc.status === 'active' ? 'inactive' : 'active';
+    renderDocTable();
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function getFileType(name) {
+  const ext = name.split('.').pop().toUpperCase();
+  if (ext === 'DOC') return 'DOCX';
+  return ext;
+}
+
+async function handleFileUpload(file) {
+  const doc = {
+    name: file.name,
+    type: getFileType(file.name),
+    size: formatFileSize(file.size),
+    pages: Math.max(1, Math.round(file.size / 50000)),
+    estimatedChunks: Math.max(3, Math.round(file.size / 16000))
+  };
+
+  // Show pipeline area
+  const pipelineArea = document.getElementById('pipeline-area');
+  pipelineArea.classList.remove('hidden');
+  pipelineArea.classList.add('animate-slide-up');
+  document.getElementById('upload-success').classList.add('hidden');
+
+  // File info
+  document.getElementById('pipeline-file-info').innerHTML = `
+    <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
+      <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    </div>
+    <div>
+      <p class="text-sm font-semibold text-gray-900 dark:text-white">${doc.name}</p>
+      <p class="text-xs text-gray-500">${doc.type} &bull; ${doc.size} &bull; ${doc.pages} pages</p>
+    </div>`;
+
+  const steps = [
+    { label: 'Parsing Document', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { label: 'Chunking Text', icon: 'M4 6h16M4 12h16m-7 6h7' },
+    { label: 'Generating Embeddings', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+    { label: 'Storing in Vector DB', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4' }
+  ];
+
+  // Render steps
+  const stepsContainer = document.getElementById('pipeline-steps');
+  stepsContainer.innerHTML = steps.map((s, i) => `
+    <div id="step-${i}" class="flex flex-col items-center text-center">
+      <div class="w-12 h-12 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center mb-2 transition-all duration-300" id="step-icon-${i}">
+        <svg class="w-5 h-5 text-gray-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${s.icon}"/></svg>
+      </div>
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400" id="step-label-${i}">${s.label}</p>
+    </div>`).join('');
+
+  // Clear log
+  const log = document.getElementById('pipeline-log');
+  log.innerHTML = '';
+
+  const now = new Date();
+  const timeStr = () => {
+    const t = new Date();
+    return `[${t.toLocaleTimeString('en-US', { hour12: false })}]`;
+  };
+
+  const addLog = (text) => {
+    const line = document.createElement('div');
+    line.className = 'animate-fade-in';
+    line.textContent = `${timeStr()} ${text}`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  };
+
+  const activateStep = (i) => {
+    const icon = document.getElementById(`step-icon-${i}`);
+    icon.classList.remove('border-gray-300', 'dark:border-gray-600');
+    icon.classList.add('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-900/30', 'animate-pulse-ring');
+    icon.querySelector('svg').classList.remove('text-gray-400');
+    icon.querySelector('svg').classList.add('text-indigo-600', 'dark:text-indigo-400');
+    document.getElementById(`step-label-${i}`).classList.add('text-indigo-600', 'dark:text-indigo-400');
+  };
+
+  const completeStep = (i) => {
+    const icon = document.getElementById(`step-icon-${i}`);
+    icon.classList.remove('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-900/30', 'animate-pulse-ring');
+    icon.classList.add('border-green-500', 'bg-green-50', 'dark:bg-green-900/30');
+    icon.innerHTML = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+    document.getElementById(`step-label-${i}`).classList.remove('text-indigo-600', 'dark:text-indigo-400');
+    document.getElementById(`step-label-${i}`).classList.add('text-green-600', 'dark:text-green-400');
+  };
+
+  // Step 1: Parse
+  activateStep(0);
+  addLog(`Extracting text from ${doc.name}...`);
+  await sleep(1200);
+  addLog(`Parsed ${doc.pages} pages, ${(doc.pages * 310).toLocaleString()} tokens extracted`);
+  completeStep(0);
+
+  // Step 2: Chunk
+  await sleep(300);
+  activateStep(1);
+  addLog(`Splitting text into semantic chunks (512 token window, 64 overlap)...`);
+  await sleep(1000);
+  addLog(`Generated ${doc.estimatedChunks} chunks with metadata`);
+  completeStep(1);
+
+  // Step 3: Embed
+  await sleep(300);
+  activateStep(2);
+  addLog(`Generating embeddings via text-embedding-3-large...`);
+  await sleep(1500);
+  addLog(`${doc.estimatedChunks}/${doc.estimatedChunks} embeddings computed (1536 dimensions)`);
+  completeStep(2);
+
+  // Step 4: Store
+  await sleep(300);
+  activateStep(3);
+  const totalVectors = KNOWLEDGE_BASE.documents.reduce((sum, d) => sum + d.chunks, 0) + doc.estimatedChunks;
+  addLog(`Upserting ${doc.estimatedChunks} vectors to Pinecone index 'insurance-kb'...`);
+  await sleep(800);
+  addLog(`Storage complete. Index size: ${totalVectors.toLocaleString()} vectors`);
+  completeStep(3);
+
+  addLog(`\u2705 Document "${doc.name}" processed successfully!`);
+
+  // Add to knowledge base
+  const newDoc = {
+    id: 'doc-new-' + Date.now(),
+    name: doc.name.replace(/_/g, ' ').replace(/\.[^.]+$/, ''),
+    type: doc.type,
+    pages: doc.pages,
+    chunks: doc.estimatedChunks,
+    dateIngested: new Date().toISOString().split('T')[0],
+    status: 'active',
+    sections: []
+  };
+  KNOWLEDGE_BASE.documents.push(newDoc);
+
+  // Show success
+  await sleep(400);
+  document.getElementById('upload-success').classList.remove('hidden');
+  document.getElementById('success-detail').textContent = `${doc.name} \u2014 ${doc.estimatedChunks} chunks indexed in ${totalVectors.toLocaleString()} total vectors`;
+
+  renderDocTable();
+}
+
+// ===== ANALYTICS =====
+
+function initCharts() {
+  const isDark = document.documentElement.classList.contains('dark');
+  const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)';
+  const textColor = isDark ? '#9ca3af' : '#6b7280';
+
+  Chart.defaults.color = textColor;
+  Chart.defaults.borderColor = gridColor;
+
+  // Queries Over Time
+  chartInstances.queries = new Chart(document.getElementById('chart-queries'), {
+    type: 'line',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [{
+        label: 'Queries',
+        data: [145, 203, 178, 234, 198, 87, 102],
+        borderColor: '#4F46E5',
+        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#4F46E5',
+        pointRadius: 4
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: gridColor } }, x: { grid: { display: false } } } }
+  });
+
+  // Top Topics
+  chartInstances.topics = new Chart(document.getElementById('chart-topics'), {
+    type: 'bar',
+    data: {
+      labels: ['Claims Processing', 'Policy Coverage', 'Deductibles', 'Fraud Detection', 'Subrogation', 'Documentation'],
+      datasets: [{
+        label: 'Queries',
+        data: [342, 289, 198, 156, 134, 128],
+        backgroundColor: ['#4F46E5', '#7C3AED', '#2563EB', '#0891B2', '#059669', '#D97706'],
+        borderRadius: 6
+      }]
+    },
+    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: gridColor } }, y: { grid: { display: false } } } }
+  });
+
+  // Confidence Distribution
+  chartInstances.confidence = new Chart(document.getElementById('chart-confidence'), {
+    type: 'doughnut',
+    data: {
+      labels: ['High (>80%)', 'Medium (60-80%)', 'Low (<60%)'],
+      datasets: [{
+        data: [876, 298, 73],
+        backgroundColor: ['#22c55e', '#eab308', '#ef4444'],
+        borderWidth: 0
+      }]
+    },
+    options: { responsive: true, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } } } }
+  });
+
+  // Recent queries table
+  const tbody = document.getElementById('recent-queries-body');
+  ANALYTICS_DATA.recentQueries.forEach(q => {
+    const confColor = q.confidence >= 80 ? 'green' : q.confidence >= 60 ? 'amber' : 'red';
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50';
+    tr.innerHTML = `
+      <td class="px-4 py-2 text-gray-700 dark:text-gray-300 truncate max-w-[200px]">${q.question}</td>
+      <td class="px-4 py-2"><span class="text-${confColor}-600 font-medium">${q.confidence}%</span></td>
+      <td class="px-4 py-2 text-gray-500">${q.responseTime}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function animateCounters() {
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    const isDecimal = el.dataset.decimal === 'true';
+    const duration = 1500;
+    const start = performance.now();
+
+    function update(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const current = target * eased;
+      el.textContent = isDecimal ? current.toFixed(1) : Math.floor(current).toLocaleString();
+      if (progress < 1) requestAnimationFrame(update);
+      else el.textContent = isDecimal ? target.toFixed(1) : target.toLocaleString();
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+function updateChartsTheme() {
+  if (!chartsInitialized) return;
+  const isDark = document.documentElement.classList.contains('dark');
+  const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)';
+  const textColor = isDark ? '#9ca3af' : '#6b7280';
+  Chart.defaults.color = textColor;
+  Chart.defaults.borderColor = gridColor;
+  Object.values(chartInstances).forEach(chart => {
+    if (chart.options.scales) {
+      Object.values(chart.options.scales).forEach(scale => {
+        if (scale.grid) scale.grid.color = gridColor;
+        scale.ticks = scale.ticks || {};
+        scale.ticks.color = textColor;
+      });
+    }
+    chart.update();
+  });
+}
+
+// ===== DARK MODE =====
+
+function initDarkMode() {
+  const saved = localStorage.getItem('exl-theme');
+  if (saved !== 'light') {
+    document.documentElement.classList.add('dark');
+  }
+}
+
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('exl-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  updateChartsTheme();
+}
+
+// ===== INIT =====
+
+function renderStarterChips() {
+  const container = document.getElementById('starter-chips');
+  STARTER_QUESTIONS.forEach(q => {
+    const chip = document.createElement('button');
+    chip.className = 'text-sm px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:border-indigo-300 hover:shadow-sm transition-all';
+    chip.textContent = q;
+    chip.onclick = () => handleSend(q);
+    container.appendChild(chip);
+  });
+}
+
+function init() {
+  initDarkMode();
+  renderStarterChips();
+  renderDocTable();
+  renderConversationHistory();
+
+  // Enter key to send
+  document.getElementById('chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  });
+
+  // Sidebar toggle
+  document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+
+  // Dark mode toggle
+  document.getElementById('dark-toggle').addEventListener('click', toggleDarkMode);
+
+  // File input for upload
+  document.getElementById('file-input').addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+      handleFileUpload(e.target.files[0]);
+      e.target.value = '';
+    }
+  });
+
+  // Escape to close modal
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeSourceModal();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

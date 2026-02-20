@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Chat &amp; Data Insights Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
+        .chart-grid {
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                              linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 20% 25%;
+        }
+        .dark .chart-grid {
+            background-image: linear-gradient(to right, #1e293b 1px, transparent 1px),
+                              linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-20 flex flex-col items-center py-6 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50">
+<div class="mb-8">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
+<span class="material-icons">analytics</span>
+</div>
+</div>
+<nav class="flex flex-col gap-6 flex-1">
+<a class="p-3 bg-primary/10 text-primary rounded-xl transition-all" href="#" title="Dashboard">
+<span class="material-icons">grid_view</span>
+</a>
+<a class="p-3 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all" href="#" title="Data Sources">
+<span class="material-icons">storage</span>
+</a>
+<a class="p-3 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all" href="#" title="History">
+<span class="material-icons">history</span>
+</a>
+<a class="p-3 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all" href="#" title="Team">
+<span class="material-icons">people</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-6">
+<a class="p-3 text-slate-400 hover:text-primary rounded-xl transition-all" href="#">
+<span class="material-icons">settings</span>
+</a>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBidy_nLoS97IlQEHeoJEjye7GvEIrkz-6bwnUzU2kCQ6asjgW6neg3n27qmSkVH_paacRQ1OI4E7rb_baDw-H6B3x2EvOCWx8xHTZ7QTq7boFSE7WwgtAPMd94g07U9HyAgXaOCOawYSfXa7BqB4w1cxvlZWr1SMQ8zSmnDx8udkO00gReM2OzZNfha7u9YlotwHEtaY01TWCw084cZLQF5c1FFJ_VdO82u9EUBix-tPXqP0-tE6L1CIz2-FPPrk7xZPsh6qT_A-hP"/>
+</div>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0">
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8">
+<div class="flex items-center gap-3">
+<h1 class="text-lg font-semibold text-slate-800 dark:text-white">Q3 Financial Analysis</h1>
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Live Syncing</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-primary">
+<span class="material-icons text-lg">share</span>
+<span>Share Report</span>
+</button>
+<div class="h-4 w-px bg-slate-200 dark:bg-slate-700"></div>
+<button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+<span class="material-icons text-sm">add</span>
+                    New Project
+                </button>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<section class="w-[40%] flex flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 relative">
+<div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+</div>
+<div class="space-y-2 max-w-[85%]">
+<div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                Hello! I've loaded the Q3 financial dataset. What would you like to investigate first? I can help with growth trends, expense anomalies, or regional performance.
+                            </div>
+<span class="text-[10px] text-slate-400 px-1">10:42 AM</span>
+</div>
+</div>
+<div class="flex gap-4 flex-row-reverse">
+<div class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 flex-shrink-0">
+<span class="material-icons text-sm">person</span>
+</div>
+<div class="space-y-2 max-w-[85%]">
+<div class="bg-primary text-white p-4 rounded-2xl rounded-tr-none text-sm leading-relaxed">
+                                Can you analyze the revenue spike in July? I want to see which product category contributed the most.
+                            </div>
+<span class="text-[10px] text-slate-400 px-1 text-right block">10:45 AM</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+</div>
+<div class="space-y-2 max-w-[85%]">
+<div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl rounded-tl-none text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                Analyzing July's revenue... I've identified that the "Cloud Solutions" category saw a 45% increase compared to June. I've updated the <span class="font-semibold text-primary">Insights</span> and <span class="font-semibold text-primary">Visualization</span> panels on the right with the breakdown.
+                            </div>
+<span class="text-[10px] text-slate-400 px-1">10:46 AM</span>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<div class="relative flex items-center gap-2 bg-slate-50 dark:bg-slate-800 rounded-xl p-2 border border-slate-200 dark:border-slate-700 shadow-sm">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors">
+<span class="material-icons">attach_file</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 resize-none custom-scrollbar max-h-32 text-slate-700 dark:text-slate-300" placeholder="Ask AI about your data..." rows="1"></textarea>
+<button class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary/90 transition-all">
+<span class="material-icons text-xl transform rotate-[-45deg] translate-x-0.5 -translate-y-0.5">send</span>
+</button>
+</div>
+</div>
+</section>
+<section class="w-[60%] flex flex-col bg-background-light dark:bg-background-dark p-6 overflow-y-auto custom-scrollbar">
+<div class="space-y-4">
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-icons text-primary">lightbulb</span>
+<span class="font-semibold text-sm">Key Insights</span>
+</div>
+<span class="material-icons text-slate-400">expand_less</span>
+</button>
+<div class="p-5 border-t border-slate-100 dark:border-slate-800">
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 rounded-lg bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30">
+<p class="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Growth Driver</p>
+<p class="text-sm font-semibold">Cloud Solutions (+45.2%)</p>
+<p class="text-xs text-slate-500 mt-1">Mainly driven by Enterprise tier upgrades.</p>
+</div>
+<div class="p-4 rounded-lg bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30">
+<p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">Retention Rate</p>
+<p class="text-sm font-semibold">98.4% Monthly</p>
+<p class="text-xs text-slate-500 mt-1">Highest retention observed in past 12 months.</p>
+</div>
+</div>
+<ul class="mt-4 space-y-2">
+<li class="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
+<span class="text-primary">•</span>
+                                    Revenue concentration in Top 5 accounts has decreased by 4%.
+                                </li>
+<li class="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
+<span class="text-primary">•</span>
+                                    July operating margins improved to 24% from 21.5% in June.
+                                </li>
+</ul>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50">
+<div class="flex items-center gap-3">
+<span class="material-icons text-primary">insights</span>
+<span class="font-semibold text-sm">Performance Analysis</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 rounded-full bg-primary"></span>
+<span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Cloud Solutions</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+<span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Hardware</span>
+</div>
+</div>
+<span class="material-icons text-slate-400">expand_less</span>
+</div>
+</button>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="text-lg font-bold text-slate-800 dark:text-white">Revenue Growth Trends</h3>
+<p class="text-xs text-slate-500">Monthly breakdown for fiscal year Q2-Q3</p>
+</div>
+<div class="flex gap-2">
+<select class="text-xs border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-2 py-1 focus:ring-primary outline-none">
+<option>Last 6 Months</option>
+<option>Last 12 Months</option>
+</select>
+</div>
+</div>
+<div class="relative h-[320px] w-full mt-4 flex">
+<div class="flex flex-col justify-between text-[10px] text-slate-400 font-medium pr-4 pb-6">
+<span>$300k</span>
+<span>$225k</span>
+<span>$150k</span>
+<span>$75k</span>
+<span>$0</span>
+</div>
+<div class="flex-1 relative">
+<div class="absolute inset-0 chart-grid opacity-50"></div>
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="gradient-area" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#137fec" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#137fec" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M 0,72 L 20,68 L 40,75 L 60,30 L 80,48 L 100,28 V 100 H 0 Z" fill="url(#gradient-area)"></path>
+<path d="M 0,72 L 20,68 L 40,75 L 60,30 L 80,48 L 100,28" fill="none" stroke="#137fec" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+<path d="M 0,82 L 20,80 L 40,78 L 60,82 L 80,75 L 100,72" fill="none" stroke="#94a3b8" stroke-dasharray="8 6" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 pointer-events-none">
+<div class="absolute left-[0%] top-[72%] w-2.5 h-2.5 bg-white border-2 border-primary rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute left-[20%] top-[68%] w-2.5 h-2.5 bg-white border-2 border-primary rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute left-[40%] top-[75%] w-2.5 h-2.5 bg-white border-2 border-primary rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute left-[60%] top-[30%] w-4 h-4 bg-primary border-4 border-white dark:border-slate-900 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-primary/40 z-10 cursor-pointer pointer-events-auto group">
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded shadow-xl whitespace-nowrap opacity-100 transition-opacity">
+                                                July: $242.8k (+45%)
+                                            </div>
+</div>
+<div class="absolute left-[80%] top-[48%] w-2.5 h-2.5 bg-white border-2 border-primary rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute left-[100%] top-[28%] w-2.5 h-2.5 bg-white border-2 border-primary rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute -bottom-6 left-0 right-0 flex justify-between text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+<span>May</span>
+<span>Jun</span>
+<span class="text-primary font-extrabold border-b-2 border-primary pb-0.5">Jul</span>
+<span>Aug</span>
+<span>Sep</span>
+<span>Oct</span>
+</div>
+</div>
+</div>
+<div class="mt-14 flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg">
+<div class="flex items-center gap-6">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 font-semibold uppercase">Avg Growth</span>
+<span class="text-sm font-bold text-emerald-500">+12.4%</span>
+</div>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-700"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 font-semibold uppercase">Peak Revenue</span>
+<span class="text-sm font-bold text-slate-800 dark:text-white">$242,800</span>
+</div>
+</div>
+<button class="text-xs font-semibold text-primary hover:underline">View Full Dataset</button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-icons text-primary">table_rows</span>
+<span class="font-semibold text-sm">Raw Data Preview</span>
+</div>
+<span class="material-icons text-slate-400">expand_more</span>
+</button>
+</div>
+</div>
+<div class="mt-8 text-center text-[10px] text-slate-400 uppercase tracking-widest font-semibold">
+                    Analysis generated in 1.4s • Model: GPT-4-Insights
+                </div>
+</section>
+</main>
+</div>
+</div>
+
+</body></html>
