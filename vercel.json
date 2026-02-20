@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/test-key",
+      "destination": "/api/test_key"
+    },
+    {
+      "source": "/api/intent-switch",
+      "destination": "/api/intent_switch"
+    }
+  ]
+}

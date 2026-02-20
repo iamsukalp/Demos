@@ -3986,11 +3986,11 @@ async function saveApiKey() {
     }
     wsPort = data.wsPort || 8091;
     if (!data.wsAvailable) {
-      updateSettingsStatus('error', 'WebSocket relay not available — install websockets package');
+      updateSettingsStatus('error', 'AI voice mode is not available in this deployment');
       return;
     }
   } catch (e) {
-    updateSettingsStatus('error', 'Server not reachable — is serve.py running?');
+    updateSettingsStatus('error', 'API not reachable');
     return;
   }
 
@@ -4675,3 +4675,4 @@ document.querySelector('.sidebar').classList.add('open');
 </script>
 </body>
 </html>
+
