@@ -8,6 +8,10 @@ package-for-email.py
 # Playwright MCP cache
 .playwright-mcp/
 
+# Environment variables
+.env
+.env.*
+
 # Python
 __pycache__/
 *.pyc

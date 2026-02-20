@@ -46,10 +46,8 @@ except ImportError:
 # Single port — Render sets $PORT; default 8000 for local dev
 PORT = int(os.environ.get('PORT', 8000))
 
-# API key — prefer env var, fall back to hardcoded for local dev
-API_KEY = os.environ.get('OPENAI_API_KEY',
-    "REMOVED_SECRET"
-)
+# API key — loaded from environment variable
+API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 

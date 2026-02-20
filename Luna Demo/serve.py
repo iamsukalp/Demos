@@ -39,8 +39,8 @@ except ImportError:
 PORT = 8090
 WS_PORT = 8091
 
-# API key — hardcoded for demo convenience
-API_KEY = "REMOVED_SECRET"
+# API key — loaded from environment variable
+API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
