@@ -40,7 +40,7 @@ PORT = 8090
 WS_PORT = 8091
 
 # API key — hardcoded for demo convenience
-API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
+API_KEY = "REMOVED_SECRET"
 
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
@@ -440,4 +440,3 @@ with socketserver.TCPServer(("0.0.0.0", PORT), LunaHandler) as httpd:
     print(f"Luna server on http://localhost:{PORT} ({engine_status})")
     print(f"  AI mode: {ws_status}")
     httpd.serve_forever()
-

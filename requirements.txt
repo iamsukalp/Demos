@@ -1,8 +1,9 @@
 # EXL AI Demo Suite - Python Dependencies
 #
-# Core server uses only Python stdlib (http.server, socketserver, json, asyncio, threading).
-# The websockets package is required for the Luna IVR AI voice mode (OpenAI Realtime API relay).
+# aiohttp serves HTTP + WebSocket on a single port (required for Render/PaaS hosting).
+# websockets is the client library for relaying to OpenAI Realtime API.
 #
 # Front-end dependencies (Tailwind CSS, Chart.js, Marked.js) are loaded via CDN at runtime.
 
+aiohttp>=3.9.0
 websockets>=12.0

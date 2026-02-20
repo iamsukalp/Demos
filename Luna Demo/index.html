@@ -477,6 +477,7 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      contain: layout style;
     }
     .transcript__empty {
       flex: 1;
@@ -500,6 +501,7 @@
       display: flex;
       flex-direction: column;
       animation: messageIn 0.3s ease-out;
+      will-change: transform, opacity;
       max-width: 70%;
     }
     .message--system {
@@ -2555,7 +2557,10 @@ function formatTime(seconds) {
 }
 
 function scrollToBottom() {
-  dom.transcript.scrollTo({ top: dom.transcript.scrollHeight, behavior: 'smooth' });
+  // Use instant scroll during AI calls to avoid queuing smooth-scroll animations
+  // which cause severe lag at high message frequency
+  var behavior = (state.aiMode && state.isPlaying) ? 'auto' : 'smooth';
+  dom.transcript.scrollTo({ top: dom.transcript.scrollHeight, behavior: behavior });
 }
 
 // ===== Timer =====
@@ -2652,14 +2657,16 @@ function selectProfile(phone) {
   // Don't allow profile switch during active call
   if (state.callState !== 'idle' && state.callState !== 'ended') return;
   CALLER_PHONE = phone;
-  // Update highlight
-  document.querySelectorAll('.profile-card').forEach(function(c) {
+  // Update highlight (use cached container children instead of querySelectorAll)
+  var cards = document.getElementById('profileList');
+  if (cards) Array.prototype.forEach.call(cards.children, function(c) {
     c.classList.toggle('active', c.dataset.phone === phone);
   });
 }
 
 function setProfilesDisabled(disabled) {
-  document.querySelectorAll('.profile-card').forEach(function(c) {
+  var cards = document.getElementById('profileList');
+  if (cards) Array.prototype.forEach.call(cards.children, function(c) {
     c.classList.toggle('disabled', disabled);
   });
 }
@@ -3986,11 +3993,11 @@ async function saveApiKey() {
     }
     wsPort = data.wsPort || 8091;
     if (!data.wsAvailable) {
-      updateSettingsStatus('error', 'AI voice mode is not available in this deployment');
+      updateSettingsStatus('error', 'WebSocket relay not available — install websockets package');
       return;
     }
   } catch (e) {
-    updateSettingsStatus('error', 'API not reachable');
+    updateSettingsStatus('error', 'Server not reachable — is serve.py running?');
     return;
   }
 
@@ -4070,7 +4077,9 @@ function updateModeBadge(isAi) {
 
 function connectRealtime(scenarioId) {
   return new Promise((resolve, reject) => {
-    const wsUrl = 'ws://localhost:' + state.wsPort + '/?scenario=' + (scenarioId || '') + '&phone=' + encodeURIComponent(CALLER_PHONE);
+    // Auto-detect protocol (wss for HTTPS, ws for HTTP) and host for local + deployed
+    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = wsProto + '//' + location.host + '/ws?scenario=' + (scenarioId || '') + '&phone=' + encodeURIComponent(CALLER_PHONE);
     const ws = new WebSocket(wsUrl);
     state.ws = ws;
 
@@ -4287,6 +4296,17 @@ function findUserInsertAnchor() {
 // Luna transcript accumulation for word-by-word rendering
 let lunaTranscriptBuffer = '';
 let lunaTranscriptMsgEl = null;
+let lunaTranscriptDirty = false;
+let lunaTranscriptRAF = null;
+
+function flushLunaTranscript() {
+  lunaTranscriptRAF = null;
+  if (!lunaTranscriptDirty || !lunaTranscriptMsgEl) return;
+  lunaTranscriptDirty = false;
+  const textEl = lunaTranscriptMsgEl.querySelector('.message__bubble');
+  textEl.textContent = lunaTranscriptBuffer;
+  dom.transcript.scrollTop = dom.transcript.scrollHeight;
+}
 
 function appendLunaTranscript(delta) {
   lunaTranscriptBuffer += delta;
@@ -4299,12 +4319,24 @@ function appendLunaTranscript(delta) {
       '<div class="message__bubble"></div>';
     dom.transcript.appendChild(lunaTranscriptMsgEl);
   }
-  const textEl = lunaTranscriptMsgEl.querySelector('.message__bubble');
-  textEl.textContent = lunaTranscriptBuffer;
-  dom.transcript.scrollTop = dom.transcript.scrollHeight;
+  // Batch DOM updates to next animation frame instead of every delta
+  lunaTranscriptDirty = true;
+  if (!lunaTranscriptRAF) {
+    lunaTranscriptRAF = requestAnimationFrame(flushLunaTranscript);
+  }
 }
 
 function finalizeLunaTranscript() {
+  // Flush any pending RAF update before finalizing
+  if (lunaTranscriptRAF) {
+    cancelAnimationFrame(lunaTranscriptRAF);
+    lunaTranscriptRAF = null;
+  }
+  if (lunaTranscriptDirty && lunaTranscriptMsgEl) {
+    const textEl = lunaTranscriptMsgEl.querySelector('.message__bubble');
+    textEl.textContent = lunaTranscriptBuffer;
+    lunaTranscriptDirty = false;
+  }
   if (lunaTranscriptBuffer.trim()) {
     state.aiTranscript.push({ role: 'bot', text: lunaTranscriptBuffer.trim() });
   }
@@ -4387,13 +4419,14 @@ async function startMicStreaming() {
         const s = Math.max(-1, Math.min(1, inputData[i]));
         pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
       }
-      // Int16 → base64
+      // Int16 → base64 (chunked to avoid O(n²) string concat)
       const bytes = new Uint8Array(pcm16.buffer);
-      let binary = '';
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
+      const CHUNK = 8192;
+      const parts = [];
+      for (let i = 0; i < bytes.length; i += CHUNK) {
+        parts.push(String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + CHUNK, bytes.length))));
       }
-      const base64 = btoa(binary);
+      const base64 = btoa(parts.join(''));
       state.ws.send(JSON.stringify({
         type: 'input_audio_buffer.append',
         audio: base64,
@@ -4461,6 +4494,8 @@ function startRingtone() {
     osc2.start(now);
     osc1.stop(now + dur);
     osc2.stop(now + dur);
+    // Disconnect nodes after burst ends to free audio graph memory
+    osc1.onended = function() { osc1.disconnect(); osc2.disconnect(); gain.disconnect(); };
   }
 
   playRingBurst();
@@ -4675,4 +4710,3 @@ document.querySelector('.sidebar').classList.add('open');
 </script>
 </body>
 </html>
-

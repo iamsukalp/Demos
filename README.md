@@ -173,15 +173,11 @@ Once the server is running at `http://localhost:8000`:
 
 Luna IVR AI mode requires an OpenAI API key with access to the `gpt-4o-realtime-preview` model.
 
-For local development, set your key as an environment variable before starting the server:
-
-```bash
-# PowerShell
-$env:OPENAI_API_KEY="your_key_here"
-python serve.py
-```
-
-You can also open Luna IVR settings and test a key manually in the UI.
+The server includes a hardcoded demo key for convenience. To use your own key:
+1. Open Luna IVR in the browser
+2. Click the Settings gear icon
+3. Enter your OpenAI API key
+4. Click "Test & Save"
 
 ## CDN Dependencies (loaded at runtime)
 
@@ -194,36 +190,6 @@ You can also open Luna IVR settings and test a key manually in the UI.
 | Material Icons | — | Conversational BI |
 
 No local installation is needed for these — they are fetched from CDN when the page loads.
-
-## Deploying on Vercel
-
-This repo is Vercel-ready for static hosting plus Luna scripted API endpoints.
-
-### 1. Import the GitHub repo in Vercel
-
-- Vercel Dashboard -> **Add New...** -> **Project**
-- Select `iamsukalp/Demos`
-- Framework preset: **Other**
-- Root directory: `./`
-
-### 2. Set environment variable (optional but recommended)
-
-Add `OPENAI_API_KEY` in Project Settings -> Environment Variables.
-
-- Used by `/api/summarize`
-- Used by `/api/test-key` when no key is passed in request
-
-### 3. Deploy
-
-Trigger a deployment from the dashboard, or push to `main`.
-
-### Vercel limitation for Luna AI voice mode
-
-Luna AI voice mode depends on a long-lived WebSocket relay (`ws://...`) to OpenAI Realtime. That relay is not supported by this Vercel setup, so:
-
-- `BPVA Demo` and `CBI Demo` work normally
-- `Luna Demo` scripted mode works
-- `Luna Demo` AI voice mode is disabled in Vercel deployment
 
 ## Troubleshooting
 
@@ -238,4 +204,3 @@ Luna AI voice mode depends on a long-lived WebSocket relay (`ws://...`) to OpenA
 | Luna AI — "WebSocket relay unavailable" | Install `websockets` with `pip install websockets` |
 | Luna AI — "Invalid API key" | Open Settings and enter a valid OpenAI API key |
 | Blank page / 404 | Ensure you started the server from the correct directory |
-
