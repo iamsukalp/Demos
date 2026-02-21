@@ -3753,6 +3753,8 @@ function restartScenario() {
   // Clear transcript and UI
   dom.transcript.innerHTML = '';
   hideCallerInfo();
+  // Re-open sidebar to show profile selection
+  document.querySelector('.sidebar').classList.add('open');
   updateCallState('idle');
   // Remove active highlight from scenario cards
   document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
