@@ -1446,7 +1446,7 @@
       <div class="call-status" id="callStatus">
         <div class="call-status__left">
           <div class="status-dot status-dot--gray" id="statusDot"></div>
-          <span class="call-status__text" id="statusText">Select a scenario to begin</span>
+          <span class="call-status__text" id="statusText">Select a customer profile to begin</span>
         </div>
         <span class="call-status__timer" id="callTimer">--:--</span>
         <div class="call-status__handler" id="callHandler">
@@ -2245,7 +2245,7 @@ function updateCallState(newState, agentName) {
       break;
     default:
       dot.classList.add('status-dot--gray');
-      text.textContent = 'Select a scenario to begin';
+      text.textContent = 'Select a customer profile to begin';
       handler.innerHTML = '<span>—</span>';
       dom.callTimer.textContent = '--:--';
   }
