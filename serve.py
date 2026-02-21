@@ -51,6 +51,25 @@ API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
+# Persistent stats file
+STATS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'luna_stats.json')
+DEFAULT_STATS = {"scenariosRun": 0, "botContained": 0, "agentEscalated": 0, "totalHandleTime": 0}
+
+
+def load_stats():
+    """Load stats from JSON file."""
+    try:
+        with open(STATS_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return dict(DEFAULT_STATS)
+
+
+def save_stats(stats):
+    """Save stats to JSON file."""
+    with open(STATS_FILE, 'w') as f:
+        json.dump(stats, f)
+
 
 # ===== CORS Middleware =====
 
@@ -211,6 +230,22 @@ async def handle_intent_switch(request):
     return web.json_response({'switch': result})
 
 
+async def handle_get_stats(request):
+    """Return shared persistent stats."""
+    return web.json_response(load_stats())
+
+
+async def handle_update_stats(request):
+    """Update shared persistent stats."""
+    data = await request.json() if request.content_length else {}
+    stats = load_stats()
+    for key in DEFAULT_STATS:
+        if key in data:
+            stats[key] = data[key]
+    save_stats(stats)
+    return web.json_response(stats)
+
+
 # ===== WebSocket Relay Handler =====
 
 async def ws_relay(request):
@@ -362,7 +397,7 @@ async def ws_relay(request):
 
 # ===== Security: block sensitive paths =====
 
-BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules')
+BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules', 'luna_stats')
 
 
 async def handle_root(request):
@@ -391,6 +426,8 @@ def create_app():
     app.router.add_post('/api/classify', handle_classify)
     app.router.add_post('/api/entities', handle_entities)
     app.router.add_post('/api/intent-switch', handle_intent_switch)
+    app.router.add_get('/api/stats', handle_get_stats)
+    app.router.add_post('/api/stats', handle_update_stats)
 
     # WebSocket relay — mounted at /ws (browser connects to /ws?scenario=...&phone=...)
     app.router.add_get('/ws', ws_relay)

@@ -12,6 +12,9 @@ package-for-email.py
 .env
 .env.*
 
+# Runtime data
+luna_stats.json
+
 # Python
 __pycache__/
 *.pyc

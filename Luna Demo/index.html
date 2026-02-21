@@ -2075,7 +2075,7 @@ const state = {
   timerInterval: null,
   skipMode: false,
   abortController: null,
-  stats: JSON.parse(localStorage.getItem('luna-stats') || '{"scenariosRun":0,"botContained":0,"agentEscalated":0,"totalHandleTime":0}'),
+  stats: { scenariosRun: 0, botContained: 0, agentEscalated: 0, totalHandleTime: 0 },
   completedScenarios: new Set(),
   // Playback generation counter (incremented on each new scenario to invalidate old async flows)
   playbackGeneration: 0,
@@ -3438,7 +3438,11 @@ function updateStats(scenario) {
 }
 
 function saveStats() {
-  localStorage.setItem('luna-stats', JSON.stringify(state.stats));
+  fetch('/api/stats', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(state.stats),
+  }).catch(() => {});
   renderStats();
 }
 
@@ -4232,8 +4236,11 @@ updateThemeIcons();
 renderProfileSelector();
 document.querySelector('.sidebar').classList.add('open');
 
-// Restore persistent metrics from localStorage
-renderStats();
+// Restore persistent metrics from server
+fetch('/api/stats').then(r => r.json()).then(data => {
+  state.stats = data;
+  renderStats();
+}).catch(() => {});
 
 </script>
 </body>
