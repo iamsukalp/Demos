@@ -2282,6 +2282,29 @@ function selectProfile(phone) {
   if (cards) Array.prototype.forEach.call(cards.children, function(c) {
     c.classList.toggle('active', c.dataset.phone === phone);
   });
+  // Show call prompt for selected profile
+  showCallPrompt();
+}
+
+function showCallPrompt() {
+  dom.transcript.querySelectorAll('.message, .transfer-card, .resolution-card, .ai-call-prompt').forEach(function(el) { el.remove(); });
+  if (dom.emptyState) dom.emptyState.style.display = 'none';
+  var customer = CUSTOMER_DB[CALLER_PHONE];
+  var el = document.createElement('div');
+  el.className = 'ai-call-prompt';
+  el.id = 'aiCallPrompt';
+  el.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;color:var(--orange);margin-bottom:12px;">' +
+      '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' +
+    '</svg>' +
+    '<div style="font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;">' + escapeHtml(customer ? customer.name : 'Customer') + '</div>' +
+    '<div style="font-size:13px;color:var(--gray-500);margin-bottom:4px;">AI Voice Call</div>' +
+    '<div class="ai-call-prompt__phone">' + escapeHtml(CALLER_PHONE) + '</div>' +
+    '<button class="btn btn--start-call" style="margin-top:20px;" onclick="startFreeformCall()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
+      'Call' +
+    '</button>';
+  dom.transcript.appendChild(el);
 }
 
 function setProfilesDisabled(disabled) {
@@ -3575,6 +3598,8 @@ function restartScenario() {
   dom.btnRestart.disabled = true;
   // Re-enable profile selection
   setProfilesDisabled(false);
+  // Show call prompt for current profile
+  showCallPrompt();
 }
 
 
@@ -4235,6 +4260,7 @@ updateThemeIcons();
 // Init profile selector and open sidebar
 renderProfileSelector();
 document.querySelector('.sidebar').classList.add('open');
+showCallPrompt();
 
 // Restore persistent metrics from server
 fetch('/api/stats').then(r => r.json()).then(data => {
