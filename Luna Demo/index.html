@@ -77,11 +77,6 @@
       font-weight: 700;
       color: var(--navy);
     }
-    .header__title {
-      font-size: 14px;
-      color: var(--gray-500);
-      font-weight: 500;
-    }
     .header__badge {
       font-size: 12px;
       font-weight: 600;
@@ -1386,119 +1381,6 @@
     }
 
     /* ===== Settings Modal ===== */
-    .settings-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-    }
-    .settings-overlay.open { display: flex; }
-    .settings-modal {
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      width: 440px;
-      max-width: 90vw;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    .settings-modal h2 {
-      margin: 0 0 4px;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--navy);
-    }
-    .settings-modal__sub {
-      font-size: 13px;
-      color: var(--gray-500);
-      margin-bottom: 20px;
-    }
-    .settings-modal label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--gray-700);
-      margin-bottom: 6px;
-    }
-    .settings-modal input[type="password"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid var(--gray-300);
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: 'Consolas', 'Monaco', monospace;
-      box-sizing: border-box;
-      transition: border-color 0.2s;
-    }
-    .settings-modal input[type="password"]:focus {
-      outline: none;
-      border-color: var(--orange);
-      box-shadow: 0 0 0 3px rgba(255,91,53,0.1);
-    }
-    .settings-status {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .settings-status--disconnected {
-      background: #FEF3C7;
-      color: #92400E;
-    }
-    .settings-status--connected {
-      background: #D1FAE5;
-      color: #065F46;
-    }
-    .settings-status--error {
-      background: #FEE2E2;
-      color: #991B1B;
-    }
-    .settings-status__dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .settings-status--disconnected .settings-status__dot { background: #F59E0B; }
-    .settings-status--connected .settings-status__dot { background: #10B981; }
-    .settings-status--error .settings-status__dot { background: #EF4444; }
-    .settings-modal__actions {
-      margin-top: 20px;
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-    .settings-modal__actions button {
-      padding: 8px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-    .btn--settings-save {
-      background: var(--orange);
-      color: white;
-    }
-    .btn--settings-save:hover { background: #E54E2B; }
-    .btn--settings-close {
-      background: var(--gray-200);
-      color: var(--gray-700);
-    }
-    .btn--settings-close:hover { background: var(--gray-300); }
-    .btn--settings-clear {
-      background: transparent;
-      color: #EF4444;
-      margin-right: auto;
-    }
-    .btn--settings-clear:hover { background: #FEE2E2; }
-
     /* Mode indicator badge in footer */
     .mode-badge {
       display: inline-flex;
@@ -1564,39 +1446,6 @@
     }
     .ai-mute-btn:hover { background: rgba(6,95,70,0.1); }
 
-    /* Dark mode: settings modal */
-    html.dark .settings-modal {
-      background: #1E293B;
-    }
-    html.dark .settings-modal h2 { color: #F1F5F9; }
-    html.dark .settings-modal__sub { color: #94A3B8; }
-    html.dark .settings-modal label { color: #CBD5E1; }
-    html.dark .settings-modal input[type="password"] {
-      background: #0F172A;
-      border-color: #475569;
-      color: #E2E8F0;
-    }
-    html.dark .settings-modal input[type="password"]:focus {
-      border-color: var(--orange);
-    }
-    html.dark .settings-status--disconnected {
-      background: rgba(245,158,11,0.15);
-      color: #FBBF24;
-    }
-    html.dark .settings-status--connected {
-      background: rgba(16,185,129,0.15);
-      color: #6EE7B7;
-    }
-    html.dark .settings-status--error {
-      background: rgba(239,68,68,0.15);
-      color: #FCA5A5;
-    }
-    html.dark .btn--settings-close {
-      background: #334155;
-      color: #CBD5E1;
-    }
-    html.dark .btn--settings-close:hover { background: #475569; }
-    html.dark .btn--settings-clear:hover { background: rgba(239,68,68,0.15); }
     html.dark .mode-badge--scripted {
       background: #334155;
       color: #94A3B8;
@@ -1630,11 +1479,7 @@
       <span class="header__brand-divider"></span>
       <span class="header__brand-name">Luna</span>
     </div>
-    <span class="header__title">IVR Call Containment Simulator</span>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button class="theme-toggle" id="btnSettings" onclick="openSettings()" title="AI Settings">
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.066z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
         <svg id="sunIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>
         <svg id="moonIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -1645,24 +1490,6 @@
     </div>
   </header>
 
-  <!-- Settings Modal -->
-  <div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
-    <div class="settings-modal">
-      <h2>AI Settings</h2>
-      <div class="settings-modal__sub">Connect Luna to OpenAI for fully conversational AI mode</div>
-      <label for="apiKeyInput">OpenAI API Key</label>
-      <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off" />
-      <div class="settings-status settings-status--disconnected" id="settingsStatus">
-        <span class="settings-status__dot"></span>
-        <span id="settingsStatusText">Scripted mode — add API key for AI mode</span>
-      </div>
-      <div class="settings-modal__actions">
-        <button class="btn--settings-clear" id="btnClearKey" onclick="clearApiKey()">Clear Key</button>
-        <button class="btn--settings-close" onclick="closeSettings()">Close</button>
-        <button class="btn--settings-save" onclick="saveApiKey()">Connect</button>
-      </div>
-    </div>
-  </div>
 
   <!-- App Layout -->
   <div class="app">
@@ -1853,7 +1680,6 @@
       <div class="call-actions" id="callActions">
         <button class="btn btn--danger" id="btnEnd" disabled onclick="endCall()">End Call</button>
         <button class="btn btn--secondary" id="btnRestart" disabled onclick="restartScenario()">Restart</button>
-        <button class="btn btn--text" id="btnSkip" disabled onclick="skipAnimation()">Skip Animation</button>
       </div>
 
       <!-- Voice Recording Area -->
@@ -2511,7 +2337,6 @@ const dom = {
   callerAccounts: document.getElementById('callerAccounts'),
   btnEnd: document.getElementById('btnEnd'),
   btnRestart: document.getElementById('btnRestart'),
-  btnSkip: document.getElementById('btnSkip'),
   metricContained: document.getElementById('metricContained'),
   metricEscalated: document.getElementById('metricEscalated'),
   metricRate: document.getElementById('metricRate'),
@@ -2529,10 +2354,6 @@ const dom = {
   btnSendText: document.getElementById('btnSendText'),
   metricDynamic: document.getElementById('metricDynamic'),
   // AI mode elements
-  settingsOverlay: document.getElementById('settingsOverlay'),
-  apiKeyInput: document.getElementById('apiKeyInput'),
-  settingsStatus: document.getElementById('settingsStatus'),
-  settingsStatusText: document.getElementById('settingsStatusText'),
   aiCallIndicator: document.getElementById('aiCallIndicator'),
   btnMute: document.getElementById('btnMute'),
 };
@@ -3641,7 +3462,6 @@ async function playConversationFrom(startIndex) {
       state.abortController = null;
       state.freeformMode = false;
       dom.btnEnd.disabled = true;
-      dom.btnSkip.disabled = true;
     }
   }
 }
@@ -3733,7 +3553,6 @@ async function startFreeformCall() {
   dom.transcript.innerHTML = '';
   dom.btnEnd.disabled = false;
   dom.btnRestart.disabled = false;
-  dom.btnSkip.disabled = false;
 
   const gen = state.playbackGeneration;
 
@@ -3797,7 +3616,6 @@ async function startFreeformCall() {
       state.isPlaying = false;
       state.abortController = null;
       state.freeformMode = false;
-      dom.btnSkip.disabled = true;
     }
   } catch (e) {
     if (e.name === 'AbortError') return;
@@ -3872,7 +3690,6 @@ function selectScenario(scenarioId) {
   // Scripted mode: enable buttons and start playback
   dom.btnEnd.disabled = false;
   dom.btnRestart.disabled = false;
-  dom.btnSkip.disabled = false;
 
   // Start playback
   playConversation();
@@ -3910,7 +3727,6 @@ function endCall() {
   updateCallState('ended');
   renderMessage({ type: 'system', text: 'Call ended by user' });
   dom.btnEnd.disabled = true;
-  dom.btnSkip.disabled = true;
 }
 
 function restartScenario() {
@@ -3918,135 +3734,36 @@ function restartScenario() {
   if (state.ws) {
     endAiCall();
   }
-  if (state.freeformMode || state.detectedIntentId) {
-    startFreeformCall();
-  } else if (state.currentScenario) {
-    selectScenario(state.currentScenario.id);
+  // Stop any running scenario
+  if (state.isPlaying) {
+    stopCurrentScenario();
   }
-}
-
-function skipAnimation() {
-  if (!state.isPlaying || !state.currentScenario) return;
-
-  // Stop current playback
-  stopCurrentScenario();
-
-  // Clear and render all messages instantly
+  // Reset state to idle
+  state.currentScenario = null;
+  state.skipMode = false;
+  state.extractedEntities = {};
+  state.intentDetected = false;
+  state.detectedIntentId = null;
+  state.freeformMode = false;
+  state.playbackGeneration++;
+  state.dynamicTurns = 0;
+  state.totalCustomerTurns = 0;
+  state.conversationContext = {};
+  updateDynamicMetric();
+  // Clear transcript and UI
   dom.transcript.innerHTML = '';
-  const scenario = state.currentScenario;
-
-  for (const msg of scenario.messages) {
-    if (msg.state) {
-      updateCallState(msg.state, msg.agentName);
-    }
-    if (msg.type === 'transfer-summary') {
-      const resolvedData = {};
-      for (const [key, value] of Object.entries(msg.data)) {
-        resolvedData[key] = resolveTemplate(value, scenario.id);
-      }
-      renderTransferSummary(resolvedData);
-    } else if (msg.type === 'bot' || msg.type === 'agent') {
-      renderMessage({ ...msg, text: resolveTemplate(msg.text, scenario.id) });
-    } else {
-      renderMessage(msg);
-    }
-  }
-
-  renderResolutionCard(scenario);
-  updateStats(scenario);
+  hideCallerInfo();
+  updateCallState('idle');
+  // Remove active highlight from scenario cards
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+  // Disable action buttons (back to initial state)
   dom.btnEnd.disabled = true;
-  dom.btnSkip.disabled = true;
+  dom.btnRestart.disabled = true;
+  // Re-enable profile selection
+  setProfilesDisabled(false);
 }
 
-// ===== Settings Modal & API Key =====
-function openSettings() {
-  dom.settingsOverlay.classList.add('open');
-  const saved = localStorage.getItem('luna-openai-key') || '';
-  dom.apiKeyInput.value = saved;
-}
 
-function closeSettings() {
-  dom.settingsOverlay.classList.remove('open');
-}
-
-async function saveApiKey() {
-  const key = dom.apiKeyInput.value.trim();
-  if (!key) {
-    updateSettingsStatus('error', 'Please enter an API key');
-    return;
-  }
-  localStorage.setItem('luna-openai-key', key);
-  updateSettingsStatus('disconnected', 'Saving key to server...');
-
-  // Step 1: Send key to server
-  let wsPort = 8091;
-  try {
-    const res = await fetch('/api/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: key }),
-    });
-    const data = await res.json();
-    if (!data.success || !data.configured) {
-      updateSettingsStatus('error', 'Server rejected the key');
-      return;
-    }
-    wsPort = data.wsPort || 8091;
-    if (!data.wsAvailable) {
-      updateSettingsStatus('error', 'WebSocket relay not available — install websockets package');
-      return;
-    }
-  } catch (e) {
-    updateSettingsStatus('error', 'Server not reachable — is serve.py running?');
-    return;
-  }
-
-  // Step 2: Test API key against OpenAI
-  updateSettingsStatus('disconnected', 'Testing OpenAI API key...');
-  try {
-    const testRes = await fetch('/api/test-key', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: key }),
-    });
-    const testData = await testRes.json();
-    if (testData.valid) {
-      state.aiConfigured = true;
-      state.aiMode = true;
-      state.wsPort = wsPort;
-      updateSettingsStatus('connected', 'API key valid — AI mode active');
-      updateModeBadge(true);
-    } else {
-      updateSettingsStatus('error', testData.error || 'Invalid API key');
-      localStorage.removeItem('luna-openai-key');
-      state.aiConfigured = false;
-      state.aiMode = false;
-      updateModeBadge(false);
-    }
-  } catch (e) {
-    updateSettingsStatus('error', 'Key test failed: ' + e.message);
-  }
-}
-
-function clearApiKey() {
-  localStorage.removeItem('luna-openai-key');
-  dom.apiKeyInput.value = '';
-  state.aiConfigured = false;
-  state.aiMode = false;
-  // Tell server to clear key
-  fetch('/api/config', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey: '' }),
-  }).catch(() => {});
-  updateSettingsStatus('disconnected', 'Scripted mode — add API key for AI mode');
-  updateModeBadge(false);
-}
-
-function updateSettingsStatus(type, text) {
-  dom.settingsStatus.className = 'settings-status settings-status--' + type;
-  dom.settingsStatusText.textContent = text;
-}
 
 function updateModeBadge(isAi) {
   // Mode badge removed from UI
@@ -4602,7 +4319,6 @@ async function startAiCall(scenarioId) {
   dom.transcript.querySelectorAll('.message:not(.message--system), .transfer-summary, .resolution-card, .ai-call-prompt').forEach(el => el.remove());
   dom.btnEnd.disabled = false;
   dom.btnRestart.disabled = false;
-  dom.btnSkip.disabled = true; // Skip doesn't apply to AI mode
 
   // Show ringing (skip if already ringing from initiateAiCall)
   if (state.callState !== 'ringing') {
@@ -4677,7 +4393,6 @@ function endAiCall() {
   }
 
   dom.btnEnd.disabled = true;
-  dom.btnSkip.disabled = true;
   dom.btnRestart.disabled = false;
 
   // Collapse sidebar
