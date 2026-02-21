@@ -2075,7 +2075,7 @@ const state = {
   timerInterval: null,
   skipMode: false,
   abortController: null,
-  stats: { scenariosRun: 0, botContained: 0, agentEscalated: 0, totalHandleTime: 0 },
+  stats: JSON.parse(localStorage.getItem('luna-stats') || '{"scenariosRun":0,"botContained":0,"agentEscalated":0,"totalHandleTime":0}'),
   completedScenarios: new Set(),
   // Playback generation counter (incremented on each new scenario to invalidate old async flows)
   playbackGeneration: 0,
@@ -3434,7 +3434,15 @@ function updateStats(scenario) {
     }
   }
   state.stats.totalHandleTime += state.timerSeconds;
+  saveStats();
+}
 
+function saveStats() {
+  localStorage.setItem('luna-stats', JSON.stringify(state.stats));
+  renderStats();
+}
+
+function renderStats() {
   dom.metricContained.textContent = state.stats.botContained;
   dom.metricEscalated.textContent = state.stats.agentEscalated;
 
@@ -4223,6 +4231,9 @@ updateThemeIcons();
 // Init profile selector and open sidebar
 renderProfileSelector();
 document.querySelector('.sidebar').classList.add('open');
+
+// Restore persistent metrics from localStorage
+renderStats();
 
 </script>
 </body>
