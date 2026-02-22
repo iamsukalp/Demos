@@ -13,7 +13,7 @@ package-for-email.py
 .env.*
 
 # Runtime data
-luna_stats.json
+iris_stats.json
 
 # Python
 __pycache__/

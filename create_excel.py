@@ -33,16 +33,16 @@ def style_sheet(ws, num_cols, num_rows):
 
 
 # ==========================================
-# SHEET 1: Luna IVR
+# SHEET 1: IRIS IVR
 # ==========================================
 ws1 = wb.active
-ws1.title = "Luna IVR - Call Scripts"
+ws1.title = "IRIS IVR - Call Scripts"
 
 h1 = ['#', 'Scenario Name', 'Outcome', 'Intent Detected', 'Customer Opening Line', 'Full Conversation Script', 'Agent (if escalated)']
 for i, h in enumerate(h1, 1):
     ws1.cell(row=1, column=i, value=h)
 
-luna = [
+iris = [
     [1, 'Block My Credit Card', 'Bot Resolves', 'Block My Credit Card',
      "I need to block my credit card right away. I think someone's been using it without my permission.",
      "Customer: Hi I need to block my credit card right away. I think someone's been using it without my permission.\n\nBot: I'm sorry to hear that. I can help you block your credit card immediately. For security, can you confirm the last four digits of the card you'd like to block?\n\nCustomer: It ends in 4829.\n\nBot: Thank you, Varun. I can see your Visa card ending in 4829 on your account. I'm blocking this card now. Done - your card ending in 4829 has been blocked effective immediately.\n\nCustomer: No that's everything. Thank you for the quick help.\n\nBot: You're welcome, Varun. Your account security is our priority. Have a great day!", ''],
@@ -75,11 +75,11 @@ luna = [
      "Customer: I need to send a wire transfer to India. It's $12,000 to my parents' bank account. I've done this once before through the branch but I was hoping I could do it over the phone this time.\n\nBot: I can help you get started. I see a previous wire on file to HDFC Bank, India. International wires require verification and compliance review. Let me connect you with our international payments team.\n\nAgent James: I've pulled up your previous wire details. Recipient: Rajesh & Meera Krishnamurthy, HDFC Bank Mumbai. Amount: $12,000 USD. Shall I proceed?\n\nCustomer: Yes everything looks correct. Please go ahead.\n\nAgent James: Wire transfer initiated. Confirmation #WIR-2026-44210. Wire fee waived (Platinum). Estimated arrival: 1-2 business days.\n\nCustomer: No that's great. Much easier than going to the branch. Thanks James!\n\nAgent James: Glad I could help, Varun. Next time you can also initiate international wires through our online banking portal. Have a great day!", 'James'],
 ]
 
-for ri, rd in enumerate(luna, 2):
+for ri, rd in enumerate(iris, 2):
     for ci, v in enumerate(rd, 1):
         ws1.cell(row=ri, column=ci, value=v)
 
-style_sheet(ws1, len(h1), len(luna) + 1)
+style_sheet(ws1, len(h1), len(iris) + 1)
 ws1.column_dimensions['A'].width = 5
 ws1.column_dimensions['B'].width = 28
 ws1.column_dimensions['C'].width = 16
@@ -246,9 +246,9 @@ ws2.column_dimensions['K'].width = 40
 
 
 # ==========================================
-# SHEET 3: IntelliRetrieve
+# SHEET 3: Agent Assist
 # ==========================================
-ws3 = wb.create_sheet("IntelliRetrieve - Q&A")
+ws3 = wb.create_sheet("Agent Assist - Q&A")
 
 h3 = ['#', 'ID', 'Type', 'Category', 'Sample Question', 'Keywords', 'Answer', 'Confidence', 'Parent ID']
 for i, h in enumerate(h3, 1):
@@ -331,6 +331,6 @@ wb.save(out)
 sz = os.path.getsize(out) / 1024
 print(f'Created: {out}')
 print(f'Size: {sz:.1f} KB')
-print(f'Sheet 1: Luna IVR - 10 call scripts')
+print(f'Sheet 1: IRIS IVR - 10 call scripts')
 print(f'Sheet 2: CBI - 21 analytics scenarios')
-print(f'Sheet 3: IntelliRetrieve - 16 Q&A pairs (12 main + 4 follow-ups)')
+print(f'Sheet 3: Agent Assist - 16 Q&A pairs (12 main + 4 follow-ups)')

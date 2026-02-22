@@ -1,5 +1,5 @@
 """
-Luna IVR Demo Server
+IRIS IVR Demo Server
 ====================
 Static file server + API endpoints for dynamic response engine.
 WebSocket relay server for OpenAI Realtime API integration.
@@ -45,7 +45,7 @@ API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
 
-class LunaHandler(http.server.SimpleHTTPRequestHandler):
+class IrisHandler(http.server.SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         pass  # suppress logs to avoid stdout issues
@@ -168,13 +168,13 @@ class LunaHandler(http.server.SimpleHTTPRequestHandler):
             if role == 'customer':
                 lines.append(f"Customer: {text}")
             elif role == 'bot':
-                lines.append(f"Luna (AI Agent): {text}")
+                lines.append(f"IRIS (AI Agent): {text}")
             elif role == 'system':
                 lines.append(f"[System: {text}]")
         conversation_log = '\n'.join(lines)
 
         prompt = (
-            "You are an IVR call center analyst. Below is the transcript of a call between a customer and Luna, "
+            "You are an IVR call center analyst. Below is the transcript of a call between a customer and IRIS, "
             "an AI IVR agent for EXL Financial Services. Write a concise but detailed summary of the call. "
             "Include:\n"
             "- Why the customer called (intent)\n"
@@ -319,7 +319,7 @@ async def relay_handler(browser_ws):
             session_updated = await openai_ws.recv()
             await browser_ws.send(session_updated)
 
-            # Trigger Luna's greeting — send response.create so she speaks first
+            # Trigger IRIS's greeting — send response.create so it speaks first
             await openai_ws.send(json.dumps({"type": "response.create"}))
 
             # Bidirectional relay
@@ -436,7 +436,7 @@ else:
 # Start HTTP server
 engine_status = "with response engine" if ENGINE_AVAILABLE else "static only (engine not found)"
 socketserver.TCPServer.allow_reuse_address = True
-with socketserver.TCPServer(("0.0.0.0", PORT), LunaHandler) as httpd:
-    print(f"Luna server on http://localhost:{PORT} ({engine_status})")
+with socketserver.TCPServer(("0.0.0.0", PORT), IrisHandler) as httpd:
+    print(f"IRIS server on http://localhost:{PORT} ({engine_status})")
     print(f"  AI mode: {ws_status}")
     httpd.serve_forever()

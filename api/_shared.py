@@ -6,10 +6,10 @@ import urllib.request
 
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LUNA_DIR = os.path.join(ROOT_DIR, "Luna Demo")
+IRIS_DIR = os.path.join(ROOT_DIR, "IRIS Demo")
 
-if LUNA_DIR not in sys.path:
-    sys.path.insert(0, LUNA_DIR)
+if IRIS_DIR not in sys.path:
+    sys.path.insert(0, IRIS_DIR)
 
 try:
     from response_engine import get_response, extract_entities, classify_yes_no, detect_intent_switch
@@ -92,13 +92,13 @@ def summarize_transcript(transcript, api_key):
         if role == "customer":
             lines.append(f"Customer: {text}")
         elif role == "bot":
-            lines.append(f"Luna (AI Agent): {text}")
+            lines.append(f"IRIS (AI Agent): {text}")
         elif role == "system":
             lines.append(f"[System: {text}]")
     conversation_log = "\n".join(lines)
 
     prompt = (
-        "You are an IVR call center analyst. Below is the transcript of a call between a customer and Luna, "
+        "You are an IVR call center analyst. Below is the transcript of a call between a customer and IRIS, "
         "an AI IVR agent for EXL Financial Services. Write a concise but detailed summary of the call. "
         "Include:\n"
         "- Why the customer called (intent)\n"

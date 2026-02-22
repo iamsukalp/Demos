@@ -1,7 +1,7 @@
 """
 EXL Demos Server
 =================
-Single-port server: static files + Luna IVR API endpoints + WebSocket relay.
+Single-port server: static files + IRIS IVR API endpoints + WebSocket relay.
 Works locally (python serve.py) and on Render / any PaaS that exposes one port.
 
 Uses aiohttp for combined HTTP + WebSocket on a single port.
@@ -18,18 +18,18 @@ import aiohttp
 # Set working directory to this file's location (Demos root)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# Add Luna Demo to Python path for its modules
-LUNA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Luna Demo')
-sys.path.insert(0, LUNA_DIR)
+# Add IRIS Demo to Python path for its modules
+IRIS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'IRIS Demo')
+sys.path.insert(0, IRIS_DIR)
 
-# Import Luna response engine (graceful if missing)
+# Import IRIS response engine (graceful if missing)
 try:
     from response_engine import get_response, extract_entities, classify_yes_no, detect_intent_switch
     ENGINE_AVAILABLE = True
 except ImportError:
     ENGINE_AVAILABLE = False
 
-# Import Luna LLM engine (graceful if missing)
+# Import IRIS LLM engine (graceful if missing)
 try:
     from llm_engine import build_session_config, handle_function_call, lookup_customer
     LLM_AVAILABLE = True
@@ -52,7 +52,7 @@ API_KEY = os.environ.get('OPENAI_API_KEY', '')
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
 # Persistent stats file
-STATS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'luna_stats.json')
+STATS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'iris_stats.json')
 DEFAULT_STATS = {"scenariosRun": 0, "botContained": 0, "agentEscalated": 0, "totalHandleTime": 0}
 
 
@@ -143,13 +143,13 @@ async def handle_summarize(request):
         if role == 'customer':
             lines.append(f"Customer: {text}")
         elif role == 'bot':
-            lines.append(f"Luna (AI Agent): {text}")
+            lines.append(f"IRIS (AI Agent): {text}")
         elif role == 'system':
             lines.append(f"[System: {text}]")
     conversation_log = '\n'.join(lines)
 
     prompt = (
-        "You are an IVR call center analyst. Below is the transcript of a call between a customer and Luna, "
+        "You are an IVR call center analyst. Below is the transcript of a call between a customer and IRIS, "
         "an AI IVR agent for EXL Financial Services. Write a concise but detailed summary of the call. "
         "Include:\n"
         "- Why the customer called (intent)\n"
@@ -397,7 +397,7 @@ async def ws_relay(request):
 
 # ===== Security: block sensitive paths =====
 
-BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules', 'luna_stats')
+BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules', 'iris_stats')
 
 
 async def handle_root(request):
@@ -442,7 +442,7 @@ def create_app():
 
 
 if __name__ == '__main__':
-    engine_status = "with Luna response engine" if ENGINE_AVAILABLE else "static only"
+    engine_status = "with IRIS response engine" if ENGINE_AVAILABLE else "static only"
     llm_status = "LLM engine ready" if LLM_AVAILABLE else "LLM engine unavailable"
     ws_status = "WebSocket relay ready" if WS_AVAILABLE else "WebSocket unavailable (pip install websockets)"
     print(f"EXL Demos starting on port {PORT} ({engine_status}, {llm_status})")

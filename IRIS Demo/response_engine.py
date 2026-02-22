@@ -1,5 +1,5 @@
 """
-Luna IVR Response Engine
+IRIS IVR Response Engine
 ========================
 Keyword matching, entity extraction, and response selection.
 Ported from BPVA Demo's calculateKeywordScore pattern.

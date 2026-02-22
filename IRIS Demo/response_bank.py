@@ -1,5 +1,5 @@
 """
-Luna IVR Response Bank
+IRIS IVR Response Bank
 ======================
 Response variants and branching trees for all 10 scenarios.
 Each scenario has stages mapped to conversation turn indices.

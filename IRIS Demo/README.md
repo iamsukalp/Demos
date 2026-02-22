@@ -1,6 +1,6 @@
-# Luna IVR - AI Voice Call Containment Demo
+# IRIS IVR - AI Voice Call Containment Demo
 
-An interactive demo showcasing AI-powered IVR (Interactive Voice Response) call containment for banking. Luna is a real-time AI voice agent that handles customer calls using OpenAI's Realtime API, with phone-number-based customer identification, mock banking tools, and scenario-specific validation.
+An interactive demo showcasing AI-powered IVR (Interactive Voice Response) call containment for banking. IRIS is a real-time AI voice agent that handles customer calls using OpenAI's Realtime API, with phone-number-based customer identification, mock banking tools, and scenario-specific validation.
 
 ## Features
 
@@ -32,7 +32,7 @@ An interactive demo showcasing AI-powered IVR (Interactive Voice Response) call 
 ## Project Structure
 
 ```
-Luna Demo/
+IRIS Demo/
 ├── index.html           # Single-file app (HTML/CSS/JS) — UI, audio, WebSocket client
 ├── llm_engine.py        # LLM system prompts, tool definitions, mock banking handlers
 ├── response_engine.py   # Scripted response engine (bot mode, no LLM)
@@ -80,7 +80,7 @@ Download and install Python 3.x from [python.org](https://www.python.org/downloa
 ### 2. Create a virtual environment (recommended)
 
 ```bash
-cd "E:\EXL\Demos\Luna Demo"
+cd "E:\EXL\Demos\IRIS Demo"
 python -m venv venv
 ```
 
@@ -106,12 +106,12 @@ cd "E:\EXL\Demos"
 python serve.py
 ```
 
-Open `http://localhost:8000/Luna%20Demo/` in Chrome.
+Open `http://localhost:8000/IRIS%20Demo/` in Chrome.
 
 ### Option B: Standalone
 
 ```bash
-cd "E:\EXL\Demos\Luna Demo"
+cd "E:\EXL\Demos\IRIS Demo"
 python serve.py
 ```
 
@@ -123,7 +123,7 @@ Open `http://localhost:8090` in Chrome.
 
 The server includes a hardcoded demo key. To use your own:
 
-1. Click the **Settings** gear icon in Luna's header
+1. Click the **Settings** gear icon in IRIS's header
 2. Enter your OpenAI API key
 3. Click **Test & Save**
 
@@ -152,8 +152,8 @@ Each scenario validates against its specific account number. For example, the Bl
 1. Select a scenario from the dropdown (or click **Start Call** for freeform)
 2. Click the **Call** button
 3. Watch the shimmer loading animation as customer data is fetched
-4. Luna greets you by name — speak naturally to interact
-5. When done, say goodbye — Luna will end the call and show a resolution card
+4. IRIS greets you by name — speak naturally to interact
+5. When done, say goodbye — IRIS will end the call and show a resolution card
 
 ## Troubleshooting
 
@@ -164,5 +164,5 @@ Each scenario validates against its specific account number. For example, the Bl
 | No voice / silence | Grant microphone permission in Chrome |
 | "WebSocket relay unavailable" | `pip install websockets` |
 | "Invalid API key" | Enter a valid key in Settings |
-| "LLM engine not available" | Ensure `llm_engine.py` is in the Luna Demo directory |
+| "LLM engine not available" | Ensure `llm_engine.py` is in the IRIS Demo directory |
 | Messages out of order | Hard refresh with **Ctrl+Shift+R** |

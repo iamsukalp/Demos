@@ -4,9 +4,9 @@ An interactive showcase of three AI-powered demos for insurance and banking doma
 
 | Demo | Domain | Description |
 |------|--------|-------------|
-| **IntelliRetrieve** | Insurance | AI-powered document search with conversational Q&A, document ingestion pipeline, and analytics |
+| **Agent Assist** | Insurance | AI-powered document search with conversational Q&A, document ingestion pipeline, and analytics |
 | **Conversational BI** | Banking | Natural-language business intelligence with charts, data tables, SQL, and insights |
-| **Luna IVR** | Banking | AI voice agent for IVR call containment with OpenAI Realtime API, real-time speech, and mock banking tools |
+| **IRIS IVR** | Banking | AI voice agent for IVR call containment with OpenAI Realtime API, real-time speech, and mock banking tools |
 
 ## Project Structure
 
@@ -17,7 +17,7 @@ EXL Demos/
 ├── requirements.txt              # Python dependencies
 ├── README.md                     # This file
 │
-├── BPVA Demo/                    # IntelliRetrieve
+├── BPVA Demo/                    # Agent Assist
 │   └── index.html                # Single-file app (HTML/CSS/JS)
 │
 ├── CBI Demo/                     # Conversational BI
@@ -30,7 +30,7 @@ EXL Demos/
 │   │   └── scenarios.js
 │   └── questions.csv
 │
-└── Luna Demo/                    # Luna IVR
+└── IRIS Demo/                    # IRIS IVR
     ├── index.html                # Single-file app (HTML/CSS/JS)
     ├── llm_engine.py             # LLM prompts, tool defs, and mock banking handlers
     ├── response_engine.py        # Scripted response engine (bot mode)
@@ -44,8 +44,8 @@ EXL Demos/
 
 - **Python 3.x** (for the local development server)
 - **Google Chrome** (recommended for microphone and Web Audio API support)
-- **Microphone** (required for Luna IVR AI voice calls)
-- **OpenAI API key** (required for Luna IVR AI mode — needs access to `gpt-4o-realtime-preview`)
+- **Microphone** (required for IRIS IVR AI voice calls)
+- **OpenAI API key** (required for IRIS IVR AI mode — needs access to `gpt-4o-realtime-preview`)
 - **Internet connection** (CDN libraries and OpenAI API calls require connectivity)
 
 ## Setup & Installation
@@ -89,7 +89,7 @@ pip install -r requirements.txt
 ```
 
 This installs:
-- `websockets` — used by the WebSocket relay server for Luna IVR AI voice mode
+- `websockets` — used by the WebSocket relay server for IRIS IVR AI voice mode
 
 All front-end dependencies (Tailwind CSS, Chart.js, Marked.js, Google Fonts) are loaded via CDN at runtime — no npm or build step is required.
 
@@ -105,8 +105,8 @@ python serve.py
 You should see:
 
 ```
-EXL Demos on http://localhost:8000 (with Luna response engine)
-  Luna AI mode: WebSocket relay active
+EXL Demos on http://localhost:8000 (with IRIS response engine)
+  IRIS AI mode: WebSocket relay active
   WebSocket relay on ws://localhost:8091
 ```
 
@@ -118,16 +118,16 @@ http://localhost:8000
 
 This opens the main portal with cards for all three demos. Click any card to launch that demo.
 
-### Luna IVR (standalone)
+### IRIS IVR (standalone)
 
-Luna IVR has its own server for standalone use:
+IRIS IVR has its own server for standalone use:
 
 ```bash
-cd "E:\EXL\Demos\Luna Demo"
+cd "E:\EXL\Demos\IRIS Demo"
 python serve.py
 ```
 
-This serves Luna on `http://localhost:8090`. See `Luna Demo/README.md` for full details.
+This serves IRIS IVR on `http://localhost:8090`. See `IRIS Demo/README.md` for full details.
 
 > **Important:** Always use `http://`, not `https://`. These are local dev servers without SSL.
 
@@ -138,13 +138,13 @@ Once the server is running at `http://localhost:8000`:
 | URL | Demo |
 |-----|------|
 | `http://localhost:8000` | Main portal |
-| `http://localhost:8000/BPVA%20Demo/` | IntelliRetrieve |
+| `http://localhost:8000/BPVA%20Demo/` | Agent Assist |
 | `http://localhost:8000/CBI%20Demo/` | Conversational BI |
-| `http://localhost:8000/Luna%20Demo/` | Luna IVR |
+| `http://localhost:8000/IRIS%20Demo/` | IRIS IVR |
 
 ## Demo Details
 
-### IntelliRetrieve (BPVA Demo)
+### Agent Assist (BPVA Demo)
 
 - Chat interface with 6 starter questions about insurance claims
 - Document ingestion pipeline — click the upload zone to select a file, watch the parse/chunk/embed/store animation
@@ -158,9 +158,9 @@ Once the server is running at `http://localhost:8000`:
 - Auto-generated charts, data tables, SQL queries, and insights
 - Dark mode toggle
 
-### Luna IVR
+### IRIS IVR
 
-- **AI Voice Mode** — Real-time voice conversation with Luna using OpenAI's Realtime API (`gpt-4o-realtime-preview`)
+- **AI Voice Mode** — Real-time voice conversation with IRIS using OpenAI's Realtime API (`gpt-4o-realtime-preview`)
 - 10 banking call scenarios: Block Card, Loan Balance, Dispute Transaction, Account Restructuring, Reset Password, Activate Card, Transfer Funds, Credit Limit Increase, Mortgage Rate, Wire Transfer
 - Freeform "Start Call" mode for open-ended conversations
 - Phone-number-based customer lookup with rich financial profile
@@ -171,10 +171,10 @@ Once the server is running at `http://localhost:8000`:
 
 ## OpenAI API Key
 
-Luna IVR AI mode requires an OpenAI API key with access to the `gpt-4o-realtime-preview` model.
+IRIS IVR AI mode requires an OpenAI API key with access to the `gpt-4o-realtime-preview` model.
 
 The server includes a hardcoded demo key for convenience. To use your own key:
-1. Open Luna IVR in the browser
+1. Open IRIS IVR in the browser
 2. Click the Settings gear icon
 3. Enter your OpenAI API key
 4. Click "Test & Save"
@@ -184,8 +184,8 @@ The server includes a hardcoded demo key for convenience. To use your own key:
 | Library | Version | Used By |
 |---------|---------|---------|
 | Tailwind CSS | v4 | All demos |
-| Chart.js | v4 | IntelliRetrieve, Conversational BI |
-| Marked.js | latest | IntelliRetrieve |
+| Chart.js | v4 | Agent Assist, Conversational BI |
+| Marked.js | latest | Agent Assist |
 | Google Fonts (Inter, JetBrains Mono) | — | All demos |
 | Material Icons | — | Conversational BI |
 
@@ -200,7 +200,7 @@ No local installation is needed for these — they are fetched from CDN when the
 | ERR_SSL_PROTOCOL_ERROR | Use `http://` not `https://` |
 | Page shows stale content | Hard refresh with **Ctrl+Shift+R**, or restart the server |
 | Charts not rendering | Check internet connection (Chart.js loads via CDN) |
-| Luna IVR — no voice | Use Google Chrome and grant microphone permission |
-| Luna AI — "WebSocket relay unavailable" | Install `websockets` with `pip install websockets` |
-| Luna AI — "Invalid API key" | Open Settings and enter a valid OpenAI API key |
+| IRIS IVR — no voice | Use Google Chrome and grant microphone permission |
+| IRIS AI — "WebSocket relay unavailable" | Install `websockets` with `pip install websockets` |
+| IRIS AI — "Invalid API key" | Open Settings and enter a valid OpenAI API key |
 | Blank page / 404 | Ensure you started the server from the correct directory |
