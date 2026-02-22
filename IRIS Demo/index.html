@@ -1436,6 +1436,14 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span></span>
         </div>
+        <div class="caller-info__detail" id="callerAge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__detail" id="callerEthnicity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span></span>
+        </div>
         <div class="caller-info__accounts" id="callerAccounts"></div>
       </div>
 
@@ -1618,6 +1626,7 @@ const CUSTOMER_DB = {
     phone: '+1-617-555-0142',
     email: 'varun.khator@gmail.com',
     dob: 'March 15, 1988',
+    age: 37, gender: 'Male', ethnicity: 'South Asian',
     address: '142 Oak Street, Apt 7B, Boston, MA 02108',
     memberSince: 'June 2018',
     jointHolder: 'Priya Khator',
@@ -1641,6 +1650,7 @@ const CUSTOMER_DB = {
     phone: '+1-404-555-0278',
     email: 'marcus.thompson@outlook.com',
     dob: 'November 8, 1962',
+    age: 63, gender: 'Male', ethnicity: 'African American',
     address: '315 Peachtree Lane, Suite 2A, Atlanta, GA 30301',
     memberSince: 'March 2015',
     jointHolder: 'Denise Thompson',
@@ -1664,6 +1674,7 @@ const CUSTOMER_DB = {
     phone: '+1-305-555-0391',
     email: 'sofia.ramirez@yahoo.com',
     dob: 'July 22, 1996',
+    age: 29, gender: 'Female', ethnicity: 'Hispanic/Latina',
     address: '88 Coral Way, Apt 12C, Miami, FL 33145',
     memberSince: 'January 2021',
     jointHolder: null,
@@ -1687,6 +1698,7 @@ const CUSTOMER_DB = {
     phone: '+1-415-555-0534',
     email: 'emily.chen@gmail.com',
     dob: 'February 3, 1980',
+    age: 46, gender: 'Female', ethnicity: 'East Asian',
     address: '2201 Pacific Heights Blvd, San Francisco, CA 94115',
     memberSince: 'September 2016',
     jointHolder: 'David Chen',
@@ -1710,6 +1722,7 @@ const CUSTOMER_DB = {
     phone: '+1-312-555-0687',
     email: 'james.obrien@protonmail.com',
     dob: 'September 14, 1991',
+    age: 34, gender: 'Male', ethnicity: 'Caucasian',
     address: '450 North Michigan Ave, Unit 18D, Chicago, IL 60611',
     memberSince: 'August 2019',
     jointHolder: null,
@@ -2134,6 +2147,8 @@ const dom = {
   callerPhone: document.getElementById('callerPhone'),
   callerEmail: document.getElementById('callerEmail'),
   callerMember: document.getElementById('callerMember'),
+  callerAge: document.getElementById('callerAge'),
+  callerEthnicity: document.getElementById('callerEthnicity'),
   callerAccounts: document.getElementById('callerAccounts'),
   btnEnd: document.getElementById('btnEnd'),
   btnRestart: document.getElementById('btnRestart'),
@@ -2331,6 +2346,10 @@ function showCallerInfoShimmer() {
   dom.callerEmail.classList.add('shimmer');
   dom.callerMember.querySelector('span').textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0';
   dom.callerMember.classList.add('shimmer');
+  dom.callerAge.querySelector('span').textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0';
+  dom.callerAge.classList.add('shimmer');
+  dom.callerEthnicity.querySelector('span').textContent = '\u00A0\u00A0\u00A0\u00A0\u00A0';
+  dom.callerEthnicity.classList.add('shimmer');
   const verified = document.getElementById('callerVerified');
   if (verified) verified.style.display = 'none';
   dom.callerAccounts.innerHTML = '';
@@ -2355,6 +2374,10 @@ function showCallerInfo(caller) {
   dom.callerEmail.querySelector('span').textContent = caller.email || '';
   dom.callerMember.classList.remove('shimmer');
   dom.callerMember.querySelector('span').textContent = caller.memberSince ? 'Member since ' + caller.memberSince : '';
+  dom.callerAge.classList.remove('shimmer');
+  dom.callerAge.querySelector('span').textContent = caller.age ? caller.age + ' yrs, ' + caller.gender : '';
+  dom.callerEthnicity.classList.remove('shimmer');
+  dom.callerEthnicity.querySelector('span').textContent = caller.ethnicity || '';
 
   // Build accounts summary
   let html = '<div class="caller-info__accounts-title">Accounts</div>';
