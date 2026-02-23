@@ -835,7 +835,8 @@ Greet this customer by name. You already know who they are from the phone number
             "input_audio_format": "pcm16",
             "output_audio_format": "pcm16",
             "input_audio_transcription": {
-                "model": "whisper-1"
+                "model": "whisper-1",
+                "language": "en"
             },
             "turn_detection": {
                 "type": "server_vad",
