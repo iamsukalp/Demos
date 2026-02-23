@@ -346,6 +346,13 @@
       line-height: 1.5;
     }
     .history-card.expanded .history-card__details { display: block; }
+    .history-card__transcript { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--gray-200); }
+    .history-card__transcript-title { font-size: 11px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+    .history-msg { margin-bottom: 4px; line-height: 1.4; }
+    .history-msg__label { font-weight: 600; margin-right: 4px; }
+    .history-msg--customer .history-msg__label { color: var(--navy); }
+    .history-msg--bot .history-msg__label { color: var(--accent); }
+    .history-msg__text { color: var(--gray-600); }
     .history-empty {
       text-align: center;
       padding: 40px 20px;
@@ -3669,6 +3676,21 @@ function renderHistory() {
     card.onclick = () => card.classList.toggle('expanded');
     const badgeClass = h.outcome === 'contained' ? 'history-card__badge--contained' : 'history-card__badge--escalated';
     const badgeText = h.outcome === 'contained' ? 'Contained' : 'Escalated';
+    let messagesHtml = '';
+    if (h.messages && h.messages.length > 0) {
+      messagesHtml = '<div class="history-card__transcript">' +
+        '<div class="history-card__transcript-title">Conversation</div>' +
+        h.messages.map(m => {
+          const isCustomer = m.role === 'customer' || m.role === 'user';
+          const label = isCustomer ? 'Customer' : 'IRIS';
+          const cls = isCustomer ? 'history-msg--customer' : 'history-msg--bot';
+          return '<div class="history-msg ' + cls + '">' +
+            '<span class="history-msg__label">' + label + '</span>' +
+            '<span class="history-msg__text">' + escapeHtml(m.text || '') + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
     card.innerHTML =
       '<div class="history-card__header">' +
         '<span class="history-card__name">' + escapeHtml(h.customerName || 'Unknown') + '</span>' +
@@ -3682,6 +3704,7 @@ function renderHistory() {
       '<div class="history-card__details">' +
         '<div><strong>Phone:</strong> ' + escapeHtml(h.customerPhone || '') + '</div>' +
         '<div><strong>Actions:</strong> ' + escapeHtml(h.actionsTaken || 'None') + '</div>' +
+        messagesHtml +
       '</div>';
     container.appendChild(card);
   });
@@ -4480,6 +4503,7 @@ function endAiCall() {
       intent: state.aiEndCallData.intent || 'General Inquiry',
       actionsTaken: state.aiEndCallData.actions_taken || '',
       outcome: aiFlow,
+      messages: (state.aiTranscript || []).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
     });
   }
 
