@@ -3651,6 +3651,7 @@ function switchSidebarTab(tab) {
 
 // ===== Call History =====
 function saveCallToHistory(record) {
+  console.log('[IRIS] saveCallToHistory:', record.customerName, 'messages:', (record.messages || []).length);
   state.callHistory.unshift(record);
   if (state.callHistory.length > 20) state.callHistory = state.callHistory.slice(0, 20);
   localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
@@ -3719,16 +3720,30 @@ function clearHistory() {
 }
 
 function loadHistory() {
+  let localData = [];
   try {
-    const saved = JSON.parse(localStorage.getItem('iris-call-history') || '[]');
-    if (saved.length) {
-      state.callHistory = saved;
+    localData = JSON.parse(localStorage.getItem('iris-call-history') || '[]');
+    if (localData.length) {
+      state.callHistory = localData;
       renderHistory();
     }
   } catch(e) {}
   fetch('/api/history').then(r => r.json()).then(data => {
     if (Array.isArray(data) && data.length > 0) {
-      state.callHistory = data.reverse().slice(0, 20);
+      const serverData = data.reverse().slice(0, 20);
+      // Merge: prefer localStorage records (may have messages) over server records that lack them
+      const merged = serverData.map(s => {
+        const local = localData.find(l => l.timestamp === s.timestamp && l.customerPhone === s.customerPhone);
+        if (local && local.messages && (!s.messages || s.messages.length === 0)) return local;
+        return s;
+      });
+      // Also include any localStorage-only records not on server
+      localData.forEach(l => {
+        if (!merged.find(m => m.timestamp === l.timestamp && m.customerPhone === l.customerPhone)) {
+          merged.unshift(l);
+        }
+      });
+      state.callHistory = merged.slice(0, 20);
       localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
       renderHistory();
     }
@@ -4492,8 +4507,12 @@ function endAiCall() {
     const aiFlow = state.aiEndCallData.outcome === 'escalated' ? 'escalated' : 'contained';
     updateStats(aiFlow, state.timerSeconds);
 
-    // Save to call history
+    // Save to call history — capture transcript before any cleanup
     const customer = CUSTOMER_DB[CALLER_PHONE];
+    const capturedMessages = (state.aiTranscript || [])
+      .filter(m => m && m.role && m.role !== 'system' && m.text)
+      .map(m => ({ role: m.role, text: m.text }));
+    console.log('[IRIS] Saving history — transcript entries:', state.aiTranscript.length, 'messages kept:', capturedMessages.length);
     saveCallToHistory({
       timestamp: new Date().toLocaleString(),
       customerName: customer ? customer.name : 'Unknown',
@@ -4503,7 +4522,7 @@ function endAiCall() {
       intent: state.aiEndCallData.intent || 'General Inquiry',
       actionsTaken: state.aiEndCallData.actions_taken || '',
       outcome: aiFlow,
-      messages: (state.aiTranscript || []).filter(m => m.role !== 'system').map(m => ({ role: m.role, text: m.text })),
+      messages: capturedMessages,
     });
   }
 
