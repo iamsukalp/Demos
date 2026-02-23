@@ -353,6 +353,40 @@
     .history-msg--customer .history-msg__label { color: var(--navy); }
     .history-msg--bot .history-msg__label { color: var(--accent); }
     .history-msg__text { color: var(--gray-600); }
+    .history-replay-header {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .history-replay-header__title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .history-replay-header__info {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .history-replay-header__name { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .history-replay-header__meta { font-size: 11px; color: var(--gray-500); }
+    .history-replay-header__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .history-replay-header__intent { font-size: 12px; color: var(--gray-600); }
+    .history-replay-header__actions { font-size: 11px; color: var(--gray-500); margin-top: 6px; line-height: 1.4; }
     .history-empty {
       text-align: center;
       padding: 40px 20px;
@@ -3674,7 +3708,10 @@ function renderHistory() {
   state.callHistory.forEach(h => {
     const card = document.createElement('div');
     card.className = 'history-card';
-    card.onclick = () => card.classList.toggle('expanded');
+    card.onclick = () => {
+      card.classList.toggle('expanded');
+      loadHistoryToTranscript(h);
+    };
     const badgeClass = h.outcome === 'contained' ? 'history-card__badge--contained' : 'history-card__badge--escalated';
     const badgeText = h.outcome === 'contained' ? 'Contained' : 'Escalated';
     let messagesHtml = '';
@@ -3709,6 +3746,50 @@ function renderHistory() {
       '</div>';
     container.appendChild(card);
   });
+}
+
+function loadHistoryToTranscript(h) {
+  // Clear current transcript and show history conversation in the main pane
+  dom.transcript.innerHTML = '';
+  if (dom.emptyState) dom.emptyState.style.display = 'none';
+
+  // Header card with call info
+  const isContained = h.outcome === 'contained';
+  const badgeClass = isContained ? 'resolution-card__outcome--contained' : 'resolution-card__outcome--escalated';
+  const outcomeText = isContained ? 'Contained by Bot' : 'Escalated to Agent';
+
+  const header = document.createElement('div');
+  header.className = 'history-replay-header';
+  header.innerHTML =
+    '<div class="history-replay-header__title">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>' +
+      ' Call History' +
+    '</div>' +
+    '<div class="history-replay-header__info">' +
+      '<span class="history-replay-header__name">' + escapeHtml(h.customerName || 'Unknown') + '</span>' +
+      '<span class="history-replay-header__meta">' + escapeHtml(h.timestamp || '') + ' &middot; ' + escapeHtml(h.duration || '--:--') + '</span>' +
+    '</div>' +
+    '<div class="history-replay-header__row">' +
+      '<span class="resolution-card__outcome ' + badgeClass + '">' + escapeHtml(outcomeText) + '</span>' +
+      '<span class="history-replay-header__intent">' + escapeHtml(h.intent || 'General') + '</span>' +
+    '</div>' +
+    (h.actionsTaken ? '<div class="history-replay-header__actions"><strong>Actions:</strong> ' + escapeHtml(h.actionsTaken) + '</div>' : '');
+  dom.transcript.appendChild(header);
+
+  // Render conversation messages
+  if (h.messages && h.messages.length > 0) {
+    h.messages.forEach(m => {
+      const isCustomer = m.role === 'customer' || m.role === 'user';
+      const type = isCustomer ? 'customer' : 'bot';
+      renderMessage({ type: type, text: m.text || '' });
+    });
+  } else {
+    const noMsg = document.createElement('div');
+    noMsg.className = 'message message--system';
+    noMsg.innerHTML = '<div class="message__bubble">No conversation transcript available for this call</div>';
+    dom.transcript.appendChild(noMsg);
+  }
+  scrollToBottom();
 }
 
 function clearHistory() {
