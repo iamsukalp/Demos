@@ -840,9 +840,9 @@ Greet this customer by name. You already know who they are from the phone number
             },
             "turn_detection": {
                 "type": "server_vad",
-                "threshold": 0.5,
-                "silence_duration_ms": 500,
-                "prefix_padding_ms": 300
+                "threshold": 0.65,
+                "silence_duration_ms": 650,
+                "prefix_padding_ms": 400
             },
             "tools": tools,
             "tool_choice": "auto",

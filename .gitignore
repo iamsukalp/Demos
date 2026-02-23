@@ -14,6 +14,7 @@ package-for-email.py
 
 # Runtime data
 iris_stats.json
+iris_history.json
 
 # Python
 __pycache__/

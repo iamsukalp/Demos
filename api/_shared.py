@@ -6,7 +6,7 @@ import urllib.request
 
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IRIS_DIR = os.path.join(ROOT_DIR, "IRIS Demo")
+IRIS_DIR = os.path.join(ROOT_DIR, "IRIS")
 
 if IRIS_DIR not in sys.path:
     sys.path.insert(0, IRIS_DIR)

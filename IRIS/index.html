@@ -281,6 +281,78 @@
       color: var(--navy);
     }
 
+    /* ===== Sidebar Tabs ===== */
+    .sidebar__tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 16px;
+      flex-shrink: 0;
+    }
+    .sidebar__tab {
+      flex: 1;
+      padding: 10px 0;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-500);
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      background: none;
+      border-top: none; border-left: none; border-right: none;
+    }
+    .sidebar__tab:hover { color: var(--navy); }
+    .sidebar__tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+    .sidebar__panel { display: none; overflow-y: auto; flex: 1; }
+    .sidebar__panel.active { display: block; }
+
+    /* ===== History Cards ===== */
+    .history-card {
+      padding: 10px 12px;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .history-card:hover { border-color: var(--gray-300); background: var(--gray-50); }
+    .history-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .history-card__name { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .history-card__time { font-size: 11px; color: var(--gray-500); }
+    .history-card__row { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+    .history-card__badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+    .history-card__badge--contained { background: var(--green-light, #DCFCE7); color: var(--green, #16A34A); }
+    .history-card__badge--escalated { background: #FEF2F2; color: var(--red, #ef4444); }
+    .history-card__details {
+      display: none;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--gray-200);
+      font-size: 11px;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+    .history-card.expanded .history-card__details { display: block; }
+    .history-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray-400);
+      font-size: 13px;
+    }
+
     /* ===== Shimmer Loading ===== */
     @keyframes shimmer {
       0% { background-position: -200px 0; }
@@ -753,6 +825,21 @@
     .metric__value {
       color: var(--white);
       font-weight: 700;
+    }
+    .metric--reset {
+      cursor: pointer;
+      background: none;
+      border: 1px solid var(--gray-600);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--gray-400);
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+    .metric--reset:hover {
+      border-color: var(--red, #ef4444);
+      color: var(--red, #ef4444);
     }
 
     /* ===== Animations ===== */
@@ -1408,6 +1495,14 @@
   <div class="app">
     <!-- Sidebar -->
     <aside class="sidebar">
+      <!-- Sidebar Tabs -->
+      <div class="sidebar__tabs">
+        <button class="sidebar__tab active" onclick="switchSidebarTab('profiles')">Profiles</button>
+        <button class="sidebar__tab" onclick="switchSidebarTab('history')">History</button>
+      </div>
+
+      <!-- Profiles Panel -->
+      <div class="sidebar__panel active" id="panelProfiles">
       <div class="sidebar__section sidebar__section--profiles" id="profileSection">
         <div class="sidebar__heading">Customer Profiles</div>
         <div id="profileList"></div>
@@ -1446,6 +1541,20 @@
         </div>
         <div class="caller-info__accounts" id="callerAccounts"></div>
       </div>
+      </div><!-- /panelProfiles -->
+
+      <!-- History Panel -->
+      <div class="sidebar__panel" id="panelHistory">
+        <div class="sidebar__section">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="sidebar__heading" style="margin-bottom:0;">Call History</div>
+            <button onclick="clearHistory()" style="font-size:11px;color:var(--gray-500);background:none;border:none;cursor:pointer;text-decoration:underline;">Clear</button>
+          </div>
+          <div id="historyList">
+            <div class="history-empty">No call history yet</div>
+          </div>
+        </div>
+      </div><!-- /panelHistory -->
 
     </aside>
 
@@ -1467,7 +1576,7 @@
       <div class="transcript" id="transcript">
         <div class="transcript__empty" id="emptyState">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          <div class="transcript__empty-text">Ready for demo</div>
+          <div class="transcript__empty-text">Ready</div>
           <div class="transcript__empty-sub">Speak freely or select a scenario from the sidebar</div>
           <button class="btn btn--start-call" id="btnStartCall" onclick="startFreeformCall()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -1524,6 +1633,10 @@
     <div class="metric">Containment Rate <span class="metric__value" id="metricRate">—</span></div>
     <div class="metric">Avg Handle Time <span class="metric__value" id="metricTime">—</span></div>
     <div class="metric">Dynamic Turns <span class="metric__value" id="metricDynamic">0 / 0</span></div>
+    <button class="metric metric--reset" id="btnResetStats" onclick="resetStats()" title="Reset all metrics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align:middle;margin-right:3px;"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      Reset
+    </button>
   </footer>
 
 <script>
@@ -2090,7 +2203,7 @@ const state = {
   skipMode: false,
   abortController: null,
   stats: { scenariosRun: 0, botContained: 0, agentEscalated: 0, totalHandleTime: 0 },
-  completedScenarios: new Set(),
+  callHistory: [],        // loaded from server/localStorage on init
   // Playback generation counter (incremented on each new scenario to invalidate old async flows)
   playbackGeneration: 0,
   // Intent detection
@@ -3297,7 +3410,7 @@ async function playConversationFrom(startIndex) {
     // Scenario complete
     if (state.isPlaying && gen === state.playbackGeneration) {
       renderResolutionCard(scenario);
-      updateStats(scenario);
+      updateStats(scenario.flow === 'contained' ? 'contained' : 'escalated', state.timerSeconds);
     }
   } catch (e) {
     if (e.name === 'AbortError') return;
@@ -3470,27 +3583,25 @@ async function startFreeformCall() {
 }
 
 // ===== Stats =====
-function updateStats(scenario) {
-  if (!state.completedScenarios.has(scenario.id)) {
-    state.completedScenarios.add(scenario.id);
-    state.stats.scenariosRun++;
-    if (scenario.flow === 'contained') {
-      state.stats.botContained++;
-    } else {
-      state.stats.agentEscalated++;
-    }
+function updateStats(outcome, handleTimeSeconds) {
+  // Always increment — each call is a new event
+  state.stats.scenariosRun++;
+  state.stats.totalHandleTime += handleTimeSeconds;
+  if (outcome === 'contained') {
+    state.stats.botContained++;
+  } else {
+    state.stats.agentEscalated++;
   }
-  state.stats.totalHandleTime += state.timerSeconds;
-  saveStats();
-}
-
-function saveStats() {
+  renderStats();
+  // Send incremental update to server (authoritative)
   fetch('/api/stats', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(state.stats),
+    body: JSON.stringify({ action: outcome, handleTime: handleTimeSeconds }),
+  }).then(r => r.json()).then(serverStats => {
+    state.stats = serverStats;
+    renderStats();
   }).catch(() => {});
-  renderStats();
 }
 
 function renderStats() {
@@ -3502,7 +3613,103 @@ function renderStats() {
     dom.metricRate.textContent = rate + '%';
     const avg = Math.round(state.stats.totalHandleTime / state.stats.scenariosRun);
     dom.metricTime.textContent = formatTime(avg);
+  } else {
+    dom.metricRate.textContent = '—';
+    dom.metricTime.textContent = '—';
   }
+}
+
+function resetStats() {
+  if (!confirm('Reset all metrics to zero?')) return;
+  fetch('/api/stats', { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      state.stats = data;
+      renderStats();
+    })
+    .catch(() => {
+      state.stats = { scenariosRun: 0, botContained: 0, agentEscalated: 0, totalHandleTime: 0 };
+      renderStats();
+    });
+}
+
+// ===== Sidebar Tabs =====
+function switchSidebarTab(tab) {
+  document.querySelectorAll('.sidebar__tab').forEach(t => {
+    t.classList.toggle('active', t.textContent.trim().toLowerCase() === tab);
+  });
+  document.getElementById('panelProfiles').classList.toggle('active', tab === 'profiles');
+  document.getElementById('panelHistory').classList.toggle('active', tab === 'history');
+}
+
+// ===== Call History =====
+function saveCallToHistory(record) {
+  state.callHistory.unshift(record);
+  if (state.callHistory.length > 20) state.callHistory = state.callHistory.slice(0, 20);
+  localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
+  fetch('/api/history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(record),
+  }).catch(() => {});
+  renderHistory();
+}
+
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  if (!container) return;
+  if (state.callHistory.length === 0) {
+    container.innerHTML = '<div class="history-empty">No call history yet</div>';
+    return;
+  }
+  container.innerHTML = '';
+  state.callHistory.forEach(h => {
+    const card = document.createElement('div');
+    card.className = 'history-card';
+    card.onclick = () => card.classList.toggle('expanded');
+    const badgeClass = h.outcome === 'contained' ? 'history-card__badge--contained' : 'history-card__badge--escalated';
+    const badgeText = h.outcome === 'contained' ? 'Contained' : 'Escalated';
+    card.innerHTML =
+      '<div class="history-card__header">' +
+        '<span class="history-card__name">' + escapeHtml(h.customerName || 'Unknown') + '</span>' +
+        '<span class="history-card__time">' + escapeHtml(h.timestamp || '') + '</span>' +
+      '</div>' +
+      '<div class="history-card__row">' +
+        '<span class="history-card__badge ' + badgeClass + '">' + badgeText + '</span>' +
+        ' &middot; ' + escapeHtml(h.duration || '--:--') +
+        ' &middot; ' + escapeHtml(h.intent || 'General') +
+      '</div>' +
+      '<div class="history-card__details">' +
+        '<div><strong>Phone:</strong> ' + escapeHtml(h.customerPhone || '') + '</div>' +
+        '<div><strong>Actions:</strong> ' + escapeHtml(h.actionsTaken || 'None') + '</div>' +
+      '</div>';
+    container.appendChild(card);
+  });
+}
+
+function clearHistory() {
+  if (!confirm('Clear all call history?')) return;
+  state.callHistory = [];
+  localStorage.removeItem('iris-call-history');
+  fetch('/api/history', { method: 'DELETE' }).catch(() => {});
+  renderHistory();
+}
+
+function loadHistory() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('iris-call-history') || '[]');
+    if (saved.length) {
+      state.callHistory = saved;
+      renderHistory();
+    }
+  } catch(e) {}
+  fetch('/api/history').then(r => r.json()).then(data => {
+    if (Array.isArray(data) && data.length > 0) {
+      state.callHistory = data.reverse().slice(0, 20);
+      localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
+      renderHistory();
+    }
+  }).catch(() => {});
 }
 
 // ===== Scenario Selection =====
@@ -3738,11 +3945,21 @@ function handleRealtimeMessage(data) {
       'good bye', 'the end', 'thanks for watching',
       'subscribe', 'hmm', 'uh', 'um', 'ah', 'oh', 'huh', 'yeah', 'okay', 'so', 'and',
       'thank you for watching', 'please subscribe', 'like and subscribe', 'see you next time',
-      'see you', 'see ya', 'music', 'applause', 'laughter', 'silence', 'mbc', 'sbs'];
+      'see you', 'see ya', 'music', 'applause', 'laughter', 'silence', 'mbc', 'sbs',
+      'i', 'a', 'the', 'it', 'is', 'do', 'no', 'yes', 'we', 'he', 'she', 'they', 'my',
+      'right', 'well', 'like', 'just', 'but', 'not', 'all', 'can', 'this', 'that', 'with',
+      'ok', 'alright', 'hello', 'hi', 'hey', 'yep', 'nope', 'nah', 'yea', 'ya',
+      'wow', 'whoa', 'ooh', 'aah', 'mm', 'mmm', 'mhm', 'ugh', 'er', 'ehm',
+      'sure', 'fine', 'great', 'good', 'nice', 'cool', 'go ahead', 'next', 'stop',
+      'subtitles by', 'translated by', 'captions by', 'transcribed by',
+      'foreign', 'inaudible', 'unintelligible', 'speaking foreign language',
+      'beep', 'ring', 'ding', 'static', 'noise', 'background noise',
+      'phone ringing', 'cough', 'sigh', 'gasp', 'clap', 'snap',
+      'amara org', 'www', 'com', 'org', 'net'];
     // Reject non-Latin scripts (Korean, Arabic, Chinese, Japanese, Thai, Devanagari, etc.)
     // These are Whisper hallucinations from background noise — caller speaks English
     const NON_LATIN_RE = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\uAC00-\uD7AF\u0900-\u097F\u0E00-\u0E7F\u1000-\u109F]/;
-    if (text && stripped.length > 1 &&
+    if (text && stripped.length > 3 &&
         !/^[\s.,!?…*\-–—]+$/.test(text) &&
         !NON_LATIN_RE.test(text) &&
         !WHISPER_NOISE.includes(stripped)) {
@@ -4249,10 +4466,21 @@ function endAiCall() {
   // Show resolution card if the call completed normally
   if (state.aiEndCallData) {
     renderAiResolutionCard();
-    if (state.currentScenario) {
-      const aiFlow = state.aiEndCallData.outcome === 'escalated' ? 'escalated' : 'contained';
-      updateStats({ ...state.currentScenario, flow: aiFlow });
-    }
+    const aiFlow = state.aiEndCallData.outcome === 'escalated' ? 'escalated' : 'contained';
+    updateStats(aiFlow, state.timerSeconds);
+
+    // Save to call history
+    const customer = CUSTOMER_DB[CALLER_PHONE];
+    saveCallToHistory({
+      timestamp: new Date().toLocaleString(),
+      customerName: customer ? customer.name : 'Unknown',
+      customerPhone: CALLER_PHONE,
+      duration: formatTime(state.timerSeconds),
+      durationSeconds: state.timerSeconds,
+      intent: state.aiEndCallData.intent || 'General Inquiry',
+      actionsTaken: state.aiEndCallData.actions_taken || '',
+      outcome: aiFlow,
+    });
   }
 
   dom.btnEnd.disabled = true;
@@ -4291,6 +4519,9 @@ fetch('/api/stats').then(r => r.json()).then(data => {
   state.stats = data;
   renderStats();
 }).catch(() => {});
+
+// Load call history
+loadHistory();
 
 </script>
 </body>

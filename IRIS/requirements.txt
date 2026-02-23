@@ -1,4 +1,4 @@
-# IRIS IVR Demo - Python Dependencies
+# IRIS IVR - Python Dependencies
 #
 # Core server uses Python stdlib (http.server, socketserver, json, asyncio, threading).
 # The websockets package is required for the AI voice mode (OpenAI Realtime API relay).

@@ -1,5 +1,5 @@
 """
-IRIS IVR Demo Server
+IRIS IVR Server
 ====================
 Static file server + API endpoints for dynamic response engine.
 WebSocket relay server for OpenAI Realtime API integration.

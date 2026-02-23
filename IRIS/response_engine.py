@@ -2,14 +2,14 @@
 IRIS IVR Response Engine
 ========================
 Keyword matching, entity extraction, and response selection.
-Ported from BPVA Demo's calculateKeywordScore pattern.
+Ported from BPVA's calculateKeywordScore pattern.
 No external dependencies — stdlib only.
 """
 
 import re
 from response_bank import RESPONSE_BANK, INTENT_KEYWORDS
 
-# ===== Keyword Scoring (ported from BPVA Demo) =====
+# ===== Keyword Scoring (ported from BPVA) =====
 
 def calculate_keyword_score(user_input, keywords):
     """

@@ -1,6 +1,6 @@
-# IRIS IVR - AI Voice Call Containment Demo
+# IRIS IVR - AI Voice Call Containment
 
-An interactive demo showcasing AI-powered IVR (Interactive Voice Response) call containment for banking. IRIS is a real-time AI voice agent that handles customer calls using OpenAI's Realtime API, with phone-number-based customer identification, mock banking tools, and scenario-specific validation.
+An interactive showcase of AI-powered IVR (Interactive Voice Response) call containment for banking. IRIS is a real-time AI voice agent that handles customer calls using OpenAI's Realtime API, with phone-number-based customer identification, mock banking tools, and scenario-specific validation.
 
 ## Features
 
@@ -32,12 +32,12 @@ An interactive demo showcasing AI-powered IVR (Interactive Voice Response) call 
 ## Project Structure
 
 ```
-IRIS Demo/
+IRIS/
 ├── index.html           # Single-file app (HTML/CSS/JS) — UI, audio, WebSocket client
 ├── llm_engine.py        # LLM system prompts, tool definitions, mock banking handlers
 ├── response_engine.py   # Scripted response engine (bot mode, no LLM)
 ├── serve.py             # Standalone server (port 8090 HTTP + 8091 WebSocket)
-├── demo-script.csv      # Demo script reference for presenters
+├── demo-script.csv      # Script reference for presenters
 ├── requirements.txt     # Python dependencies
 └── README.md            # This file
 ```
@@ -80,7 +80,7 @@ Download and install Python 3.x from [python.org](https://www.python.org/downloa
 ### 2. Create a virtual environment (recommended)
 
 ```bash
-cd "E:\EXL\Demos\IRIS Demo"
+cd "E:\EXL\Demos\IRIS"
 python -m venv venv
 ```
 
@@ -106,12 +106,12 @@ cd "E:\EXL\Demos"
 python serve.py
 ```
 
-Open `http://localhost:8000/IRIS%20Demo/` in Chrome.
+Open `http://localhost:8000/IRIS/` in Chrome.
 
 ### Option B: Standalone
 
 ```bash
-cd "E:\EXL\Demos\IRIS Demo"
+cd "E:\EXL\Demos\IRIS"
 python serve.py
 ```
 
@@ -121,7 +121,7 @@ Open `http://localhost:8090` in Chrome.
 
 ## OpenAI API Key
 
-The server includes a hardcoded demo key. To use your own:
+The server includes a hardcoded built-in key. To use your own:
 
 1. Click the **Settings** gear icon in IRIS's header
 2. Enter your OpenAI API key
@@ -131,7 +131,7 @@ The key is validated against the OpenAI API before being stored in the server se
 
 ## Customer Data
 
-The demo uses a single customer profile for all scenarios:
+The app uses a single customer profile for all scenarios:
 
 | Field | Value |
 |-------|-------|
@@ -164,5 +164,5 @@ Each scenario validates against its specific account number. For example, the Bl
 | No voice / silence | Grant microphone permission in Chrome |
 | "WebSocket relay unavailable" | `pip install websockets` |
 | "Invalid API key" | Enter a valid key in Settings |
-| "LLM engine not available" | Ensure `llm_engine.py` is in the IRIS Demo directory |
+| "LLM engine not available" | Ensure `llm_engine.py` is in the IRIS directory |
 | Messages out of order | Hard refresh with **Ctrl+Shift+R** |

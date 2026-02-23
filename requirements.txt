@@ -1,4 +1,4 @@
-# EXL AI Demo Suite - Python Dependencies
+# EXL AI Suite - Python Dependencies
 #
 # aiohttp serves HTTP + WebSocket on a single port (required for Render/PaaS hosting).
 # websockets is the client library for relaying to OpenAI Realtime API.

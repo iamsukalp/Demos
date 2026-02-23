@@ -1,5 +1,5 @@
 """
-EXL Demos Server
+EXL Server
 =================
 Single-port server: static files + IRIS IVR API endpoints + WebSocket relay.
 Works locally (python serve.py) and on Render / any PaaS that exposes one port.
@@ -18,8 +18,8 @@ import aiohttp
 # Set working directory to this file's location (Demos root)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# Add IRIS Demo to Python path for its modules
-IRIS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'IRIS Demo')
+# Add IRIS to Python path for its modules
+IRIS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'IRIS')
 sys.path.insert(0, IRIS_DIR)
 
 # Import IRIS response engine (graceful if missing)
@@ -71,6 +71,26 @@ def save_stats(stats):
         json.dump(stats, f)
 
 
+# Persistent call history file
+HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'iris_history.json')
+MAX_HISTORY = 50  # Keep last N call records
+
+
+def load_history():
+    """Load call history from JSON file."""
+    try:
+        with open(HISTORY_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def save_history(history):
+    """Save call history to JSON file."""
+    with open(HISTORY_FILE, 'w') as f:
+        json.dump(history[-MAX_HISTORY:], f)
+
+
 # ===== CORS Middleware =====
 
 @web.middleware
@@ -80,7 +100,7 @@ async def cors_middleware(request, handler):
     else:
         resp = await handler(request)
     resp.headers['Access-Control-Allow-Origin'] = '*'
-    resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET, POST, DELETE, OPTIONS'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
@@ -236,14 +256,53 @@ async def handle_get_stats(request):
 
 
 async def handle_update_stats(request):
-    """Update shared persistent stats."""
+    """Increment stats atomically (not full overwrite)."""
     data = await request.json() if request.content_length else {}
+    action = data.get('action')  # 'contained' | 'escalated'
+    handle_time = data.get('handleTime', 0)
+
     stats = load_stats()
-    for key in DEFAULT_STATS:
-        if key in data:
-            stats[key] = data[key]
+
+    if action in ('contained', 'escalated'):
+        stats['scenariosRun'] = stats.get('scenariosRun', 0) + 1
+        stats['totalHandleTime'] = stats.get('totalHandleTime', 0) + handle_time
+        if action == 'contained':
+            stats['botContained'] = stats.get('botContained', 0) + 1
+        else:
+            stats['agentEscalated'] = stats.get('agentEscalated', 0) + 1
+
     save_stats(stats)
     return web.json_response(stats)
+
+
+async def handle_reset_stats(request):
+    """Reset all stats to zero."""
+    save_stats(dict(DEFAULT_STATS))
+    return web.json_response(dict(DEFAULT_STATS))
+
+
+# ===== Call History Handlers =====
+
+async def handle_get_history(request):
+    """Return call history."""
+    return web.json_response(load_history())
+
+
+async def handle_add_history(request):
+    """Add a new call history entry."""
+    data = await request.json() if request.content_length else {}
+    if not data:
+        return web.json_response({'error': 'No data provided'}, status=400)
+    history = load_history()
+    history.append(data)
+    save_history(history)
+    return web.json_response({'success': True, 'count': len(history)})
+
+
+async def handle_delete_history(request):
+    """Clear all call history."""
+    save_history([])
+    return web.json_response({'success': True})
 
 
 # ===== WebSocket Relay Handler =====
@@ -397,7 +456,7 @@ async def ws_relay(request):
 
 # ===== Security: block sensitive paths =====
 
-BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules', 'iris_stats')
+BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules', 'iris_stats', 'iris_history')
 
 
 async def handle_root(request):
@@ -428,6 +487,10 @@ def create_app():
     app.router.add_post('/api/intent-switch', handle_intent_switch)
     app.router.add_get('/api/stats', handle_get_stats)
     app.router.add_post('/api/stats', handle_update_stats)
+    app.router.add_delete('/api/stats', handle_reset_stats)
+    app.router.add_get('/api/history', handle_get_history)
+    app.router.add_post('/api/history', handle_add_history)
+    app.router.add_delete('/api/history', handle_delete_history)
 
     # WebSocket relay — mounted at /ws (browser connects to /ws?scenario=...&phone=...)
     app.router.add_get('/ws', ws_relay)
@@ -445,7 +508,7 @@ if __name__ == '__main__':
     engine_status = "with IRIS response engine" if ENGINE_AVAILABLE else "static only"
     llm_status = "LLM engine ready" if LLM_AVAILABLE else "LLM engine unavailable"
     ws_status = "WebSocket relay ready" if WS_AVAILABLE else "WebSocket unavailable (pip install websockets)"
-    print(f"EXL Demos starting on port {PORT} ({engine_status}, {llm_status})")
+    print(f"EXL Suite starting on port {PORT} ({engine_status}, {llm_status})")
     print(f"  {ws_status}")
     print(f"  HTTP + WebSocket on single port {PORT}")
     web.run_app(create_app(), host='0.0.0.0', port=PORT, print=None)

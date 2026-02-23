@@ -1,9 +1,9 @@
-# EXL AI Demo Suite
+# EXL AI Suite
 
-An interactive showcase of three AI-powered demos for insurance and banking domains. Each demo is a self-contained web application served from a single local development server.
+An interactive showcase of three AI-powered apps for insurance and banking domains. Each app is a self-contained web application served from a single local development server.
 
-| Demo | Domain | Description |
-|------|--------|-------------|
+| App | Domain | Description |
+|-----|--------|-------------|
 | **Agent Assist** | Insurance | AI-powered document search with conversational Q&A, document ingestion pipeline, and analytics |
 | **Conversational BI** | Banking | Natural-language business intelligence with charts, data tables, SQL, and insights |
 | **IRIS IVR** | Banking | AI voice agent for IVR call containment with OpenAI Realtime API, real-time speech, and mock banking tools |
@@ -12,15 +12,15 @@ An interactive showcase of three AI-powered demos for insurance and banking doma
 
 ```
 EXL Demos/
-├── index.html                    # Main portal (links to all 3 demos)
+├── index.html                    # Main portal (links to all 3 apps)
 ├── serve.py                      # Unified server: HTTP (8000) + WebSocket relay (8091)
 ├── requirements.txt              # Python dependencies
 ├── README.md                     # This file
 │
-├── BPVA Demo/                    # Agent Assist
+├── BPVA/                         # Agent Assist
 │   └── index.html                # Single-file app (HTML/CSS/JS)
 │
-├── CBI Demo/                     # Conversational BI
+├── CBI/                          # Conversational BI
 │   ├── index.html
 │   ├── css/app.css
 │   ├── js/
@@ -30,7 +30,7 @@ EXL Demos/
 │   │   └── scenarios.js
 │   └── questions.csv
 │
-└── IRIS Demo/                    # IRIS IVR
+└── IRIS/                         # IRIS IVR
     ├── index.html                # Single-file app (HTML/CSS/JS)
     ├── llm_engine.py             # LLM prompts, tool defs, and mock banking handlers
     ├── response_engine.py        # Scripted response engine (bot mode)
@@ -95,7 +95,7 @@ All front-end dependencies (Tailwind CSS, Chart.js, Marked.js, Google Fonts) are
 
 ## Starting the Server
 
-### Option A: Serve all demos from the root (recommended)
+### Option A: Serve all apps from the root (recommended)
 
 ```bash
 cd "E:\EXL\Demos"
@@ -116,42 +116,42 @@ Open **Google Chrome** and navigate to:
 http://localhost:8000
 ```
 
-This opens the main portal with cards for all three demos. Click any card to launch that demo.
+This opens the main portal with cards for all three apps. Click any card to launch that app.
 
 ### IRIS IVR (standalone)
 
 IRIS IVR has its own server for standalone use:
 
 ```bash
-cd "E:\EXL\Demos\IRIS Demo"
+cd "E:\EXL\Demos\IRIS"
 python serve.py
 ```
 
-This serves IRIS IVR on `http://localhost:8090`. See `IRIS Demo/README.md` for full details.
+This serves IRIS IVR on `http://localhost:8090`. See `IRIS/README.md` for full details.
 
 > **Important:** Always use `http://`, not `https://`. These are local dev servers without SSL.
 
-## Accessing the Demos
+## Accessing the Apps
 
 Once the server is running at `http://localhost:8000`:
 
-| URL | Demo |
-|-----|------|
+| URL | App |
+|-----|-----|
 | `http://localhost:8000` | Main portal |
-| `http://localhost:8000/BPVA%20Demo/` | Agent Assist |
-| `http://localhost:8000/CBI%20Demo/` | Conversational BI |
-| `http://localhost:8000/IRIS%20Demo/` | IRIS IVR |
+| `http://localhost:8000/BPVA/` | Agent Assist |
+| `http://localhost:8000/CBI/` | Conversational BI |
+| `http://localhost:8000/IRIS/` | IRIS IVR |
 
-## Demo Details
+## App Details
 
-### Agent Assist (BPVA Demo)
+### Agent Assist (BPVA)
 
 - Chat interface with 6 starter questions about insurance claims
 - Document ingestion pipeline — click the upload zone to select a file, watch the parse/chunk/embed/store animation
 - Knowledge Base table with activate/deactivate toggles
 - Analytics dashboard with charts and counters
 
-### Conversational BI (CBI Demo)
+### Conversational BI (CBI)
 
 - Split-panel layout: Chat (left) + Analytics (right)
 - 21 banking scenarios (deposits, loans, NPAs, revenue, etc.)
@@ -173,7 +173,7 @@ Once the server is running at `http://localhost:8000`:
 
 IRIS IVR AI mode requires an OpenAI API key with access to the `gpt-4o-realtime-preview` model.
 
-The server includes a hardcoded demo key for convenience. To use your own key:
+The server includes a hardcoded built-in key for convenience. To use your own key:
 1. Open IRIS IVR in the browser
 2. Click the Settings gear icon
 3. Enter your OpenAI API key
@@ -183,10 +183,10 @@ The server includes a hardcoded demo key for convenience. To use your own key:
 
 | Library | Version | Used By |
 |---------|---------|---------|
-| Tailwind CSS | v4 | All demos |
+| Tailwind CSS | v4 | All apps |
 | Chart.js | v4 | Agent Assist, Conversational BI |
 | Marked.js | latest | Agent Assist |
-| Google Fonts (Inter, JetBrains Mono) | — | All demos |
+| Google Fonts (Inter, JetBrains Mono) | — | All apps |
 | Material Icons | — | Conversational BI |
 
 No local installation is needed for these — they are fetched from CDN when the page loads.
