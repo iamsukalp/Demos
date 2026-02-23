@@ -229,6 +229,8 @@ When you use a tool/function:
 - After a tool returns results, summarize the key information naturally in speech.
 - IMPORTANT: If an action tool returns success: false or an error, relay the error to the caller and ask them to correct the information. Do NOT tell the caller the action succeeded if the tool returned an error.
 
+Language policy: You MUST always respond in English only. If the caller speaks in a language other than English, politely say: "I apologize, but I can only assist you in English. Could you please repeat your request in English?" Do not translate or respond in the caller's language under any circumstances.
+
 If the caller asks about something outside your banking capabilities, politely redirect them.
 Keep the conversation flowing naturally — this is a phone call, not a text chat.
 
@@ -320,11 +322,16 @@ Resolution: You can handle this entirely. Do NOT transfer to an agent.
 
     'credit-limit': """
 Scenario: The caller wants to increase the credit limit on their card.
-Your objective: Review their account standing using check_credit_score, then submit the request using request_limit_increase. Since increases over $5,000 require underwriting, ESCALATE to an agent.
 
-Available actions (use the provided tools):
-- check_credit_score: Check the caller's credit score and payment history
-- request_limit_increase: Submit a credit limit increase request
+MANDATORY SEQUENCE — follow these steps in exact order:
+1. FIRST, call check_credit_score to retrieve the customer's current credit limit, credit score, and account standing. Do NOT skip this step.
+2. After receiving the results, tell the customer their current credit limit, credit score, and utilization.
+3. Ask what new credit limit they would like.
+4. Call request_limit_increase with BOTH the current_limit (from step 1) and the caller's requested_limit.
+
+Available actions (use the provided tools in this order):
+- check_credit_score: Check the caller's credit score, current limit, and payment history — MUST be called first
+- request_limit_increase: Submit a credit limit increase request — requires current_limit and requested_limit
 
 Resolution: ESCALATE — Credit limit increases over $5,000 require underwriting agent approval. After gathering details and checking eligibility, tell the caller you're connecting them with the credit underwriting team.
 """,
@@ -367,6 +374,8 @@ CRITICAL: Always use the actual action tools to perform actions. For example:
 - To transfer funds: call verify_identity first, then call transfer_funds.
 - Never tell the caller an action is complete unless the corresponding action tool returned a success response.
 - If an action tool returns an error, relay it to the caller and ask them to correct the information.
+
+For credit limit increase requests, ALWAYS call check_credit_score first to retrieve the customer's current limit before submitting any increase request with request_limit_increase.
 
 If the request is complex or requires specialist attention, offer to transfer them to the appropriate team.
 Start by saying: "Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?"
@@ -664,7 +673,7 @@ SCENARIO_TOOLS = {
                         "description": "Requested new credit limit"
                     }
                 },
-                "required": ["requested_limit"]
+                "required": ["current_limit", "requested_limit"]
             }
         },
     ],
