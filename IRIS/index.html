@@ -4060,16 +4060,16 @@ function handleRealtimeMessage(data) {
     // Filter out empty transcripts, punctuation-only, non-English, and common Whisper hallucinations
     // Strip punctuation for matching — Whisper often adds "." or "!" to hallucinated phrases
     const stripped = text ? text.toLowerCase().replace(/[.,!?…;:\-–—'"()]/g, '').replace(/\s+/g, ' ').trim() : '';
+    // Only filter clear Whisper hallucinations — NOT real conversational words like
+    // "yes", "sure", "okay" etc. which customers genuinely say during calls
     const WHISPER_NOISE = ['you', 'thank you', 'thanks', 'bye', 'bye bye', 'byebye', 'goodbye',
       'good bye', 'the end', 'thanks for watching',
-      'subscribe', 'hmm', 'uh', 'um', 'ah', 'oh', 'huh', 'yeah', 'okay', 'so', 'and',
+      'subscribe', 'hmm', 'uh', 'um', 'ah', 'oh', 'huh', 'so', 'and',
       'thank you for watching', 'please subscribe', 'like and subscribe', 'see you next time',
       'see you', 'see ya', 'music', 'applause', 'laughter', 'silence', 'mbc', 'sbs',
-      'i', 'a', 'the', 'it', 'is', 'do', 'no', 'yes', 'we', 'he', 'she', 'they', 'my',
-      'right', 'well', 'like', 'just', 'but', 'not', 'all', 'can', 'this', 'that', 'with',
-      'ok', 'alright', 'hello', 'hi', 'hey', 'yep', 'nope', 'nah', 'yea', 'ya',
+      'i', 'a', 'the', 'it', 'is', 'do', 'we', 'he', 'she', 'they', 'my',
+      'well', 'like', 'just', 'but', 'not', 'all', 'can', 'this', 'that', 'with',
       'wow', 'whoa', 'ooh', 'aah', 'mm', 'mmm', 'mhm', 'ugh', 'er', 'ehm',
-      'sure', 'fine', 'great', 'good', 'nice', 'cool', 'go ahead', 'next', 'stop',
       'subtitles by', 'translated by', 'captions by', 'transcribed by',
       'foreign', 'inaudible', 'unintelligible', 'speaking foreign language',
       'beep', 'ring', 'ding', 'static', 'noise', 'background noise',
@@ -4078,7 +4078,7 @@ function handleRealtimeMessage(data) {
     // Reject non-Latin scripts (Korean, Arabic, Chinese, Japanese, Thai, Devanagari, etc.)
     // These are Whisper hallucinations from background noise — caller speaks English
     const NON_LATIN_RE = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\uAC00-\uD7AF\u0900-\u097F\u0E00-\u0E7F\u1000-\u109F]/;
-    if (text && stripped.length > 3 &&
+    if (text && stripped.length > 1 &&
         !/^[\s.,!?…*\-–—]+$/.test(text) &&
         !NON_LATIN_RE.test(text) &&
         !WHISPER_NOISE.includes(stripped)) {
