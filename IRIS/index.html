@@ -5710,25 +5710,27 @@ function endAiCall() {
   // Show resolution card if the call completed normally
   if (state.aiEndCallData) {
     renderAiResolutionCard();
-
-    // Save to call history — capture transcript before any cleanup
-    const customer = CUSTOMER_DB[CALLER_PHONE];
-    const capturedMessages = (state.aiTranscript || [])
-      .filter(m => m && m.role && m.role !== 'system' && m.text)
-      .map(m => ({ role: m.role, text: m.text }));
-    console.log('[IVR] Saving history — transcript entries:', state.aiTranscript.length, 'messages kept:', capturedMessages.length);
-    saveCallToHistory({
-      timestamp: new Date().toLocaleString(),
-      customerName: customer ? customer.name : 'Unknown',
-      customerPhone: CALLER_PHONE,
-      duration: formatTime(state.timerSeconds),
-      durationSeconds: state.timerSeconds,
-      intent: state.aiEndCallData.intent || 'General Inquiry',
-      actionsTaken: state.aiEndCallData.actions_taken || '',
-      outcome: aiFlow,
-      messages: capturedMessages,
-    });
   }
+
+  // Save to call history — always save, even if user ended call manually
+  const customer = CUSTOMER_DB[CALLER_PHONE];
+  const capturedMessages = (state.aiTranscript || [])
+    .filter(m => m && m.role && m.role !== 'system' && m.text)
+    .map(m => ({ role: m.role, text: m.text }));
+  const endData = state.aiEndCallData || {};
+  const outcome = endData.outcome || (state.aiEndCallData ? 'contained' : 'ended_by_user');
+  console.log('[IVR] Saving history — transcript entries:', (state.aiTranscript || []).length, 'messages kept:', capturedMessages.length);
+  saveCallToHistory({
+    timestamp: new Date().toLocaleString(),
+    customerName: customer ? customer.name : 'Unknown',
+    customerPhone: CALLER_PHONE,
+    duration: formatTime(state.timerSeconds),
+    durationSeconds: state.timerSeconds,
+    intent: endData.intent || 'General Inquiry',
+    actionsTaken: endData.actions_taken || '',
+    outcome: outcome,
+    messages: capturedMessages,
+  });
 
   dom.btnEnd.disabled = true;
   dom.btnRestart.disabled = false;
