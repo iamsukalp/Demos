@@ -92,6 +92,10 @@ class IrisHandler(http.server.SimpleHTTPRequestHandler):
             self._handle_summarize(data)
             return
 
+        if self.path == '/api/tts':
+            self._handle_tts(data)
+            return
+
         # Response engine endpoints (fallback/scripted mode)
         if not ENGINE_AVAILABLE:
             self._json_error(503, 'Response engine not available')
@@ -246,6 +250,44 @@ class IrisHandler(http.server.SimpleHTTPRequestHandler):
         self._json_response({'switch': result})
 
     # --- JSON Helpers ---
+    def _handle_tts(self, data):
+        """Text-to-Speech via OpenAI TTS API. Returns MP3 audio."""
+        global API_KEY
+        text = data.get('text', '').strip()
+        if not text:
+            self._json_error(400, 'No text provided')
+            return
+        if not API_KEY:
+            self._json_error(503, 'API key not configured')
+            return
+        try:
+            import urllib.request
+            req_body = json.dumps({
+                "model": "tts-1",
+                "input": text,
+                "voice": "alloy",
+                "response_format": "mp3",
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                'https://api.openai.com/v1/audio/speech',
+                data=req_body,
+                headers={
+                    'Authorization': f'Bearer {API_KEY}',
+                    'Content-Type': 'application/json',
+                },
+                method='POST',
+            )
+            resp = urllib.request.urlopen(req, timeout=15)
+            audio_data = resp.read()
+            self.send_response(200)
+            self.send_header('Content-Type', 'audio/mpeg')
+            self._send_cors_headers()
+            self.send_header('Content-Length', str(len(audio_data)))
+            self.end_headers()
+            self.wfile.write(audio_data)
+        except Exception as e:
+            self._json_error(500, f'TTS failed: {str(e)}')
+
     def _json_response(self, data, status=200):
         """Send a JSON response."""
         body = json.dumps(data).encode('utf-8')

@@ -189,6 +189,39 @@ async def handle_summarize(request):
         return web.json_response({'summary': f'Summary generation failed: {str(e)}'})
 
 
+async def handle_tts(request):
+    """Text-to-Speech via OpenAI TTS API. Returns MP3 audio."""
+    global API_KEY
+    data = await request.json() if request.content_length else {}
+    text = data.get('text', '').strip()
+    if not text:
+        return web.json_response({'error': 'No text provided'}, status=400)
+    if not API_KEY:
+        return web.json_response({'error': 'API key not configured'}, status=503)
+    try:
+        import urllib.request
+        req_body = json.dumps({
+            "model": "tts-1",
+            "input": text,
+            "voice": "alloy",
+            "response_format": "mp3",
+        }).encode('utf-8')
+        req = urllib.request.Request(
+            'https://api.openai.com/v1/audio/speech',
+            data=req_body,
+            headers={
+                'Authorization': f'Bearer {API_KEY}',
+                'Content-Type': 'application/json',
+            },
+            method='POST',
+        )
+        resp = urllib.request.urlopen(req, timeout=15)
+        audio_data = resp.read()
+        return web.Response(body=audio_data, content_type='audio/mpeg')
+    except Exception as e:
+        return web.json_response({'error': f'TTS failed: {str(e)}'}, status=500)
+
+
 async def handle_respond(request):
     if not ENGINE_AVAILABLE:
         return web.json_response({'error': 'Response engine not available'}, status=503)
@@ -435,6 +468,7 @@ def create_app():
     app.router.add_post('/api/config', handle_config)
     app.router.add_post('/api/test-key', handle_test_key)
     app.router.add_post('/api/summarize', handle_summarize)
+    app.router.add_post('/api/tts', handle_tts)
     app.router.add_post('/api/respond', handle_respond)
     app.router.add_post('/api/classify', handle_classify)
     app.router.add_post('/api/entities', handle_entities)

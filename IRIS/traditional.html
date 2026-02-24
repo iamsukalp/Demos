@@ -1326,9 +1326,8 @@ function toggleTTS() {
   state.ttsEnabled = !state.ttsEnabled;
   document.getElementById('ttsOnIcon').style.display = state.ttsEnabled ? 'block' : 'none';
   document.getElementById('ttsOffIcon').style.display = state.ttsEnabled ? 'none' : 'block';
-  if (!state.ttsEnabled && window.speechSynthesis) {
-    speechSynthesis.cancel();
-    state.ttsSpeaking = false;
+  if (!state.ttsEnabled) {
+    cancelTts();
   }
 }
 
@@ -1427,8 +1426,7 @@ function selectScenario(scenarioId) {
   }
 
   // Cancel any active TTS
-  if (window.speechSynthesis) speechSynthesis.cancel();
-  state.ttsSpeaking = false;
+  cancelTts();
 
   state.currentScenarioId = scenarioId;
   state.scenarioComplete = false;
@@ -1654,9 +1652,8 @@ function onKeyPress(digit) {
   playDtmfTone();
 
   // Cancel TTS immediately if speaking
-  if (window.speechSynthesis && speechSynthesis.speaking) {
-    speechSynthesis.cancel();
-    state.ttsSpeaking = false;
+  if (state.ttsSpeaking) {
+    cancelTts();
   }
 
   // Multi-digit mode (identity verification)
@@ -1908,56 +1905,73 @@ function renderDtmfSystem(text) {
   scrollToBottom();
 }
 
-// ===== TTS (Text-to-Speech) =====
+// ===== TTS (Text-to-Speech via OpenAI) =====
+var _ttsAudioContext = null;
+var _ttsCurrentSource = null;
+
+function getTtsAudioContext() {
+  if (!_ttsAudioContext || _ttsAudioContext.state === 'closed') {
+    _ttsAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return _ttsAudioContext;
+}
+
+function cancelTts() {
+  if (_ttsCurrentSource) {
+    try { _ttsCurrentSource.stop(); } catch (e) {}
+    _ttsCurrentSource = null;
+  }
+  state.ttsSpeaking = false;
+}
+
 function speakText(text) {
   return new Promise(function(resolve) {
-    if (!state.ttsEnabled || !window.speechSynthesis) {
+    if (!state.ttsEnabled) {
       resolve();
       return;
     }
 
-    // Cancel any ongoing speech
-    speechSynthesis.cancel();
+    // Cancel any ongoing TTS
+    cancelTts();
 
-    var utterance = new SpeechSynthesisUtterance(text);
+    var gen = state.playbackGeneration;
 
-    // Select an English voice
-    var voices = speechSynthesis.getVoices();
-    var preferred = voices.find(function(v) {
-      return v.lang.startsWith('en') && /Microsoft|Google/i.test(v.name);
-    }) || voices.find(function(v) {
-      return v.lang.startsWith('en');
+    fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    })
+    .then(function(resp) {
+      if (!resp.ok) throw new Error('TTS HTTP ' + resp.status);
+      return resp.arrayBuffer();
+    })
+    .then(function(buffer) {
+      if (gen !== state.playbackGeneration) { resolve(); return; }
+      var ctx = getTtsAudioContext();
+      return ctx.decodeAudioData(buffer);
+    })
+    .then(function(audioBuffer) {
+      if (!audioBuffer || gen !== state.playbackGeneration) { resolve(); return; }
+      var ctx = getTtsAudioContext();
+      var source = ctx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(ctx.destination);
+
+      state.ttsSpeaking = true;
+      _ttsCurrentSource = source;
+
+      source.onended = function() {
+        state.ttsSpeaking = false;
+        _ttsCurrentSource = null;
+        resolve();
+      };
+      source.start(0);
+    })
+    .catch(function(err) {
+      console.warn('TTS error:', err);
+      state.ttsSpeaking = false;
+      resolve(); // Silently continue without audio
     });
-    if (preferred) utterance.voice = preferred;
-
-    utterance.rate = 0.95;
-    utterance.pitch = 0.9;
-    utterance.volume = 1.0;
-
-    state.ttsSpeaking = true;
-
-    // Chrome 15-second bug workaround
-    var resumeInterval = setInterval(function() {
-      if (!state.ttsSpeaking || !speechSynthesis.speaking) {
-        clearInterval(resumeInterval);
-        return;
-      }
-      speechSynthesis.pause();
-      speechSynthesis.resume();
-    }, 10000);
-
-    utterance.onend = function() {
-      state.ttsSpeaking = false;
-      clearInterval(resumeInterval);
-      resolve();
-    };
-    utterance.onerror = function() {
-      state.ttsSpeaking = false;
-      clearInterval(resumeInterval);
-      resolve();
-    };
-
-    speechSynthesis.speak(utterance);
   });
 }
 
@@ -2059,7 +2073,7 @@ function onScenarioComplete() {
   setKeypadEnabled(false);
   updateKeypadHint('Scenario complete', '');
   hidePinDisplay();
-  if (window.speechSynthesis) { speechSynthesis.cancel(); state.ttsSpeaking = false; }
+  cancelTts();
 
   var metrics = DTMF_SCENARIOS[state.currentScenarioId] && DTMF_SCENARIOS[state.currentScenarioId].metrics;
   var title = SCENARIO_TITLES[state.currentScenarioId] && SCENARIO_TITLES[state.currentScenarioId].title || '';
@@ -2122,7 +2136,7 @@ function resetUI() {
   state.inputBuffer = '';
   state.verifyExpectedDigits = null;
   hidePinDisplay();
-  if (window.speechSynthesis) { speechSynthesis.cancel(); state.ttsSpeaking = false; }
+  cancelTts();
   dom.transcript.innerHTML =
     '<div class="transcript__empty" id="emptyState">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:48px;height:48px;opacity:0.4;">' +
@@ -2147,11 +2161,21 @@ showCallerInfo(CUSTOMER_DB[CALLER_PHONE]);
 renderScenarioList();
 updateThemeIcons();
 
-// Preload speech synthesis voices
-if (window.speechSynthesis) {
-  speechSynthesis.getVoices();
-  speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
-}
+// Pre-initialize TTS audio context on first user gesture
+document.addEventListener('click', function initTtsCtx() {
+  getTtsAudioContext();
+  document.removeEventListener('click', initTtsCtx);
+}, { once: true });
+
+// Send API key to server on startup (shared with AI IVR via localStorage)
+(function initApiKey() {
+  var savedKey = localStorage.getItem('iris-openai-key') || '';
+  fetch('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey: savedKey })
+  }).catch(function() {});
+})();
 </script>
 </body>
 </html>
