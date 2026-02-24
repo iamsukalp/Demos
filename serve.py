@@ -355,6 +355,34 @@ async def ws_relay(request):
 
             async def openai_to_browser():
                 msg_count = 0
+                # Silence timer: detect when user doesn't respond after AI speaks
+                SILENCE_TIMEOUT_S = 5
+                MAX_SILENCE_PROMPTS = 2
+                silence_timer_task = None
+                silence_prompt_count = 0
+
+                async def silence_timeout():
+                    nonlocal silence_prompt_count
+                    try:
+                        await asyncio.sleep(SILENCE_TIMEOUT_S)
+                        silence_prompt_count += 1
+                        print(f"  [SILENCE] Timeout #{silence_prompt_count} after {SILENCE_TIMEOUT_S}s")
+                        if silence_prompt_count >= MAX_SILENCE_PROMPTS:
+                            hint = "[silence - caller has not responded after multiple prompts, end the call politely]"
+                        else:
+                            hint = "[silence - caller has not responded, gently ask if they are still there]"
+                        await openai_ws.send(json.dumps({
+                            "type": "conversation.item.create",
+                            "item": {
+                                "type": "message",
+                                "role": "user",
+                                "content": [{"type": "input_text", "text": hint}]
+                            }
+                        }))
+                        await openai_ws.send(json.dumps({"type": "response.create"}))
+                    except asyncio.CancelledError:
+                        pass
+
                 try:
                     async for message in openai_ws:
                         if browser_ws.closed:
@@ -366,6 +394,18 @@ async def ws_relay(request):
                             print(f"  [WS] OpenAI → Browser: {evt_type}")
                         elif msg_count % 50 == 0:
                             print(f"  [WS] OpenAI → Browser: audio chunks ({msg_count} msgs)")
+
+                        # Silence timer management
+                        if evt_type == "response.done":
+                            if silence_timer_task and not silence_timer_task.done():
+                                silence_timer_task.cancel()
+                            silence_timer_task = asyncio.create_task(silence_timeout())
+                        if evt_type in ("input_audio_buffer.speech_started", "response.created"):
+                            if silence_timer_task and not silence_timer_task.done():
+                                silence_timer_task.cancel()
+                                silence_timer_task = None
+                            if evt_type == "input_audio_buffer.speech_started":
+                                silence_prompt_count = 0
 
                         if data.get("type") == "response.function_call_arguments.done":
                             func_name = data.get("name", "")
@@ -415,6 +455,9 @@ async def ws_relay(request):
                     pass
                 except Exception:
                     pass
+                finally:
+                    if silence_timer_task and not silence_timer_task.done():
+                        silence_timer_task.cancel()
 
             done, pending = await asyncio.wait(
                 [
