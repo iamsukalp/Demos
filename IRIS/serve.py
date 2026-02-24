@@ -273,7 +273,7 @@ async def relay_handler(browser_ws):
     params = parse_qs(parsed.query)
     scenario_id = params.get('scenario', [None])[0]
     phone = params.get('phone', [None])[0]
-    silence_ms = int(params.get('silence', [3000])[0])
+    silence_ms = int(params.get('silence', [1000])[0])
 
     # Look up customer from phone number
     customer_context = None

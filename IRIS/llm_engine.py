@@ -805,7 +805,7 @@ END_CALL_TOOL = {
 
 # ===== Session Config Builder =====
 
-def build_session_config(scenario_id=None, customer_context=None, phone=None, silence_ms=3000):
+def build_session_config(scenario_id=None, customer_context=None, phone=None, silence_ms=1000):
     """Build the session.update config for OpenAI Realtime API."""
     global _active_scenario, _CUST
     _active_scenario = scenario_id

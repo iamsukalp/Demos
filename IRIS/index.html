@@ -1908,8 +1908,8 @@
       </select>
     </div>
     <div class="settings-panel__group">
-      <label class="settings-panel__label">Silence Detection <span id="silenceValue" style="float:right;font-weight:600;">3.0s</span></label>
-      <input type="range" id="settingSilenceDuration" min="500" max="5000" step="250" value="3000" oninput="updateSilenceLabel(this.value); saveAudioSettings()" style="width:100%;accent-color:var(--accent);">
+      <label class="settings-panel__label">Silence Detection <span id="silenceValue" style="float:right;font-weight:600;">1.0s</span></label>
+      <input type="range" id="settingSilenceDuration" min="500" max="5000" step="250" value="1000" oninput="updateSilenceLabel(this.value); saveAudioSettings()" style="width:100%;accent-color:var(--accent);">
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-top:2px;"><span>0.5s (fast)</span><span>5s (patient)</span></div>
     </div>
   </div>
@@ -5759,7 +5759,7 @@ function updateSilenceLabel(val) {
 }
 
 function getSilenceDuration() {
-  return parseInt(document.getElementById('settingSilenceDuration').value) || 3000;
+  return parseInt(document.getElementById('settingSilenceDuration').value) || 1000;
 }
 
 function saveAudioSettings() {

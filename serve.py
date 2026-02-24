@@ -266,7 +266,7 @@ async def ws_relay(request):
 
     scenario_id = request.query.get('scenario') or None
     phone = request.query.get('phone') or None
-    silence_ms = int(request.query.get('silence', 3000))
+    silence_ms = int(request.query.get('silence', 1000))
     print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}, silence={silence_ms}ms")
 
     # Upgrade to WebSocket

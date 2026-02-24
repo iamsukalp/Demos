@@ -374,6 +374,38 @@
       border-color: rgba(251, 78, 11, 0.35);
       box-shadow: 0 0 0 2px rgba(251, 78, 11, 0.08);
     }
+
+    /* ===== PIN Entry Display ===== */
+    .pin-display {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 10px 0 4px;
+    }
+    .pin-display__dot {
+      width: 40px;
+      height: 48px;
+      border: 2px solid var(--gray-300, #CBD5E1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy, #0F172A);
+      background: var(--gray-50, #F8FAFC);
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+    .pin-display__dot--filled {
+      border-color: #FB4E0B;
+      background: rgba(251, 78, 11, 0.08);
+      transform: scale(1.05);
+    }
+    .pin-display--shake {
+      animation: shake 0.35s ease-in-out;
+    }
+
     .ivr-toast {
       position: absolute;
       bottom: 80px;
@@ -652,6 +684,8 @@
     html.dark .keypad__letters { color: #64748B; }
     html.dark .keypad__key--correct { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(251, 78, 11, 0.2); }
     html.dark .keypad__key--valid { border-color: rgba(251, 78, 11, 0.25); box-shadow: 0 0 0 2px rgba(251, 78, 11, 0.1); }
+    html.dark .pin-display__dot { border-color: #334155; background: #0F172A; color: #F1F5F9; }
+    html.dark .pin-display__dot--filled { border-color: #FB4E0B; background: rgba(251, 78, 11, 0.15); }
     html.dark .ivr-toast { background: rgba(30, 41, 59, 0.95); }
     html.dark .keypad-panel__status { border-top-color: #334155; }
     html.dark .keypad-panel__timer-label { color: #64748b; }
@@ -703,6 +737,18 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7v4a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
         AI IVR
       </a>
+      <button class="theme-toggle" id="ttsToggle" onclick="toggleTTS()" title="Toggle IVR voice">
+        <svg id="ttsOnIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M19.07 4.93a10 10 0 010 14.14"/>
+          <path d="M15.54 8.46a5 5 0 010 7.07"/>
+        </svg>
+        <svg id="ttsOffIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+      </button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
         <svg id="sunIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>
         <svg id="moonIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -1198,6 +1244,15 @@ const state = {
   timerSeconds: 0,
   timerInterval: null,
   audioCtx: null,
+  // Multi-digit verification
+  multiDigitMode: false,
+  inputBuffer: '',
+  verifyAttempts: 0,
+  maxVerifyAttempts: 3,
+  verifyExpectedDigits: null,
+  // TTS
+  ttsEnabled: true,
+  ttsSpeaking: false,
 };
 
 // ===== DOM Refs =====
@@ -1265,6 +1320,16 @@ function updateThemeIcons() {
   var isDark = document.documentElement.classList.contains('dark');
   document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
   document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+}
+
+function toggleTTS() {
+  state.ttsEnabled = !state.ttsEnabled;
+  document.getElementById('ttsOnIcon').style.display = state.ttsEnabled ? 'block' : 'none';
+  document.getElementById('ttsOffIcon').style.display = state.ttsEnabled ? 'none' : 'block';
+  if (!state.ttsEnabled && window.speechSynthesis) {
+    speechSynthesis.cancel();
+    state.ttsSpeaking = false;
+  }
 }
 
 // ===== Profile Management =====
@@ -1361,14 +1426,41 @@ function selectScenario(scenarioId) {
     state.isPlaying = false;
   }
 
+  // Cancel any active TTS
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  state.ttsSpeaking = false;
+
   state.currentScenarioId = scenarioId;
   state.scenarioComplete = false;
   state.playbackGeneration++;
-  state.steps = dtmfScenario.steps;
+  // Deep clone steps so we don't mutate static scenario data
+  state.steps = JSON.parse(JSON.stringify(dtmfScenario.steps));
   state.currentStepIndex = 0;
   state.waitingForKeypress = false;
   state.expectedDigit = null;
   state.expectedLabel = null;
+  state.multiDigitMode = false;
+  state.inputBuffer = '';
+  state.verifyExpectedDigits = null;
+
+  // Inject identity verification steps after language selection
+  var customer = CUSTOMER_DB[CALLER_PHONE];
+  var verifyLast4 = customer && customer.accounts && customer.accounts[scenarioId];
+  if (verifyLast4) {
+    var langIdx = -1;
+    for (var i = 0; i < state.steps.length; i++) {
+      if (state.steps[i].type === 'keypress' && state.steps[i].label === 'English') {
+        langIdx = i;
+        break;
+      }
+    }
+    if (langIdx >= 0) {
+      state.steps.splice(langIdx + 1, 0,
+        { type: 'ivr-menu', text: 'For verification, please enter the last four digits of your account or card number.', delay: 2000 },
+        { type: 'keypress', digit: verifyLast4, label: 'Account Verification', multiDigit: true, delay: 1500 }
+      );
+    }
+  }
 
   // Highlight active scenario button
   document.querySelectorAll('.compare-scenario-btn').forEach(function(b) {
@@ -1477,6 +1569,62 @@ function highlightValidKeys(validOptions, expectedDigit) {
   });
 }
 
+function highlightMultiDigitKeys() {
+  dom.keypad.querySelectorAll('.keypad__key').forEach(function(key) {
+    key.classList.remove('keypad__key--correct', 'keypad__key--valid');
+    var d = key.dataset.digit;
+    if (/^[0-9#]$/.test(d)) {
+      key.classList.add('keypad__key--valid');
+    }
+  });
+}
+
+// ===== PIN Display =====
+function showPinDisplay(numDigits) {
+  var container = document.getElementById('pinDisplay');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'pinDisplay';
+    container.className = 'pin-display';
+    var header = document.querySelector('.keypad-panel__header');
+    header.appendChild(container);
+  }
+  var html = '';
+  for (var i = 0; i < numDigits; i++) {
+    html += '<span class="pin-display__dot"></span>';
+  }
+  container.innerHTML = html;
+  container.style.display = 'flex';
+}
+
+function updatePinDisplay(buffer, maxLen) {
+  var container = document.getElementById('pinDisplay');
+  if (!container) return;
+  var dots = container.querySelectorAll('.pin-display__dot');
+  for (var i = 0; i < maxLen; i++) {
+    if (i < buffer.length) {
+      dots[i].textContent = buffer[i];
+      dots[i].classList.add('pin-display__dot--filled');
+    } else {
+      dots[i].textContent = '';
+      dots[i].classList.remove('pin-display__dot--filled');
+    }
+  }
+}
+
+function hidePinDisplay() {
+  var container = document.getElementById('pinDisplay');
+  if (container) container.style.display = 'none';
+}
+
+function shakePinDisplay() {
+  var container = document.getElementById('pinDisplay');
+  if (container) {
+    container.classList.add('pin-display--shake');
+    setTimeout(function() { container.classList.remove('pin-display--shake'); }, 400);
+  }
+}
+
 // ===== DTMF Audio =====
 function playDtmfTone() {
   try {
@@ -1505,6 +1653,18 @@ function onKeyPress(digit) {
 
   playDtmfTone();
 
+  // Cancel TTS immediately if speaking
+  if (window.speechSynthesis && speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    state.ttsSpeaking = false;
+  }
+
+  // Multi-digit mode (identity verification)
+  if (state.multiDigitMode) {
+    handleMultiDigitKeypress(digit);
+    return;
+  }
+
   var expectedFirst = state.expectedDigit.charAt(0);
 
   // Check if this digit is a valid menu option
@@ -1530,6 +1690,63 @@ function onKeyPress(digit) {
   }
 }
 
+// ===== Multi-Digit Input (Identity Verification) =====
+function handleMultiDigitKeypress(digit) {
+  var expected = state.verifyExpectedDigits;
+  var maxLen = expected.length;
+
+  // '#' acts as optional terminator
+  if (digit === '#') {
+    if (state.inputBuffer.length > 0) {
+      validateMultiDigitInput();
+    }
+    return;
+  }
+
+  // Only accept digit keys 0-9
+  if (!/^[0-9]$/.test(digit)) return;
+
+  // Append to buffer
+  state.inputBuffer += digit;
+  updatePinDisplay(state.inputBuffer, maxLen);
+
+  // Auto-submit when buffer reaches expected length
+  if (state.inputBuffer.length >= maxLen) {
+    setTimeout(function() { validateMultiDigitInput(); }, 300);
+  }
+}
+
+function validateMultiDigitInput() {
+  var expected = state.verifyExpectedDigits;
+
+  if (state.inputBuffer === expected) {
+    // Success
+    hidePinDisplay();
+    acceptKeypress(state.inputBuffer, 'Verified ****' + expected);
+  } else {
+    // Failure
+    state.verifyAttempts++;
+    if (state.verifyAttempts >= state.maxVerifyAttempts) {
+      // Max attempts — bypass for demo
+      updateKeypadHint('Max attempts reached — continuing...', 'keypad-panel__hint--error');
+      hidePinDisplay();
+      setTimeout(function() {
+        acceptKeypress(expected, 'Verification bypassed (demo)');
+      }, 1200);
+    } else {
+      // Error — allow retry
+      updateKeypadHint("That doesn't match our records. Please try again.", 'keypad-panel__hint--error');
+      shakePinDisplay();
+      state.inputBuffer = '';
+      updatePinDisplay('', expected.length);
+      setTimeout(function() {
+        if (!state.waitingForKeypress) return;
+        updateKeypadHint('Enter last 4 digits of your card/account', 'keypad-panel__hint--waiting');
+      }, 2000);
+    }
+  }
+}
+
 function acceptKeypress(digit, label, skipRender) {
   state.waitingForKeypress = false;
   setKeypadEnabled(false);
@@ -1543,6 +1760,9 @@ function acceptKeypress(digit, label, skipRender) {
   state.expectedDigit = null;
   state.expectedLabel = null;
   state.validOptions = [];
+  state.multiDigitMode = false;
+  state.inputBuffer = '';
+  state.verifyExpectedDigits = null;
   updateKeypadHint('', '');
 
   var gen = state.playbackGeneration;
@@ -1581,6 +1801,31 @@ function startInteractivePlayback(scenarioId) {
   advanceSteps(gen);
 }
 
+function setupKeypressStep(nextStep) {
+  state.waitingForKeypress = true;
+  state.expectedDigit = nextStep.digit;
+  state.expectedLabel = nextStep.label;
+
+  if (nextStep.multiDigit) {
+    // Multi-digit mode (identity verification)
+    state.multiDigitMode = true;
+    state.inputBuffer = '';
+    state.verifyAttempts = 0;
+    state.verifyExpectedDigits = nextStep.digit;
+    setKeypadEnabled(true);
+    highlightMultiDigitKeys();
+    showPinDisplay(nextStep.digit.length);
+    updateKeypadHint('Enter last 4 digits of your card/account', 'keypad-panel__hint--waiting');
+  } else {
+    // Single-digit mode (menu selection)
+    state.multiDigitMode = false;
+    state.validOptions = parseMenuOptions(state.lastMenuText);
+    setKeypadEnabled(true);
+    highlightValidKeys(state.validOptions, nextStep.digit);
+    updateKeypadHint('Press ' + nextStep.digit.charAt(0) + ' for ' + nextStep.label, 'keypad-panel__hint--waiting');
+  }
+}
+
 async function advanceSteps(gen) {
   var steps = state.steps;
 
@@ -1604,26 +1849,14 @@ async function advanceSteps(gen) {
           // Check if next step is a keypress
           if (state.currentStepIndex < steps.length && steps[state.currentStepIndex].type === 'keypress') {
             var nextStep = steps[state.currentStepIndex];
-            state.waitingForKeypress = true;
-            state.expectedDigit = nextStep.digit;
-            state.expectedLabel = nextStep.label;
-            state.validOptions = parseMenuOptions(state.lastMenuText);
-            setKeypadEnabled(true);
-            highlightValidKeys(state.validOptions, nextStep.digit);
-            updateKeypadHint('Press ' + nextStep.digit.charAt(0) + ' for ' + nextStep.label, 'keypad-panel__hint--waiting');
+            setupKeypressStep(nextStep);
             return; // Wait for user
           }
           break;
 
         case 'keypress':
           // Direct keypress without preceding ivr-menu (rare)
-          state.waitingForKeypress = true;
-          state.expectedDigit = step.digit;
-          state.expectedLabel = step.label;
-          state.validOptions = parseMenuOptions(state.lastMenuText);
-          setKeypadEnabled(true);
-          highlightValidKeys(state.validOptions, step.digit);
-          updateKeypadHint('Press ' + step.digit.charAt(0) + ' for ' + step.label, 'keypad-panel__hint--waiting');
+          setupKeypressStep(step);
           return; // Wait for user
 
         case 'hold':
@@ -1675,6 +1908,72 @@ function renderDtmfSystem(text) {
   scrollToBottom();
 }
 
+// ===== TTS (Text-to-Speech) =====
+function speakText(text) {
+  return new Promise(function(resolve) {
+    if (!state.ttsEnabled || !window.speechSynthesis) {
+      resolve();
+      return;
+    }
+
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+
+    var utterance = new SpeechSynthesisUtterance(text);
+
+    // Select an English voice
+    var voices = speechSynthesis.getVoices();
+    var preferred = voices.find(function(v) {
+      return v.lang.startsWith('en') && /Microsoft|Google/i.test(v.name);
+    }) || voices.find(function(v) {
+      return v.lang.startsWith('en');
+    });
+    if (preferred) utterance.voice = preferred;
+
+    utterance.rate = 0.95;
+    utterance.pitch = 0.9;
+    utterance.volume = 1.0;
+
+    state.ttsSpeaking = true;
+
+    // Chrome 15-second bug workaround
+    var resumeInterval = setInterval(function() {
+      if (!state.ttsSpeaking || !speechSynthesis.speaking) {
+        clearInterval(resumeInterval);
+        return;
+      }
+      speechSynthesis.pause();
+      speechSynthesis.resume();
+    }, 10000);
+
+    utterance.onend = function() {
+      state.ttsSpeaking = false;
+      clearInterval(resumeInterval);
+      resolve();
+    };
+    utterance.onerror = function() {
+      state.ttsSpeaking = false;
+      clearInterval(resumeInterval);
+      resolve();
+    };
+
+    speechSynthesis.speak(utterance);
+  });
+}
+
+async function typewriterEffect(element, text, gen) {
+  var chars = text.split('');
+  var output = '';
+  for (var i = 0; i < chars.length; i++) {
+    if (gen !== state.playbackGeneration) return;
+    output += chars[i];
+    element.textContent = output;
+    scrollToBottom();
+    var charDelay = chars[i] === '\n' ? 80 : (chars[i] === '.' ? 60 : 25);
+    await sleep(charDelay, gen);
+  }
+}
+
 async function renderDtmfMenu(text, gen) {
   var el = document.createElement('div');
   el.className = 'dtmf-msg dtmf-msg--ivr';
@@ -1684,23 +1983,19 @@ async function renderDtmfMenu(text, gen) {
   dom.transcript.appendChild(el);
   scrollToBottom();
 
-  // Typewriter effect
-  var chars = text.split('');
-  var output = '';
-  for (var i = 0; i < chars.length; i++) {
-    if (gen !== state.playbackGeneration) return;
-    output += chars[i];
-    textSpan.textContent = output;
-    scrollToBottom();
-    var charDelay = chars[i] === '\n' ? 80 : (chars[i] === '.' ? 60 : 25);
-    await sleep(charDelay, gen);
-  }
+  // Run TTS and typewriter in parallel
+  await Promise.all([
+    speakText(text),
+    typewriterEffect(textSpan, text, gen)
+  ]);
 }
 
 function renderDtmfKeypress(digit, label) {
   var el = document.createElement('div');
   el.className = 'dtmf-msg dtmf-msg--keypress';
-  el.innerHTML = '<span class="dtmf-key-label">' + escapeHtml(label) + '</span><div class="dtmf-key-badge">' + escapeHtml(digit.substring(0, 2)) + '</div>';
+  var displayDigit = digit.length > 2 ? '****' : escapeHtml(digit.substring(0, 2));
+  var badgeStyle = digit.length > 2 ? ' style="font-size:11px;letter-spacing:1px;"' : '';
+  el.innerHTML = '<span class="dtmf-key-label">' + escapeHtml(label) + '</span><div class="dtmf-key-badge"' + badgeStyle + '>' + displayDigit + '</div>';
   dom.transcript.appendChild(el);
   scrollToBottom();
 }
@@ -1763,6 +2058,8 @@ function onScenarioComplete() {
   state.scenarioComplete = true;
   setKeypadEnabled(false);
   updateKeypadHint('Scenario complete', '');
+  hidePinDisplay();
+  if (window.speechSynthesis) { speechSynthesis.cancel(); state.ttsSpeaking = false; }
 
   var metrics = DTMF_SCENARIOS[state.currentScenarioId] && DTMF_SCENARIOS[state.currentScenarioId].metrics;
   var title = SCENARIO_TITLES[state.currentScenarioId] && SCENARIO_TITLES[state.currentScenarioId].title || '';
@@ -1821,6 +2118,11 @@ function resetUI() {
   state.scenarioComplete = false;
   state.currentScenarioId = null;
   state.waitingForKeypress = false;
+  state.multiDigitMode = false;
+  state.inputBuffer = '';
+  state.verifyExpectedDigits = null;
+  hidePinDisplay();
+  if (window.speechSynthesis) { speechSynthesis.cancel(); state.ttsSpeaking = false; }
   dom.transcript.innerHTML =
     '<div class="transcript__empty" id="emptyState">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:48px;height:48px;opacity:0.4;">' +
@@ -1844,6 +2146,12 @@ renderProfileSelector();
 showCallerInfo(CUSTOMER_DB[CALLER_PHONE]);
 renderScenarioList();
 updateThemeIcons();
+
+// Preload speech synthesis voices
+if (window.speechSynthesis) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
+}
 </script>
 </body>
 </html>
