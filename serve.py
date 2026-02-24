@@ -282,7 +282,7 @@ async def ws_relay(request):
     scenario_id = request.query.get('scenario') or None
     phone = request.query.get('phone') or None
     silence_ms = int(request.query.get('silence', 1000))
-    disconnect_timeout = max(3, min(15, int(request.query.get('disconnect_timeout', 5))))
+    disconnect_timeout = max(3, min(15, int(request.query.get('disconnect_timeout', 15))))
     mode = request.query.get('mode') or None
     print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}, silence={silence_ms}ms, disconnect_timeout={disconnect_timeout}s, mode={mode}")
 

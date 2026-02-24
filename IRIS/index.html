@@ -1922,8 +1922,8 @@
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-top:2px;"><span>0.5s (fast)</span><span>5s (patient)</span></div>
     </div>
     <div class="settings-panel__group">
-      <label class="settings-panel__label">No Response Timeout <span id="disconnectTimeoutValue" style="float:right;font-weight:600;">5s</span></label>
-      <input type="range" id="settingDisconnectTimeout" min="3" max="15" step="1" value="5" oninput="updateDisconnectTimeoutLabel(this.value); saveAudioSettings()" style="width:100%;accent-color:var(--accent);">
+      <label class="settings-panel__label">No Response Timeout <span id="disconnectTimeoutValue" style="float:right;font-weight:600;">15s</span></label>
+      <input type="range" id="settingDisconnectTimeout" min="3" max="15" step="1" value="15" oninput="updateDisconnectTimeoutLabel(this.value); saveAudioSettings()" style="width:100%;accent-color:var(--accent);">
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-top:2px;"><span>3s (quick)</span><span>15s (patient)</span></div>
     </div>
   </div>
@@ -5799,7 +5799,7 @@ function updateDisconnectTimeoutLabel(val) {
 }
 
 function getDisconnectTimeout() {
-  return parseInt(document.getElementById('settingDisconnectTimeout').value) || 5;
+  return parseInt(document.getElementById('settingDisconnectTimeout').value) || 15;
 }
 
 function saveAudioSettings() {

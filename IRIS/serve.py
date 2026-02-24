@@ -355,7 +355,7 @@ async def relay_handler(browser_ws):
     scenario_id = params.get('scenario', [None])[0]
     phone = params.get('phone', [None])[0]
     silence_ms = int(params.get('silence', [1000])[0])
-    disconnect_timeout = max(3, min(15, int(params.get('disconnect_timeout', [5])[0])))
+    disconnect_timeout = max(3, min(15, int(params.get('disconnect_timeout', [15])[0])))
     mode = params.get('mode', [None])[0]
 
     # Look up customer from phone number
