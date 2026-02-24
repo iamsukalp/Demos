@@ -53,24 +53,7 @@ OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-pr
 
 
 
-# Persistent call history file
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'iris_history.json')
-MAX_HISTORY = 50  # Keep last N call records
-
-
-def load_history():
-    """Load call history from JSON file."""
-    try:
-        with open(HISTORY_FILE, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
-
-
-def save_history(history):
-    """Save call history to JSON file."""
-    with open(HISTORY_FILE, 'w') as f:
-        json.dump(history[-MAX_HISTORY:], f)
+# History is now stored in Supabase (client-side) — server endpoints kept as no-op stubs
 
 
 # ===== CORS Middleware =====
@@ -270,24 +253,17 @@ async def handle_intent_switch(request):
 # ===== Call History Handlers =====
 
 async def handle_get_history(request):
-    """Return call history."""
-    return web.json_response(load_history())
+    """Return empty — history is now in Supabase."""
+    return web.json_response([])
 
 
 async def handle_add_history(request):
-    """Add a new call history entry."""
-    data = await request.json() if request.content_length else {}
-    if not data:
-        return web.json_response({'error': 'No data provided'}, status=400)
-    history = load_history()
-    history.append(data)
-    save_history(history)
-    return web.json_response({'success': True, 'count': len(history)})
+    """No-op — history is now saved to Supabase client-side."""
+    return web.json_response({'success': True, 'count': 0})
 
 
 async def handle_delete_history(request):
-    """Clear all call history."""
-    save_history([])
+    """No-op — history is now deleted from Supabase client-side."""
     return web.json_response({'success': True})
 
 

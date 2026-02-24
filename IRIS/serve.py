@@ -44,24 +44,7 @@ API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
-# Persistent call history file (shared with root serve.py)
-HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'iris_history.json')
-MAX_HISTORY = 50
-
-
-def load_history():
-    """Load call history from JSON file."""
-    try:
-        with open(HISTORY_FILE, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
-
-
-def save_history(history):
-    """Save call history to JSON file."""
-    with open(HISTORY_FILE, 'w') as f:
-        json.dump(history[-MAX_HISTORY:], f)
+# History is now stored in Supabase (client-side) — server endpoints kept as no-op stubs
 
 
 class IrisHandler(http.server.SimpleHTTPRequestHandler):
@@ -327,22 +310,15 @@ class IrisHandler(http.server.SimpleHTTPRequestHandler):
             self._json_error(500, f'TTS failed: {str(e)}')
 
     def _handle_get_history(self):
-        """Return call history."""
-        self._json_response(load_history())
+        """Return empty — history is now in Supabase."""
+        self._json_response([])
 
     def _handle_add_history(self, data):
-        """Add a new call history entry."""
-        if not data:
-            self._json_error(400, 'No data provided')
-            return
-        history = load_history()
-        history.append(data)
-        save_history(history)
-        self._json_response({'success': True, 'count': len(history)})
+        """No-op — history is now saved to Supabase client-side."""
+        self._json_response({'success': True, 'count': 0})
 
     def _handle_delete_history(self):
-        """Clear all call history."""
-        save_history([])
+        """No-op — history is now deleted from Supabase client-side."""
         self._json_response({'success': True})
 
     def _json_response(self, data, status=200):

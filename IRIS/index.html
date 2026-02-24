@@ -1840,11 +1840,17 @@
     html.dark .settings-panel select { background: #0F172A; border-color: #334155; color: #F1F5F9; }
     html.dark .settings-panel__label { color: #94A3B8; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     // Anti-flash: apply dark mode before paint
     if (localStorage.getItem('exl-theme') !== 'light') {
       document.documentElement.classList.add('dark');
     }
+    // Supabase client init
+    var _supabaseClient = window.supabase.createClient(
+      'https://fdwmywxvjlrqutohonln.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkd215d3h2amxycXV0b2hvbmxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDYyMTEsImV4cCI6MjA4NzUyMjIxMX0.TEKnJ8-_MDYSZM1UpVqtcqxBpzcXL4-s09WHZg6icBE'
+    );
   </script>
 </head>
 <body>
@@ -4311,17 +4317,28 @@ function switchSidebarTab(tab) {
   document.getElementById('panelHistory').classList.toggle('active', tab === 'history');
 }
 
-// ===== Call History =====
-function saveCallToHistory(record) {
+// ===== Call History (Supabase) =====
+async function saveCallToHistory(record) {
   console.log('[IVR] saveCallToHistory:', record.customerName, 'messages:', (record.messages || []).length);
+  const row = {
+    customer_name: record.customerName || 'Unknown',
+    customer_phone: record.customerPhone || '',
+    duration: record.duration || '--:--',
+    duration_seconds: record.durationSeconds || 0,
+    intent: record.intent || 'General',
+    actions_taken: record.actionsTaken || '',
+    outcome: record.outcome || 'contained',
+    messages: record.messages || [],
+  };
+  try {
+    const { data, error } = await _supabaseClient.from('iris_history').insert([row]).select();
+    if (!error && data && data.length) {
+      record.id = data[0].id;
+      record.timestamp = new Date(data[0].created_at).toLocaleString();
+    }
+  } catch (e) { console.warn('Supabase save failed:', e); }
   state.callHistory.unshift(record);
-  if (state.callHistory.length > 20) state.callHistory = state.callHistory.slice(0, 20);
-  localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
-  fetch('/api/history', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(record),
-  }).catch(() => {});
+  if (state.callHistory.length > 50) state.callHistory = state.callHistory.slice(0, 50);
   renderHistory();
 }
 
@@ -4333,7 +4350,7 @@ function renderHistory() {
     return;
   }
   container.innerHTML = '';
-  state.callHistory.forEach((h, idx) => {
+  state.callHistory.forEach((h) => {
     const card = document.createElement('div');
     card.className = 'history-card';
     card.onclick = () => {
@@ -4361,10 +4378,11 @@ function renderHistory() {
         '<div><strong>Phone:</strong> ' + escapeHtml(h.customerPhone || '') + '</div>' +
         '<div><strong>Actions:</strong> ' + escapeHtml(h.actionsTaken || 'None') + '</div>' +
       '</div>';
-    // Wire up delete button
+    // Wire up delete button — use Supabase id
+    const recordId = h.id;
     card.querySelector('.history-card__delete').addEventListener('click', (e) => {
       e.stopPropagation();
-      deleteHistoryItem(idx);
+      deleteHistoryItem(recordId);
     });
     container.appendChild(card);
   });
@@ -4414,49 +4432,48 @@ function loadHistoryToTranscript(h) {
   scrollToBottom();
 }
 
-function clearHistory() {
+async function clearHistory() {
   if (!confirm('Clear all call history?')) return;
-  state.callHistory = [];
-  localStorage.removeItem('iris-call-history');
-  fetch('/api/history', { method: 'DELETE' }).catch(() => {});
-  renderHistory();
-}
-
-function deleteHistoryItem(index) {
-  state.callHistory.splice(index, 1);
-  localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
-  renderHistory();
-}
-
-function loadHistory() {
-  let localData = [];
   try {
-    localData = JSON.parse(localStorage.getItem('iris-call-history') || '[]');
-    if (localData.length) {
-      state.callHistory = localData;
-      renderHistory();
+    await _supabaseClient.from('iris_history').delete().gte('created_at', '1970-01-01');
+  } catch (e) { console.warn('Supabase clear failed:', e); }
+  state.callHistory = [];
+  renderHistory();
+}
+
+async function deleteHistoryItem(id) {
+  if (id) {
+    try {
+      await _supabaseClient.from('iris_history').delete().eq('id', id);
+    } catch (e) { console.warn('Supabase delete failed:', e); }
+  }
+  state.callHistory = state.callHistory.filter(h => h.id !== id);
+  renderHistory();
+}
+
+async function loadHistory() {
+  try {
+    const { data, error } = await _supabaseClient
+      .from('iris_history')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (!error && data) {
+      state.callHistory = data.map(row => ({
+        id: row.id,
+        timestamp: new Date(row.created_at).toLocaleString(),
+        customerName: row.customer_name,
+        customerPhone: row.customer_phone,
+        duration: row.duration,
+        durationSeconds: row.duration_seconds,
+        intent: row.intent,
+        actionsTaken: row.actions_taken,
+        outcome: row.outcome,
+        messages: row.messages || [],
+      }));
     }
-  } catch(e) {}
-  fetch('/api/history').then(r => r.json()).then(data => {
-    if (Array.isArray(data) && data.length > 0) {
-      const serverData = data.reverse().slice(0, 20);
-      // Merge: prefer localStorage records (may have messages) over server records that lack them
-      const merged = serverData.map(s => {
-        const local = localData.find(l => l.timestamp === s.timestamp && l.customerPhone === s.customerPhone);
-        if (local && local.messages && (!s.messages || s.messages.length === 0)) return local;
-        return s;
-      });
-      // Also include any localStorage-only records not on server
-      localData.forEach(l => {
-        if (!merged.find(m => m.timestamp === l.timestamp && m.customerPhone === l.customerPhone)) {
-          merged.unshift(l);
-        }
-      });
-      state.callHistory = merged.slice(0, 20);
-      localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
-      renderHistory();
-    }
-  }).catch(() => {});
+  } catch (e) { console.warn('Supabase load failed:', e); }
+  renderHistory();
 }
 
 // ===== Scenario Selection =====
