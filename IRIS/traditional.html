@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EXL | Traditional IVR Experience</title>
+  <link rel="icon" href="../assets/exl-logo.svg" type="image/svg+xml">
+  <style>
+    /* ===== CSS Custom Properties ===== */
+    :root {
+      --orange: #fb4e0b;
+      --orange-light: #FEF0EB;
+      --navy: #0F172A;
+      --dark: #1F2937;
+      --gray-700: #374151;
+      --gray-600: #4B5563;
+      --gray-500: #6B7280;
+      --gray-400: #9CA3AF;
+      --gray-300: #D1D5DB;
+      --gray-200: #E5E7EB;
+      --gray-100: #F3F4F6;
+      --gray-50: #F9FAFB;
+      --white: #FFFFFF;
+      --blue: #1E40AF;
+      --blue-light: #DBEAFE;
+      --green: #059669;
+      --green-light: #ECFDF5;
+      --green-bright: #22C55E;
+      --yellow: #EAB308;
+      --sky: #3B82F6;
+      --red: #EF4444;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font);
+      font-size: 16px;
+      color: var(--navy);
+      background: var(--gray-50);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      height: 60px;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .header__brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header__brand-logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--orange);
+      letter-spacing: -0.5px;
+    }
+    .header__brand-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--gray-300);
+    }
+    .header__brand-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .header__home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: var(--gray-500);
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .header__home:hover {
+      background: var(--gray-100);
+      color: var(--navy);
+    }
+    .btn--back-ai {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 8px;
+      border: 1px solid var(--gray-200); background: white;
+      color: var(--gray-600); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      text-decoration: none;
+    }
+    .btn--back-ai:hover { border-color: var(--orange); color: var(--orange); }
+    .btn--back-ai svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ===== App Layout ===== */
+    .app {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      width: 300px;
+      background: var(--white);
+      border-right: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+    .sidebar__section {
+      padding: 20px;
+    }
+    .sidebar__section--profiles {
+      padding: 16px;
+    }
+    .sidebar__heading {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray-500);
+      margin-bottom: 12px;
+    }
+
+    /* ===== Profile Cards ===== */
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .profile-card:last-child { margin-bottom: 0; }
+    .profile-card:hover { border-color: var(--gray-300); background: var(--gray-50); }
+    .profile-card.active {
+      border-color: var(--orange);
+      border-left: 3px solid var(--orange);
+      background: var(--orange-light);
+    }
+    .profile-card__avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .profile-card__avatar--platinum { background: #EDE9FE; color: #5B21B6; }
+    .profile-card__avatar--gold { background: #FEF3C7; color: #92400E; }
+    .profile-card__avatar--silver { background: var(--gray-100); color: var(--gray-600); }
+    .profile-card__body { flex: 1; min-width: 0; }
+    .profile-card__name {
+      font-size: 13px; font-weight: 600; color: var(--navy);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .profile-card__meta {
+      font-size: 11px; color: var(--gray-500);
+    }
+
+    /* ===== Caller Info ===== */
+    .caller-info {
+      padding: 20px;
+      display: none;
+      border-top: 1px solid var(--gray-200);
+    }
+    .caller-info.visible { display: block; }
+    .caller-info__heading {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--gray-500); margin-bottom: 12px;
+    }
+    .caller-info__avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--orange-light); color: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; margin-bottom: 12px;
+    }
+    .caller-info__name {
+      font-size: 16px; font-weight: 600; color: var(--navy); margin-bottom: 2px;
+    }
+    .caller-info__tier {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 9999px;
+      background: #FEF3C7; color: #92400E; margin-bottom: 10px;
+    }
+    .caller-info__tier--gold { background: #FEF3C7; color: #92400E; }
+    .caller-info__tier--silver { background: var(--gray-100); color: var(--gray-600); }
+    .caller-info__tier--platinum { background: #EDE9FE; color: #5B21B6; }
+    .caller-info__detail {
+      font-size: 13px; color: var(--gray-500); margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .caller-info__detail svg { width: 14px; height: 14px; opacity: 0.6; }
+    .caller-info__accounts {
+      margin-top: 16px; border-top: 1px solid var(--gray-200); padding-top: 12px;
+    }
+    .caller-info__accounts-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--gray-400); margin-bottom: 8px;
+    }
+    .caller-info__account-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; font-size: 12px;
+    }
+    .caller-info__account-name {
+      color: var(--gray-600); display: flex; align-items: center; gap: 4px;
+    }
+    .caller-info__account-name .acct-num {
+      color: var(--gray-400); font-family: monospace; font-size: 11px;
+    }
+    .caller-info__account-val {
+      font-weight: 600; color: var(--navy);
+    }
+
+    /* ===== Scenario Picker ===== */
+    .scenario-picker {
+      padding: 0 16px 16px;
+      border-top: 1px solid var(--gray-200);
+      padding-top: 16px;
+    }
+    .compare-scenario-btn {
+      display: block; width: 100%; text-align: left;
+      padding: 8px 12px; margin-bottom: 6px;
+      background: var(--gray-50, #f8fafc); border: 1px solid var(--gray-200);
+      border-radius: 8px; cursor: pointer; font-size: 13px;
+      color: var(--navy); transition: all 0.15s;
+    }
+    .compare-scenario-btn:hover {
+      border-color: var(--orange); background: #fff7ed; color: var(--orange);
+    }
+    .compare-scenario-btn.active {
+      border-color: var(--orange); background: var(--orange); color: white;
+    }
+
+    /* ===== Main Area ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ===== Transcript Pane ===== */
+    .transcript-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .transcript-pane__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #f8f9fa;
+      color: #6b7280;
+      border-bottom: 1px solid var(--gray-200);
+      flex-shrink: 0;
+    }
+    .transcript-pane__timer {
+      margin-left: auto;
+      font-family: 'SF Mono', 'Cascadia Code', monospace;
+      font-size: 12px;
+      color: #9ca3af;
+      font-weight: 500;
+    }
+    .transcript {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ===== Empty State ===== */
+    .transcript__empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: var(--gray-400);
+      text-align: center;
+      gap: 12px;
+      padding: 40px;
+    }
+    .transcript__empty svg { width: 48px; height: 48px; opacity: 0.4; }
+    .transcript__empty-text { font-size: 15px; font-weight: 500; }
+    .transcript__empty-sub { font-size: 13px; color: var(--gray-400); }
+
+    /* ===== Keypad Panel ===== */
+    .keypad-panel {
+      width: 260px;
+      background: var(--white);
+      border-left: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .keypad-panel__header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      text-align: center;
+    }
+    .keypad-panel__title {
+      font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 4px;
+    }
+    .keypad-panel__hint {
+      font-size: 12px; color: var(--gray-500); min-height: 18px;
+      transition: color 0.2s;
+    }
+    .keypad-panel__hint--error {
+      color: var(--red); font-weight: 600;
+      animation: shake 0.3s ease-in-out;
+    }
+    .keypad-panel__hint--waiting {
+      color: var(--orange); font-weight: 500;
+    }
+
+    /* ===== Keypad Grid ===== */
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 20px 24px;
+    }
+    .keypad__key {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 2px solid var(--gray-200); background: var(--white);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s ease;
+      margin: 0 auto; user-select: none;
+      outline: none;
+    }
+    .keypad__key:hover:not(.keypad__key--disabled) {
+      border-color: var(--gray-400); background: var(--gray-50);
+    }
+    .keypad__key:active:not(.keypad__key--disabled) {
+      transform: scale(0.93); background: var(--gray-100);
+    }
+    .keypad__key--disabled {
+      opacity: 0.3; pointer-events: none;
+    }
+    .keypad__key--correct {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(251, 78, 11, 0.15);
+      animation: hintPulse 1.5s ease-in-out infinite;
+    }
+    .keypad__digit {
+      font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1;
+    }
+    .keypad__letters {
+      font-size: 9px; font-weight: 600; letter-spacing: 2px;
+      color: var(--gray-400); margin-top: 2px;
+    }
+
+    /* ===== Keypad Status Area ===== */
+    .keypad-panel__status {
+      padding: 16px 20px;
+      border-top: 1px solid var(--gray-200);
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+    .keypad-panel__timer-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--gray-400);
+    }
+    .keypad-panel__elapsed {
+      font-family: 'SF Mono', 'Cascadia Code', monospace;
+      font-size: 28px; font-weight: 700; color: var(--navy);
+    }
+    .btn--restart {
+      padding: 8px 20px; border-radius: 8px;
+      border: 1px solid var(--gray-200); background: var(--white);
+      color: var(--gray-600); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn--restart:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* ===== DTMF Message Styles ===== */
+    .dtmf-msg {
+      animation: messageIn 0.3s ease-out;
+      max-width: 90%;
+    }
+    .dtmf-msg--system {
+      align-self: center; text-align: center;
+      font-size: 12px; color: #9ca3af; font-style: italic;
+      padding: 4px 12px;
+    }
+    .dtmf-msg--ivr {
+      align-self: flex-start;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      border-radius: 12px 12px 12px 2px;
+      padding: 12px 16px;
+      font-family: 'SF Mono', 'Cascadia Code', 'Courier New', monospace;
+      font-size: 13px; color: #475569; line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .dtmf-msg--ivr .dtmf-ivr-icon {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; color: #94a3b8; margin-bottom: 6px; font-family: inherit;
+    }
+    .dtmf-msg--keypress {
+      align-self: flex-end;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .dtmf-key-badge {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+      border: 2px solid #94a3b8;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'SF Mono', monospace; font-size: 16px; font-weight: 700;
+      color: #334155; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .dtmf-key-label {
+      font-size: 12px; color: #64748b; font-style: italic;
+    }
+    .dtmf-msg--hold {
+      align-self: center; text-align: center;
+      background: #fef3c7; border: 1px solid #fde68a;
+      border-radius: 12px; padding: 16px 24px;
+    }
+    .dtmf-hold-icon {
+      font-size: 20px; animation: holdPulse 1.5s ease-in-out infinite;
+    }
+    .dtmf-hold-text {
+      font-size: 14px; font-weight: 600; color: #92400e; margin-top: 4px;
+    }
+    .dtmf-hold-subtext {
+      font-size: 12px; color: #b45309; margin-top: 2px; font-style: italic;
+    }
+    .dtmf-hold-timer {
+      font-family: 'SF Mono', monospace; font-size: 16px;
+      color: #92400e; margin-top: 6px; font-weight: 600;
+    }
+    .dtmf-msg--agent {
+      align-self: flex-start;
+      background: #e8edf2; border-radius: 12px 12px 12px 2px;
+      padding: 10px 14px; font-size: 13px; color: #334155; line-height: 1.5;
+      max-width: 85%;
+    }
+    .dtmf-msg--agent .dtmf-agent-label {
+      font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px;
+    }
+    .dtmf-msg--customer {
+      align-self: flex-end;
+      background: #dbeafe; border-radius: 12px 12px 2px 12px;
+      padding: 10px 14px; font-size: 13px; color: #1e3a5f; line-height: 1.5;
+      max-width: 85%;
+    }
+    .dtmf-msg--transfer {
+      align-self: center; text-align: center;
+      font-size: 12px; color: #6b7280; font-style: italic;
+      padding: 8px 16px; background: #f3f4f6;
+      border-radius: 20px; display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ===== Summary Overlay ===== */
+    .summary-overlay {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 20;
+      align-items: center;
+      justify-content: center;
+    }
+    .summary-overlay.visible { display: flex; }
+    .summary-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      animation: messageIn 0.3s ease-out;
+    }
+    .summary-card__title {
+      font-size: 18px; font-weight: 700; color: var(--navy);
+      margin-bottom: 20px; text-align: center;
+    }
+    .summary-card__metrics {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 24px;
+    }
+    .summary-card__metric {
+      text-align: center; padding: 12px;
+      background: var(--gray-50); border-radius: 8px;
+    }
+    .summary-card__metric-value {
+      font-size: 22px; font-weight: 700;
+      font-family: 'SF Mono', monospace; color: var(--navy);
+    }
+    .summary-card__metric-label {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--gray-500); margin-top: 4px;
+    }
+    .summary-card__actions {
+      display: flex; gap: 12px; justify-content: center;
+    }
+    .summary-card__btn {
+      padding: 10px 24px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; border: 1px solid var(--gray-200);
+      background: var(--white); color: var(--gray-600);
+    }
+    .summary-card__btn:hover { border-color: var(--gray-400); }
+    .summary-card__btn--primary {
+      background: var(--orange); color: white; border-color: var(--orange);
+    }
+    .summary-card__btn--primary:hover { background: #e04400; }
+
+    /* ===== Animations ===== */
+    @keyframes messageIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes holdPulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes hintPulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(251, 78, 11, 0.15); }
+      50% { box-shadow: 0 0 0 6px rgba(251, 78, 11, 0.08); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* ===== Scrollbar ===== */
+    .transcript::-webkit-scrollbar { width: 6px; }
+    .transcript::-webkit-scrollbar-track { background: transparent; }
+    .transcript::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+    .transcript::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+
+    /* ===== Theme Toggle ===== */
+    .theme-toggle {
+      width: 36px; height: 36px; border-radius: 8px;
+      border: none; background: transparent;
+      color: var(--gray-500); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover {
+      background: var(--gray-100); color: var(--navy);
+    }
+
+    /* ===== Dark Mode ===== */
+    html.dark body { background: #0F172A; color: #E2E8F0; }
+    html.dark .header { background: #1E293B; border-bottom-color: #334155; }
+    html.dark .header__brand-name { color: #F1F5F9; }
+    html.dark .header__home { color: #94A3B8; }
+    html.dark .header__home:hover { background: #334155; color: #F1F5F9; }
+    html.dark .btn--back-ai { background: #1E293B; color: #94A3B8; border-color: #334155; }
+    html.dark .btn--back-ai:hover { border-color: var(--orange); color: var(--orange); }
+    html.dark .sidebar { background: #1E293B; border-right-color: #334155; }
+    html.dark .sidebar__heading { color: #94A3B8; }
+    html.dark .profile-card { border-color: #334155; }
+    html.dark .profile-card:hover { border-color: #475569; background: #1E293B; }
+    html.dark .profile-card.active { border-color: var(--orange); background: rgba(255, 91, 53, 0.08); }
+    html.dark .profile-card__name { color: #F1F5F9; }
+    html.dark .profile-card__meta { color: #94A3B8; }
+    html.dark .caller-info { border-top-color: #334155; }
+    html.dark .caller-info__heading { color: #94A3B8; }
+    html.dark .caller-info__name { color: #F1F5F9; }
+    html.dark .caller-info__detail { color: #94A3B8; }
+    html.dark .caller-info__accounts { border-top-color: #334155; }
+    html.dark .caller-info__account-name { color: #94A3B8; }
+    html.dark .caller-info__account-val { color: #F1F5F9; }
+    html.dark .scenario-picker { border-top-color: #334155; }
+    html.dark .compare-scenario-btn { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    html.dark .compare-scenario-btn:hover { border-color: var(--orange); background: rgba(251,78,11,0.1); color: var(--orange); }
+    html.dark .compare-scenario-btn.active { background: var(--orange); color: white; border-color: var(--orange); }
+    html.dark .transcript-pane__header { background: #1a1f2e; color: #6b7280; border-bottom-color: #334155; }
+    html.dark .transcript-pane__timer { color: #64748b; }
+    html.dark .transcript { background: #0F172A; }
+    html.dark .transcript__empty { color: #64748B; }
+    html.dark .transcript::-webkit-scrollbar-thumb { background: #475569; }
+    html.dark .transcript::-webkit-scrollbar-thumb:hover { background: #64748B; }
+    html.dark .sidebar::-webkit-scrollbar-thumb { background: #475569; }
+    html.dark .keypad-panel { background: #1E293B; border-left-color: #334155; }
+    html.dark .keypad-panel__header { border-bottom-color: #334155; }
+    html.dark .keypad-panel__title { color: #F1F5F9; }
+    html.dark .keypad-panel__hint { color: #94A3B8; }
+    html.dark .keypad-panel__elapsed { color: #F1F5F9; }
+    html.dark .keypad__key { border-color: #334155; background: #1E293B; }
+    html.dark .keypad__key:hover:not(.keypad__key--disabled) { border-color: #475569; background: #0F172A; }
+    html.dark .keypad__digit { color: #F1F5F9; }
+    html.dark .keypad__letters { color: #64748B; }
+    html.dark .keypad__key--correct { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(251, 78, 11, 0.2); }
+    html.dark .keypad-panel__status { border-top-color: #334155; }
+    html.dark .keypad-panel__timer-label { color: #64748b; }
+    html.dark .btn--restart { background: #1E293B; color: #94A3B8; border-color: #334155; }
+    html.dark .btn--restart:hover { border-color: var(--orange); color: var(--orange); }
+    html.dark .theme-toggle { color: #94A3B8; }
+    html.dark .theme-toggle:hover { background: #334155; color: #F1F5F9; }
+    html.dark .dtmf-msg--system { color: #64748b; }
+    html.dark .dtmf-msg--ivr { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    html.dark .dtmf-msg--ivr .dtmf-ivr-icon { color: #64748b; }
+    html.dark .dtmf-key-badge { background: linear-gradient(135deg, #334155, #475569); border-color: #64748b; color: #e2e8f0; }
+    html.dark .dtmf-key-label { color: #94a3b8; }
+    html.dark .dtmf-msg--hold { background: rgba(254, 243, 199, 0.08); border-color: rgba(253, 230, 138, 0.15); }
+    html.dark .dtmf-hold-text { color: #fbbf24; }
+    html.dark .dtmf-hold-subtext { color: #f59e0b; }
+    html.dark .dtmf-hold-timer { color: #fbbf24; }
+    html.dark .dtmf-msg--agent { background: #1e293b; color: #cbd5e1; }
+    html.dark .dtmf-msg--agent .dtmf-agent-label { color: #94a3b8; }
+    html.dark .dtmf-msg--customer { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+    html.dark .dtmf-msg--transfer { background: #1e293b; color: #64748b; }
+    html.dark .summary-overlay { background: rgba(15, 23, 42, 0.8); }
+    html.dark .summary-card { background: #1E293B; }
+    html.dark .summary-card__title { color: #F1F5F9; }
+    html.dark .summary-card__metric { background: #0F172A; }
+    html.dark .summary-card__metric-value { color: #F1F5F9; }
+    html.dark .summary-card__metric-label { color: #94A3B8; }
+    html.dark .summary-card__btn { background: #0F172A; color: #94A3B8; border-color: #334155; }
+    html.dark .summary-card__btn:hover { border-color: #475569; }
+    html.dark .summary-card__btn--primary { background: var(--orange); color: white; border-color: var(--orange); }
+  </style>
+  <script>
+    // Anti-flash: apply dark mode before paint
+    if (localStorage.getItem('exl-theme') !== 'light') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header__brand">
+      <img src="../assets/exl-logo.svg" alt="EXL" class="header__brand-logo" style="height:24px" />
+      <span class="header__brand-divider"></span>
+      <span class="header__brand-name">Traditional IVR Experience</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="index.html" class="btn--back-ai" title="Back to AI IVR">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7v4a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+        AI IVR
+      </a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+        <svg id="sunIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>
+        <svg id="moonIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <a href="../index.html" class="header__home" title="Back to Home">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- App Layout -->
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar__section sidebar__section--profiles">
+        <div class="sidebar__heading">Customer Profiles</div>
+        <div id="profileList"></div>
+      </div>
+
+      <div class="caller-info" id="callerInfo">
+        <div class="caller-info__heading" id="callerHeading">Caller Information</div>
+        <div class="caller-info__avatar" id="callerAvatar"></div>
+        <div class="caller-info__name" id="callerName"></div>
+        <div class="caller-info__tier" id="callerTier"></div>
+        <div class="caller-info__detail" id="callerPhone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__detail" id="callerEmail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__detail" id="callerMember">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__detail" id="callerAge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__detail" id="callerEthnicity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          <span></span>
+        </div>
+        <div class="caller-info__accounts" id="callerAccounts"></div>
+      </div>
+
+      <div class="scenario-picker" id="scenarioPicker">
+        <div class="sidebar__heading">Select a Scenario</div>
+        <div id="scenarioList"></div>
+      </div>
+    </aside>
+
+    <!-- Main Area -->
+    <main class="main">
+      <!-- Transcript Pane -->
+      <div class="transcript-pane">
+        <div class="transcript-pane__header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="2"/>
+            <path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M12 18h.01"/>
+          </svg>
+          Traditional IVR (DTMF)
+          <span class="transcript-pane__timer" id="callTimer">--:--</span>
+        </div>
+        <div class="transcript" id="transcript">
+          <div class="transcript__empty" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+            <div class="transcript__empty-text">Interactive Phone Tree</div>
+            <div class="transcript__empty-sub">Select a customer profile and scenario to start navigating the IVR</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keypad Panel -->
+      <div class="keypad-panel" id="keypadPanel">
+        <div class="keypad-panel__header">
+          <div class="keypad-panel__title">Phone Keypad</div>
+          <div class="keypad-panel__hint" id="keypadHint">Select a scenario to begin</div>
+        </div>
+        <div class="keypad" id="keypad"></div>
+        <div class="keypad-panel__status">
+          <div class="keypad-panel__timer-label">Call Duration</div>
+          <div class="keypad-panel__elapsed" id="elapsedTime">--:--</div>
+          <button class="btn--restart" id="btnRestart" onclick="restartScenario()" style="display:none;">Restart Scenario</button>
+        </div>
+      </div>
+
+      <!-- Summary Overlay -->
+      <div class="summary-overlay" id="summaryOverlay">
+        <div class="summary-card" id="summaryCard"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+// ===== Data =====
+const CUSTOMER_DB = {
+  '+1-617-555-0142': {
+    name: 'Varun Khator', initials: 'VK',
+    tier: 'Platinum', tierClass: 'platinum',
+    phone: '+1-617-555-0142',
+    email: 'varun.khator@gmail.com',
+    dob: 'March 15, 1988',
+    age: 37, gender: 'Male', ethnicity: 'South Asian',
+    address: '142 Oak Street, Apt 7B, Boston, MA 02108',
+    memberSince: 'June 2018',
+    jointHolder: 'Priya Khator',
+    creditScore: 695,
+    checking: { last4: '4829', balance: 8342.15, type: 'Platinum Checking' },
+    savings: { last4: '9088', balance: 45200.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '5531', type: 'Visa Platinum', limit: 25000, balance: 6200.00 },
+    autoLoan: { last4: '7712', balance: 14230.67, vehicle: '2023 Honda Accord' },
+    mortgage: { last4: '4401', balance: 287000, rate: '5.8%', address: '142 Oak Street, Boston, MA' },
+    accounts: {
+      'block-card': '5531', 'loan-balance': '7712', 'dispute': '5531',
+      'restructure': '4829', 'reset-password': '5531', 'activate-card': '5531',
+      'transfer-funds': '4829', 'credit-limit': '5531', 'mortgage-rate': '4401',
+      'wire-transfer': '4829',
+    }
+  },
+  '+1-404-555-0278': {
+    name: 'Marcus Thompson', initials: 'MT',
+    tier: 'Gold', tierClass: 'gold',
+    phone: '+1-404-555-0278',
+    email: 'marcus.thompson@outlook.com',
+    dob: 'November 8, 1962',
+    age: 63, gender: 'Male', ethnicity: 'African American',
+    address: '315 Peachtree Lane, Suite 2A, Atlanta, GA 30301',
+    memberSince: 'March 2015',
+    jointHolder: 'Denise Thompson',
+    creditScore: 748,
+    checking: { last4: '6103', balance: 12475.30, type: 'Gold Checking' },
+    savings: { last4: '8254', balance: 68900.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '3347', type: 'Visa Gold', limit: 20000, balance: 4850.00 },
+    autoLoan: { last4: '9981', balance: 18442.33, vehicle: '2024 Toyota Camry' },
+    mortgage: { last4: '2216', balance: 195000, rate: '5.5%', address: '315 Peachtree Lane, Atlanta, GA' },
+    accounts: {
+      'block-card': '3347', 'loan-balance': '9981', 'dispute': '3347',
+      'restructure': '6103', 'reset-password': '3347', 'activate-card': '3347',
+      'transfer-funds': '6103', 'credit-limit': '3347', 'mortgage-rate': '2216',
+      'wire-transfer': '6103',
+    }
+  },
+  '+1-305-555-0391': {
+    name: 'Sofia Ramirez', initials: 'SR',
+    tier: 'Silver', tierClass: 'silver',
+    phone: '+1-305-555-0391',
+    email: 'sofia.ramirez@yahoo.com',
+    dob: 'July 22, 1996',
+    age: 29, gender: 'Female', ethnicity: 'Hispanic/Latina',
+    address: '88 Coral Way, Apt 12C, Miami, FL 33145',
+    memberSince: 'January 2021',
+    jointHolder: null,
+    creditScore: 782,
+    checking: { last4: '7741', balance: 3215.88, type: 'Silver Checking' },
+    savings: { last4: '2059', balance: 12350.00, type: 'Standard Savings' },
+    creditCard: { last4: '8862', type: 'Visa Silver', limit: 8000, balance: 3400.00 },
+    autoLoan: { last4: '1537', balance: 22100.45, vehicle: '2025 Hyundai Tucson' },
+    mortgage: { last4: '6694', balance: 342000, rate: '6.2%', address: '88 Coral Way, Miami, FL' },
+    accounts: {
+      'block-card': '8862', 'loan-balance': '1537', 'dispute': '8862',
+      'restructure': '7741', 'reset-password': '8862', 'activate-card': '8862',
+      'transfer-funds': '7741', 'credit-limit': '8862', 'mortgage-rate': '6694',
+      'wire-transfer': '7741',
+    }
+  },
+  '+1-415-555-0534': {
+    name: 'Emily Chen', initials: 'EC',
+    tier: 'Platinum', tierClass: 'platinum',
+    phone: '+1-415-555-0534',
+    email: 'emily.chen@gmail.com',
+    dob: 'February 3, 1980',
+    age: 46, gender: 'Female', ethnicity: 'East Asian',
+    address: '2201 Pacific Heights Blvd, San Francisco, CA 94115',
+    memberSince: 'September 2016',
+    jointHolder: 'David Chen',
+    creditScore: 812,
+    checking: { last4: '3285', balance: 24890.50, type: 'Platinum Checking' },
+    savings: { last4: '7463', balance: 128500.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '4178', type: 'Visa Platinum', limit: 35000, balance: 8750.00 },
+    autoLoan: { last4: '5624', balance: 9810.22, vehicle: '2022 Tesla Model 3' },
+    mortgage: { last4: '8937', balance: 625000, rate: '5.4%', address: '2201 Pacific Heights Blvd, San Francisco, CA' },
+    accounts: {
+      'block-card': '4178', 'loan-balance': '5624', 'dispute': '4178',
+      'restructure': '3285', 'reset-password': '4178', 'activate-card': '4178',
+      'transfer-funds': '3285', 'credit-limit': '4178', 'mortgage-rate': '8937',
+      'wire-transfer': '3285',
+    }
+  },
+  '+1-312-555-0687': {
+    name: "James O'Brien", initials: 'JO',
+    tier: 'Gold', tierClass: 'gold',
+    phone: '+1-312-555-0687',
+    email: 'james.obrien@protonmail.com',
+    dob: 'September 14, 1991',
+    age: 34, gender: 'Male', ethnicity: 'Caucasian',
+    address: '450 North Michigan Ave, Unit 18D, Chicago, IL 60611',
+    memberSince: 'August 2019',
+    jointHolder: null,
+    creditScore: 731,
+    checking: { last4: '5498', balance: 6780.25, type: 'Gold Checking' },
+    savings: { last4: '1376', balance: 31200.00, type: 'High-Yield Savings' },
+    creditCard: { last4: '2643', type: 'Visa Gold', limit: 18000, balance: 5100.00 },
+    autoLoan: { last4: '8815', balance: 11350.90, vehicle: '2023 Ford Bronco' },
+    mortgage: { last4: '3072', balance: 410000, rate: '5.9%', address: '450 North Michigan Ave, Chicago, IL' },
+    accounts: {
+      'block-card': '2643', 'loan-balance': '8815', 'dispute': '2643',
+      'restructure': '5498', 'reset-password': '2643', 'activate-card': '2643',
+      'transfer-funds': '5498', 'credit-limit': '2643', 'mortgage-rate': '3072',
+      'wire-transfer': '5498',
+    }
+  },
+};
+
+const CUSTOMER_PROFILES = [
+  { phone: '+1-617-555-0142', name: 'Varun Khator', initials: 'VK', tier: 'Platinum', tierClass: 'platinum', location: 'Boston, MA' },
+  { phone: '+1-404-555-0278', name: 'Marcus Thompson', initials: 'MT', tier: 'Gold', tierClass: 'gold', location: 'Atlanta, GA' },
+  { phone: '+1-305-555-0391', name: 'Sofia Ramirez', initials: 'SR', tier: 'Silver', tierClass: 'silver', location: 'Miami, FL' },
+  { phone: '+1-415-555-0534', name: 'Emily Chen', initials: 'EC', tier: 'Platinum', tierClass: 'platinum', location: 'San Francisco, CA' },
+  { phone: '+1-312-555-0687', name: "James O'Brien", initials: 'JO', tier: 'Gold', tierClass: 'gold', location: 'Chicago, IL' },
+];
+
+const SCENARIO_TITLES = {
+  'block-card':     { title: 'Block My Credit Card', flow: 'contained' },
+  'loan-balance':   { title: 'Check Loan Balance', flow: 'contained' },
+  'dispute':        { title: 'Dispute a Transaction', flow: 'escalated' },
+  'restructure':    { title: 'Account Restructuring', flow: 'escalated' },
+  'reset-password': { title: 'Reset Online Banking Password', flow: 'contained' },
+  'activate-card':  { title: 'Activate New Card', flow: 'contained' },
+  'transfer-funds': { title: 'Transfer Between Accounts', flow: 'contained' },
+  'credit-limit':   { title: 'Credit Limit Increase', flow: 'escalated' },
+  'mortgage-rate':  { title: 'Mortgage Rate Renegotiation', flow: 'escalated' },
+  'wire-transfer':  { title: 'International Wire Transfer', flow: 'escalated' },
+};
+
+const DTMF_SCENARIOS = {
+  'block-card': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'Cards and Payments', delay: 1500 },
+      { type: 'ivr-menu', text: 'Cards Menu:\nPress 1 for Balance and Transactions\nPress 2 for Lost or Stolen Card\nPress 3 for Billing Disputes\nPress 4 for Other Card Services', delay: 5000 },
+      { type: 'keypress', digit: '2', label: 'Lost or Stolen Card', delay: 1200 },
+      { type: 'ivr-menu', text: 'Your card ending in 5531 has been blocked. A replacement card will be mailed within 7 to 10 business days. If you need expedited delivery, press 1. Otherwise, press 2 to confirm.', delay: 6000 },
+      { type: 'keypress', digit: '2', label: 'Confirm standard delivery', delay: 1200 },
+      { type: 'ivr-menu', text: 'Your request has been processed. Is there anything else we can help you with? Press 1 for yes, press 2 for no.', delay: 4000 },
+      { type: 'keypress', digit: '2', label: 'No, done', delay: 1000 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '0:52', steps: 11, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+  'loan-balance': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '3', label: 'Loans', delay: 1500 },
+      { type: 'ivr-menu', text: 'Loans Menu:\nPress 1 for Personal Loans\nPress 2 for Home Loans\nPress 3 for Auto Loans\nPress 4 for Loan Payments', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Auto Loans', delay: 1200 },
+      { type: 'ivr-menu', text: 'Your auto loan account ending in 7712.\nCurrent balance: $14,230 dollars and 67 cents.\nMonthly payment: $487 dollars and 23 cents.\nNext payment due: March 15th.\nTo hear prepayment options, press 1. To repeat, press 2. To return to the main menu, press 3.', delay: 7000 },
+      { type: 'keypress', digit: '3', label: 'Return to main menu', delay: 1200 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '0:58', steps: 10, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+  'dispute': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'Cards and Payments', delay: 1500 },
+      { type: 'ivr-menu', text: 'Cards Menu:\nPress 1 for Balance and Transactions\nPress 2 for Lost or Stolen Card\nPress 3 for Billing Disputes\nPress 4 for Other Card Services', delay: 5000 },
+      { type: 'keypress', digit: '3', label: 'Billing Disputes', delay: 1200 },
+      { type: 'ivr-menu', text: 'For transaction disputes, you will need to speak with a specialist. Please hold while we connect you. Your estimated wait time is... 12 minutes.', delay: 4500 },
+      { type: 'hold', text: 'On Hold \u2014 Waiting for Disputes Department', holdSecs: 45, subtext: 'Your call is important to us. Please continue to hold.', delay: 0 },
+      { type: 'transfer', text: 'Transferring to Disputes Specialist...', delay: 2500 },
+      { type: 'agent', text: 'Disputes Department, this is Karen. How can I help you today?', label: 'Agent Karen', delay: 2500 },
+      { type: 'customer', text: "Hi, I have two charges I don't recognize on my credit card statement.", delay: 2000 },
+      { type: 'agent', text: "I can help with that. Can I have your full name and the last four digits of your card?", label: 'Agent Karen', delay: 2500 },
+      { type: 'customer', text: "Varun Khator, card ending in 5531.", delay: 1800 },
+      { type: 'agent', text: "Thank you. And which transactions are you disputing? I'll need the date, merchant name, and amount for each one.", label: 'Agent Karen', delay: 3000 },
+      { type: 'customer', text: "There's a charge from TechVault for $847.53 on January 15th, and another from QuickFuel for $234 on January 18th.", delay: 2500 },
+      { type: 'agent', text: "Got it. I've filed a provisional dispute for both transactions. You'll receive dispute forms in the mail within 5 business days. Please sign and return them. The investigation takes 10 business days.", label: 'Agent Karen', delay: 3500 },
+      { type: 'customer', text: "Ten business days? And I have to mail forms back? Can't this be done online?", delay: 2000 },
+      { type: 'agent', text: "I understand the frustration. Unfortunately, our dispute process requires signed documentation. You'll receive provisional credit within 3 business days while we investigate.", label: 'Agent Karen', delay: 3000 },
+      { type: 'system', text: 'Call ended \u2014 Resolved by Agent Karen', delay: 500 },
+    ],
+    metrics: { totalTime: '3:15', steps: 21, holdTime: '1:30', resolution: 'Agent handled', effort: 'High' },
+  },
+  'restructure': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '1', label: 'Account Information', delay: 1500 },
+      { type: 'ivr-menu', text: 'Account Menu:\nPress 1 for Balance Inquiry\nPress 2 for Recent Transactions\nPress 3 for Account Services\nPress 4 to return to Main Menu', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Account Services', delay: 1200 },
+      { type: 'ivr-menu', text: 'Account Services:\nPress 1 for Address Change\nPress 2 for Statement Requests\nPress 3 for Account Closure\nPress 0 to speak with a representative', delay: 4500 },
+      { type: 'keypress', digit: '0', label: 'Speak with representative', delay: 1200 },
+      { type: 'ivr-menu', text: 'All of our representatives are currently assisting other callers. Your estimated wait time is... 18 minutes. Please remain on the line.', delay: 4000 },
+      { type: 'hold', text: 'On Hold \u2014 Waiting for Account Services', holdSecs: 60, subtext: 'Did you know you can manage your accounts online at exlbank.com?', delay: 0 },
+      { type: 'agent', text: 'Thank you for holding. This is David from Account Services. How can I assist you?', label: 'Agent David', delay: 2500 },
+      { type: 'customer', text: "Hi David. I'm going through a divorce and need to separate our joint checking and savings accounts.", delay: 2500 },
+      { type: 'agent', text: "I'm sorry to hear that. Joint account restructuring requires some documentation. I'll need to transfer you to our specialized account management team who handles these cases.", label: 'Agent David', delay: 3000 },
+      { type: 'transfer', text: 'Transferring to Account Management...', delay: 2000 },
+      { type: 'hold', text: 'On Hold \u2014 Waiting for Account Management', holdSecs: 35, subtext: 'Your call is important to us. A specialist will be with you shortly.', delay: 0 },
+      { type: 'agent', text: "Account Management, this is Priya. I understand you need help with joint account restructuring?", label: 'Specialist Priya', delay: 2500 },
+      { type: 'customer', text: "Yes, I need to split our joint checking and savings into individual accounts.", delay: 2000 },
+      { type: 'agent', text: "I can help with that. However, this process requires both account holders to be present on the call, or you'll need to visit a branch with proper legal documentation \u2014 a signed separation agreement or court order. We can start the process today if you can schedule a branch appointment.", label: 'Specialist Priya', delay: 4000 },
+      { type: 'customer', text: "So I can't do this over the phone today?", delay: 1500 },
+      { type: 'agent', text: "Unfortunately not completely. I can note your account and schedule a priority appointment at your nearest branch. The restructuring typically takes 3\u20135 business days once all paperwork is submitted.", label: 'Specialist Priya', delay: 3500 },
+      { type: 'system', text: 'Call ended \u2014 Resolved by Specialist Priya', delay: 500 },
+    ],
+    metrics: { totalTime: '3:45', steps: 23, holdTime: '2:05', resolution: 'Agent handled', effort: 'Very High' },
+  },
+  'reset-password': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '4', label: 'Other Services', delay: 1500 },
+      { type: 'ivr-menu', text: 'Other Services:\nPress 1 for Online Banking Support\nPress 2 for Branch Locations\nPress 3 for Wire Transfers\nPress 4 for General Inquiries', delay: 4500 },
+      { type: 'keypress', digit: '1', label: 'Online Banking Support', delay: 1200 },
+      { type: 'ivr-menu', text: 'Online Banking:\nPress 1 for Password Reset\nPress 2 for Username Recovery\nPress 3 for Technical Issues\nPress 4 for Mobile App Support', delay: 4500 },
+      { type: 'keypress', digit: '1', label: 'Password Reset', delay: 1200 },
+      { type: 'ivr-menu', text: 'We will send a temporary password to your registered email address. Please allow up to 15 minutes. Press 1 to confirm, press 2 to send to a different email.', delay: 4500 },
+      { type: 'keypress', digit: '1', label: 'Confirm \u2014 send to registered email', delay: 1200 },
+      { type: 'system', text: 'Temporary password sent', delay: 1500 },
+      { type: 'ivr-menu', text: 'A temporary password has been sent. You will be required to change it upon first login. Is there anything else? Press 1 for yes, press 2 for no.', delay: 4500 },
+      { type: 'keypress', digit: '2', label: 'No, done', delay: 1000 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '1:07', steps: 16, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+  'activate-card': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank card activation line...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank Card Activation. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Your new Visa card ending in 5531 has been activated. You may begin using it immediately. Would you like to set up a PIN? Press 1 for yes, press 2 for no.', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'No PIN setup', delay: 1200 },
+      { type: 'ivr-menu', text: 'Thank you. Your card is now active. Goodbye.', delay: 2500 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '0:38', steps: 8, holdTime: '0:00', resolution: 'Automated', effort: 'Low' },
+  },
+  'transfer-funds': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '1', label: 'Account Information', delay: 1500 },
+      { type: 'ivr-menu', text: 'Account Menu:\nPress 1 for Balance Inquiry\nPress 2 for Recent Transactions\nPress 3 for Account Services\nPress 4 to return to Main Menu', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Account Services', delay: 1200 },
+      { type: 'ivr-menu', text: 'Account Services:\nPress 1 for Address Change\nPress 2 for Transfers\nPress 3 for Account Closure\nPress 0 to speak with a representative', delay: 4500 },
+      { type: 'keypress', digit: '2', label: 'Transfers', delay: 1200 },
+      { type: 'ivr-menu', text: 'Transfer from Checking to Savings.\nEnter the transfer amount in dollars and cents. For example, for $2,500.00 enter 250000 followed by the pound sign.', delay: 4500 },
+      { type: 'keypress', digit: '250000#', label: '$2,500.00', delay: 2000 },
+      { type: 'system', text: 'Processing transfer...', delay: 2500 },
+      { type: 'ivr-menu', text: 'Transfer of $2,500 from Checking to Savings has been completed. Confirmation number: TXN-2026-88341. Is there anything else? Press 1 for yes, press 2 for no.', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'No, done', delay: 1000 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '1:22', steps: 16, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+  'credit-limit': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'Cards and Payments', delay: 1500 },
+      { type: 'ivr-menu', text: 'Cards Menu:\nPress 1 for Balance and Transactions\nPress 2 for Lost or Stolen Card\nPress 3 for Billing Disputes\nPress 4 for Other Card Services', delay: 5000 },
+      { type: 'keypress', digit: '4', label: 'Other Card Services', delay: 1200 },
+      { type: 'ivr-menu', text: 'Other Card Services:\nPress 1 for Rewards Points\nPress 2 for Card Replacement\nPress 3 for Account Upgrade\nPress 0 to speak with a representative', delay: 4500 },
+      { type: 'ivr-menu', text: 'Sorry, I didn\'t get that. Press 1 for Rewards Points, Press 2 for Card Replacement, Press 3 for Account Upgrade, Press 0 for a representative.', delay: 4500 },
+      { type: 'keypress', digit: '0', label: 'Speak with representative', delay: 1200 },
+      { type: 'ivr-menu', text: 'All representatives are currently busy. Your estimated wait time is... 15 minutes. Please hold.', delay: 3500 },
+      { type: 'hold', text: 'On Hold \u2014 Waiting for Card Services', holdSecs: 50, subtext: 'Thank you for your patience. Your call will be answered in the order it was received.', delay: 0 },
+      { type: 'agent', text: 'Thank you for calling EXL Bank, this is Michael. How can I help?', label: 'Agent Michael', delay: 2500 },
+      { type: 'customer', text: "Hi Michael, I'd like to request a credit limit increase on my Visa card.", delay: 2000 },
+      { type: 'agent', text: "I'd be happy to help with that. Let me pull up your account. Can you verify your full name and date of birth?", label: 'Agent Michael', delay: 2500 },
+      { type: 'customer', text: "Varun Khator, March 15, 1988.", delay: 1500 },
+      { type: 'agent', text: "Thank you, Varun. I can see your current limit is $25,000. Based on your account history, I'll submit a request for an increase to $35,000. However, this requires a credit review which takes 3\u20135 business days. You'll receive the decision by mail.", label: 'Agent Michael', delay: 4000 },
+      { type: 'customer', text: "Can't you tell me right now if I'm approved?", delay: 1500 },
+      { type: 'agent', text: "Unfortunately, credit limit increases over $5,000 require underwriting review. I've submitted the request and it will be prioritized. Is there anything else?", label: 'Agent Michael', delay: 3000 },
+      { type: 'system', text: 'Call ended \u2014 Resolved by Agent Michael', delay: 500 },
+    ],
+    metrics: { totalTime: '3:10', steps: 21, holdTime: '1:40', resolution: 'Agent handled', effort: 'High' },
+  },
+  'mortgage-rate': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '3', label: 'Loans', delay: 1500 },
+      { type: 'ivr-menu', text: 'Loans Menu:\nPress 1 for Personal Loans\nPress 2 for Home Loans\nPress 3 for Auto Loans\nPress 4 for Loan Payments', delay: 4500 },
+      { type: 'keypress', digit: '2', label: 'Home Loans', delay: 1200 },
+      { type: 'ivr-menu', text: 'Home Loans:\nPress 1 for New Mortgage Application\nPress 2 for Existing Mortgage Services\nPress 3 for Refinancing\nPress 0 to speak with a specialist', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Refinancing', delay: 1200 },
+      { type: 'ivr-menu', text: 'For refinancing and rate renegotiation, you will need to speak with a mortgage specialist. Please hold while we transfer you. Estimated wait time is... 22 minutes.', delay: 5000 },
+      { type: 'hold', text: 'On Hold \u2014 Waiting for Mortgage Department', holdSecs: 75, subtext: 'All mortgage specialists are currently assisting other clients. We appreciate your patience.', delay: 0 },
+      { type: 'transfer', text: 'Transferring to Mortgage Specialist...', delay: 2500 },
+      { type: 'hold', text: 'On Hold \u2014 Secondary Transfer', holdSecs: 30, subtext: 'Please hold while we connect you with the next available specialist.', delay: 0 },
+      { type: 'agent', text: 'Mortgage Department, this is Sarah Williams. How can I assist you today?', label: 'Specialist Sarah', delay: 2500 },
+      { type: 'customer', text: "Hi Sarah, I'd like to renegotiate my mortgage rate. I've been a customer for about 8 years and rates have dropped significantly.", delay: 2500 },
+      { type: 'agent', text: "Let me look at your mortgage details. I can see your current rate is 5.8% on a 30-year fixed. To explore renegotiation options, I'll need to run a full property and credit assessment. This typically takes 2\u20133 weeks.", label: 'Specialist Sarah', delay: 4000 },
+      { type: 'customer', text: "Two to three weeks? Is there any way to expedite this?", delay: 1500 },
+      { type: 'agent', text: "I understand your frustration. For priority processing, I can schedule an in-branch consultation within 5 business days. They'll have full access to your file and can discuss rate options in person. Shall I schedule that?", label: 'Specialist Sarah', delay: 3500 },
+      { type: 'customer', text: "I suppose that's the best option. Yes, please schedule it.", delay: 1500 },
+      { type: 'agent', text: "Done. You have an appointment at the downtown branch on March 3rd at 2 PM. Please bring your most recent pay stubs and tax return. Is there anything else?", label: 'Specialist Sarah', delay: 3000 },
+      { type: 'system', text: 'Call ended \u2014 Resolved by Specialist Sarah', delay: 500 },
+    ],
+    metrics: { totalTime: '4:10', steps: 22, holdTime: '2:45', resolution: 'Agent handled', effort: 'Very High' },
+  },
+  'wire-transfer': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para espa\u00f1ol, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '4', label: 'Other Services', delay: 1500 },
+      { type: 'ivr-menu', text: 'Other Services:\nPress 1 for Online Banking Support\nPress 2 for Branch Locations\nPress 3 for Wire Transfers\nPress 4 for General Inquiries', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Wire Transfers', delay: 1200 },
+      { type: 'ivr-menu', text: 'Wire Transfers:\nPress 1 for Domestic Wire\nPress 2 for International Wire\nPress 3 for Wire Transfer Status', delay: 4000 },
+      { type: 'keypress', digit: '2', label: 'International Wire', delay: 1200 },
+      { type: 'ivr-menu', text: 'International wire transfers must be processed by a specialist. Please hold while we connect you. Estimated wait time is... 20 minutes.', delay: 4500 },
+      { type: 'hold', text: 'On Hold \u2014 Waiting for International Payments', holdSecs: 65, subtext: 'For faster service, international wires can be initiated online at exlbank.com.', delay: 0 },
+      { type: 'agent', text: 'International Payments, this is James. How can I assist you today?', label: 'Agent James', delay: 2500 },
+      { type: 'customer', text: "Hi James, I need to send $12,000 to my parents' account at HDFC Bank in India.", delay: 2000 },
+      { type: 'agent', text: "I can help with that. I'll need to verify some details. Can I have your account number and the beneficiary's full banking details \u2014 SWIFT code, account number, and branch address?", label: 'Agent James', delay: 3500 },
+      { type: 'customer', text: "My checking account ends in 4829. For the beneficiary, the SWIFT code is HDFCINBB, and I have the account details here...", delay: 2500 },
+      { type: 'agent', text: "Thank you. Let me enter those details. The current exchange rate is approximately 1 USD to 83.5 INR. The wire fee is $35, which is waived for Platinum members. The transfer should arrive within 1\u20132 business days. Shall I proceed?", label: 'Agent James', delay: 4000 },
+      { type: 'customer', text: "Yes, please go ahead.", delay: 1200 },
+      { type: 'agent', text: "The wire has been initiated. Confirmation number WIR-2026-44210. You'll receive an email confirmation shortly. Anything else I can help with?", label: 'Agent James', delay: 3000 },
+      { type: 'system', text: 'Call ended \u2014 Resolved by Agent James', delay: 500 },
+    ],
+    metrics: { totalTime: '3:30', steps: 20, holdTime: '2:00', resolution: 'Agent handled', effort: 'High' },
+  },
+};
+
+const KEYPAD_LAYOUT = [
+  { digit: '1', letters: '' },
+  { digit: '2', letters: 'ABC' },
+  { digit: '3', letters: 'DEF' },
+  { digit: '4', letters: 'GHI' },
+  { digit: '5', letters: 'JKL' },
+  { digit: '6', letters: 'MNO' },
+  { digit: '7', letters: 'PQRS' },
+  { digit: '8', letters: 'TUV' },
+  { digit: '9', letters: 'WXYZ' },
+  { digit: '*', letters: '' },
+  { digit: '0', letters: '+' },
+  { digit: '#', letters: '' },
+];
+
+// ===== State =====
+let CALLER_PHONE = '+1-617-555-0142';
+
+const state = {
+  currentScenarioId: null,
+  playbackGeneration: 0,
+  isPlaying: false,
+  scenarioComplete: false,
+  steps: [],
+  currentStepIndex: 0,
+  waitingForKeypress: false,
+  expectedDigit: null,
+  expectedLabel: null,
+  timerSeconds: 0,
+  timerInterval: null,
+  audioCtx: null,
+};
+
+// ===== DOM Refs =====
+const dom = {
+  transcript: document.getElementById('transcript'),
+  emptyState: document.getElementById('emptyState'),
+  callTimer: document.getElementById('callTimer'),
+  elapsedTime: document.getElementById('elapsedTime'),
+  keypad: document.getElementById('keypad'),
+  keypadHint: document.getElementById('keypadHint'),
+  scenarioList: document.getElementById('scenarioList'),
+  profileList: document.getElementById('profileList'),
+  callerInfo: document.getElementById('callerInfo'),
+  callerAvatar: document.getElementById('callerAvatar'),
+  callerName: document.getElementById('callerName'),
+  callerTier: document.getElementById('callerTier'),
+  callerPhone: document.getElementById('callerPhone'),
+  callerEmail: document.getElementById('callerEmail'),
+  callerMember: document.getElementById('callerMember'),
+  callerAge: document.getElementById('callerAge'),
+  callerEthnicity: document.getElementById('callerEthnicity'),
+  callerAccounts: document.getElementById('callerAccounts'),
+  btnRestart: document.getElementById('btnRestart'),
+  summaryOverlay: document.getElementById('summaryOverlay'),
+  summaryCard: document.getElementById('summaryCard'),
+};
+
+// ===== Utility Functions =====
+function escapeHtml(str) {
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = (s % 60).toString().padStart(2, '0');
+  return m + ':' + sec;
+}
+
+function sleep(ms, gen) {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      if (gen !== state.playbackGeneration) {
+        reject(new DOMException('Aborted', 'AbortError'));
+      } else {
+        resolve();
+      }
+    }, ms);
+  });
+}
+
+function scrollToBottom() {
+  dom.transcript.scrollTop = dom.transcript.scrollHeight;
+}
+
+// ===== Dark Mode =====
+function toggleDarkMode() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('exl-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  updateThemeIcons();
+}
+
+function updateThemeIcons() {
+  var isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('sunIcon').style.display = isDark ? 'block' : 'none';
+  document.getElementById('moonIcon').style.display = isDark ? 'none' : 'block';
+}
+
+// ===== Profile Management =====
+function renderProfileSelector() {
+  var container = dom.profileList;
+  container.innerHTML = '';
+  CUSTOMER_PROFILES.forEach(function(p) {
+    var card = document.createElement('div');
+    card.className = 'profile-card' + (p.phone === CALLER_PHONE ? ' active' : '');
+    card.dataset.phone = p.phone;
+    card.onclick = function() { selectProfile(p.phone); };
+    card.innerHTML =
+      '<div class="profile-card__avatar profile-card__avatar--' + escapeHtml(p.tierClass) + '">' + escapeHtml(p.initials) + '</div>' +
+      '<div class="profile-card__body">' +
+        '<div class="profile-card__name">' + escapeHtml(p.name) + '</div>' +
+        '<div class="profile-card__meta">' + escapeHtml(p.tier) + ' &middot; ' + escapeHtml(p.location) + '</div>' +
+      '</div>';
+    container.appendChild(card);
+  });
+}
+
+function selectProfile(phone) {
+  if (state.isPlaying) return;
+  CALLER_PHONE = phone;
+  Array.from(dom.profileList.children).forEach(function(c) {
+    c.classList.toggle('active', c.dataset.phone === phone);
+  });
+  showCallerInfo(CUSTOMER_DB[phone]);
+  renderScenarioList();
+  if (state.scenarioComplete) resetUI();
+}
+
+function showCallerInfo(caller) {
+  if (!caller) return;
+  var heading = document.getElementById('callerHeading');
+  if (heading) heading.textContent = 'Caller Information';
+  dom.callerAvatar.textContent = caller.initials;
+  dom.callerName.textContent = caller.name;
+  dom.callerTier.className = 'caller-info__tier caller-info__tier--' + caller.tierClass;
+  dom.callerTier.textContent = caller.tier + ' Member';
+  dom.callerPhone.querySelector('span').textContent = caller.phone;
+  dom.callerEmail.querySelector('span').textContent = caller.email || '';
+  dom.callerMember.querySelector('span').textContent = caller.memberSince ? 'Member since ' + caller.memberSince : '';
+  dom.callerAge.querySelector('span').textContent = caller.age ? caller.age + ' yrs, ' + caller.gender : '';
+  dom.callerEthnicity.querySelector('span').textContent = caller.ethnicity || '';
+
+  // Build accounts summary
+  var html = '<div class="caller-info__accounts-title">Accounts</div>';
+  if (caller.checking) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Checking <span class="acct-num">****' + caller.checking.last4 + '</span></span><span class="caller-info__account-val">$' + caller.checking.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.savings) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Savings <span class="acct-num">****' + caller.savings.last4 + '</span></span><span class="caller-info__account-val">$' + caller.savings.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.creditCard) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">' + escapeHtml(caller.creditCard.type) + ' <span class="acct-num">****' + caller.creditCard.last4 + '</span></span><span class="caller-info__account-val">$' + caller.creditCard.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.autoLoan) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Auto Loan <span class="acct-num">****' + caller.autoLoan.last4 + '</span></span><span class="caller-info__account-val">$' + caller.autoLoan.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.mortgage) {
+    html += '<div class="caller-info__account-row"><span class="caller-info__account-name">Mortgage <span class="acct-num">****' + caller.mortgage.last4 + '</span></span><span class="caller-info__account-val">$' + caller.mortgage.balance.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</span></div>';
+  }
+  if (caller.creditScore) {
+    html += '<div class="caller-info__account-row" style="margin-top:4px;border-top:1px solid var(--gray-200);padding-top:6px;"><span class="caller-info__account-name">Credit Score</span><span class="caller-info__account-val">' + caller.creditScore + '</span></div>';
+  }
+  dom.callerAccounts.innerHTML = html;
+  dom.callerInfo.classList.add('visible');
+}
+
+// ===== Scenario List =====
+function renderScenarioList() {
+  var html = '';
+  for (var id in DTMF_SCENARIOS) {
+    var info = SCENARIO_TITLES[id];
+    if (!info) continue;
+    var flowIcon = info.flow === 'contained' ? '\uD83E\uDD16' : '\uD83D\uDC64';
+    var activeClass = id === state.currentScenarioId ? ' active' : '';
+    html += '<button class="compare-scenario-btn' + activeClass +
+      '" data-scenario="' + id + '" onclick="selectScenario(\'' + id + '\')">' +
+      flowIcon + ' ' + escapeHtml(info.title) + '</button>';
+  }
+  dom.scenarioList.innerHTML = html;
+}
+
+function selectScenario(scenarioId) {
+  var dtmfScenario = DTMF_SCENARIOS[scenarioId];
+  if (!dtmfScenario) return;
+
+  // Abort any running playback
+  if (state.isPlaying) {
+    state.playbackGeneration++;
+    clearInterval(state.timerInterval);
+    state.isPlaying = false;
+  }
+
+  state.currentScenarioId = scenarioId;
+  state.scenarioComplete = false;
+  state.playbackGeneration++;
+  state.steps = dtmfScenario.steps;
+  state.currentStepIndex = 0;
+  state.waitingForKeypress = false;
+  state.expectedDigit = null;
+  state.expectedLabel = null;
+
+  // Highlight active scenario button
+  document.querySelectorAll('.compare-scenario-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.scenario === scenarioId);
+  });
+
+  // Show caller info
+  showCallerInfo(CUSTOMER_DB[CALLER_PHONE]);
+
+  // Clear transcript
+  dom.transcript.innerHTML = '';
+
+  // Reset keypad
+  setKeypadEnabled(false);
+  updateKeypadHint('Calling...', '');
+
+  // Show restart button
+  dom.btnRestart.style.display = '';
+
+  // Hide summary
+  dom.summaryOverlay.classList.remove('visible');
+
+  // Start playback
+  startInteractivePlayback(scenarioId);
+}
+
+// ===== Keypad =====
+function renderKeypad() {
+  var html = '';
+  KEYPAD_LAYOUT.forEach(function(k) {
+    html += '<button class="keypad__key keypad__key--disabled" data-digit="' + k.digit + '" onclick="onKeyPress(\'' + k.digit + '\')">' +
+      '<div class="keypad__digit">' + k.digit + '</div>' +
+      (k.letters ? '<div class="keypad__letters">' + k.letters + '</div>' : '') +
+      '</button>';
+  });
+  dom.keypad.innerHTML = html;
+}
+
+function setKeypadEnabled(enabled) {
+  dom.keypad.querySelectorAll('.keypad__key').forEach(function(key) {
+    key.classList.toggle('keypad__key--disabled', !enabled);
+    key.classList.remove('keypad__key--correct');
+  });
+}
+
+function highlightCorrectKey(digit) {
+  var firstDigit = digit.charAt(0);
+  dom.keypad.querySelectorAll('.keypad__key').forEach(function(key) {
+    key.classList.toggle('keypad__key--correct', key.dataset.digit === firstDigit);
+  });
+}
+
+function updateKeypadHint(text, className) {
+  dom.keypadHint.textContent = text;
+  dom.keypadHint.className = 'keypad-panel__hint' + (className ? ' ' + className : '');
+}
+
+// ===== DTMF Audio =====
+function playDtmfTone() {
+  try {
+    if (!state.audioCtx) {
+      state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    var ctx = state.audioCtx;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.1);
+  } catch (e) {
+    // Audio not available
+  }
+}
+
+// ===== Keypress Handler =====
+function onKeyPress(digit) {
+  if (!state.waitingForKeypress) return;
+
+  playDtmfTone();
+
+  var expectedFirst = state.expectedDigit.charAt(0);
+
+  if (digit === expectedFirst) {
+    // Correct!
+    state.waitingForKeypress = false;
+    setKeypadEnabled(false);
+
+    // Render keypress in transcript
+    renderDtmfKeypress(state.expectedDigit, state.expectedLabel);
+
+    // Advance past this keypress step
+    var stepDelay = state.steps[state.currentStepIndex].delay || 800;
+    state.currentStepIndex++;
+    state.expectedDigit = null;
+    state.expectedLabel = null;
+    updateKeypadHint('', '');
+
+    // Continue advancing after delay
+    var gen = state.playbackGeneration;
+    setTimeout(function() {
+      if (gen !== state.playbackGeneration) return;
+      advanceSteps(gen);
+    }, stepDelay);
+
+  } else {
+    // Wrong digit
+    updateKeypadHint('Invalid selection. Press ' + expectedFirst + ' for ' + state.expectedLabel, 'keypad-panel__hint--error');
+    setTimeout(function() {
+      if (!state.waitingForKeypress) return;
+      updateKeypadHint('Press ' + expectedFirst + ' for ' + state.expectedLabel, 'keypad-panel__hint--waiting');
+    }, 1500);
+  }
+}
+
+// Keyboard listener
+document.addEventListener('keydown', function(e) {
+  if (!state.waitingForKeypress) return;
+  var key = e.key;
+  if (/^[0-9*#]$/.test(key)) {
+    e.preventDefault();
+    onKeyPress(key);
+  }
+});
+
+// ===== Interactive Playback Engine =====
+function startInteractivePlayback(scenarioId) {
+  var gen = state.playbackGeneration;
+  state.isPlaying = true;
+
+  // Start timer
+  state.timerSeconds = 0;
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(function() {
+    if (gen !== state.playbackGeneration) { clearInterval(state.timerInterval); return; }
+    state.timerSeconds++;
+    var t = formatTime(state.timerSeconds);
+    dom.callTimer.textContent = t;
+    dom.elapsedTime.textContent = t;
+  }, 1000);
+
+  advanceSteps(gen);
+}
+
+async function advanceSteps(gen) {
+  var steps = state.steps;
+
+  try {
+    while (state.currentStepIndex < steps.length) {
+      if (gen !== state.playbackGeneration) return;
+      var step = steps[state.currentStepIndex];
+
+      switch (step.type) {
+        case 'system':
+          renderDtmfSystem(step.text);
+          await sleep(step.delay, gen);
+          state.currentStepIndex++;
+          break;
+
+        case 'ivr-menu':
+          await renderDtmfMenu(step.text, gen);
+          await sleep(step.delay, gen);
+          state.currentStepIndex++;
+          // Check if next step is a keypress
+          if (state.currentStepIndex < steps.length && steps[state.currentStepIndex].type === 'keypress') {
+            var nextStep = steps[state.currentStepIndex];
+            state.waitingForKeypress = true;
+            state.expectedDigit = nextStep.digit;
+            state.expectedLabel = nextStep.label;
+            setKeypadEnabled(true);
+            highlightCorrectKey(nextStep.digit);
+            updateKeypadHint('Press ' + nextStep.digit.charAt(0) + ' for ' + nextStep.label, 'keypad-panel__hint--waiting');
+            return; // Wait for user
+          }
+          break;
+
+        case 'keypress':
+          // Direct keypress without preceding ivr-menu (rare)
+          state.waitingForKeypress = true;
+          state.expectedDigit = step.digit;
+          state.expectedLabel = step.label;
+          setKeypadEnabled(true);
+          highlightCorrectKey(step.digit);
+          updateKeypadHint('Press ' + step.digit.charAt(0) + ' for ' + step.label, 'keypad-panel__hint--waiting');
+          return; // Wait for user
+
+        case 'hold':
+          setKeypadEnabled(false);
+          updateKeypadHint('Please hold...', '');
+          await renderDtmfHold(step.text, step.holdSecs, step.subtext, gen);
+          state.currentStepIndex++;
+          break;
+
+        case 'agent':
+          renderDtmfAgent(step.text, step.label);
+          await sleep(step.delay, gen);
+          state.currentStepIndex++;
+          break;
+
+        case 'customer':
+          renderDtmfCustomer(step.text);
+          await sleep(step.delay, gen);
+          state.currentStepIndex++;
+          break;
+
+        case 'transfer':
+          renderDtmfTransfer(step.text);
+          await sleep(step.delay, gen);
+          state.currentStepIndex++;
+          break;
+
+        default:
+          state.currentStepIndex++;
+          break;
+      }
+    }
+
+    // All steps complete
+    onScenarioComplete();
+
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    throw e;
+  }
+}
+
+// ===== DTMF Rendering Functions =====
+function renderDtmfSystem(text) {
+  var el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--system';
+  el.textContent = text;
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+async function renderDtmfMenu(text, gen) {
+  var el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--ivr';
+  el.innerHTML = '<div class="dtmf-ivr-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg> IVR System</div>';
+  var textSpan = document.createElement('div');
+  el.appendChild(textSpan);
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+
+  // Typewriter effect
+  var chars = text.split('');
+  var output = '';
+  for (var i = 0; i < chars.length; i++) {
+    if (gen !== state.playbackGeneration) return;
+    output += chars[i];
+    textSpan.textContent = output;
+    scrollToBottom();
+    var charDelay = chars[i] === '\n' ? 80 : (chars[i] === '.' ? 60 : 25);
+    await sleep(charDelay, gen);
+  }
+}
+
+function renderDtmfKeypress(digit, label) {
+  var el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--keypress';
+  el.innerHTML = '<span class="dtmf-key-label">' + escapeHtml(label) + '</span><div class="dtmf-key-badge">' + escapeHtml(digit.substring(0, 2)) + '</div>';
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+async function renderDtmfHold(text, holdSecs, subtext, gen) {
+  var el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--hold';
+  el.innerHTML =
+    '<div class="dtmf-hold-icon">\uD83C\uDFB5</div>' +
+    '<div class="dtmf-hold-text">' + escapeHtml(text) + '</div>' +
+    '<div class="dtmf-hold-subtext">' + escapeHtml(subtext || 'Your call is important to us...') + '</div>' +
+    '<div class="dtmf-hold-timer">0:00</div>';
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+
+  var countdownEl = el.querySelector('.dtmf-hold-timer');
+  var elapsed = 0;
+  // Accelerated: 1 real second = 3 hold seconds (333ms per hold-second)
+  var intervalMs = 333;
+
+  while (elapsed < holdSecs) {
+    if (gen !== state.playbackGeneration) return;
+    await sleep(intervalMs, gen);
+    elapsed++;
+    var m = Math.floor(elapsed / 60);
+    var s = (elapsed % 60).toString().padStart(2, '0');
+    countdownEl.textContent = m + ':' + s;
+    scrollToBottom();
+  }
+}
+
+function renderDtmfAgent(text, label) {
+  var el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--agent';
+  el.innerHTML = '<div class="dtmf-agent-label">\uD83D\uDC64 ' + escapeHtml(label || 'Agent') + '</div>' + escapeHtml(text);
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function renderDtmfCustomer(text) {
+  var el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--customer';
+  el.textContent = text;
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+function renderDtmfTransfer(text) {
+  var el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--transfer';
+  el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 004 4h12"/></svg> ' + escapeHtml(text);
+  dom.transcript.appendChild(el);
+  scrollToBottom();
+}
+
+// ===== Scenario Completion =====
+function onScenarioComplete() {
+  clearInterval(state.timerInterval);
+  state.isPlaying = false;
+  state.scenarioComplete = true;
+  setKeypadEnabled(false);
+  updateKeypadHint('Scenario complete', '');
+
+  var metrics = DTMF_SCENARIOS[state.currentScenarioId] && DTMF_SCENARIOS[state.currentScenarioId].metrics;
+  var title = SCENARIO_TITLES[state.currentScenarioId] && SCENARIO_TITLES[state.currentScenarioId].title || '';
+  if (metrics) {
+    showSummary(title, metrics);
+  }
+}
+
+function showSummary(title, metrics) {
+  dom.summaryCard.innerHTML =
+    '<div class="summary-card__title">' + escapeHtml(title) + '</div>' +
+    '<div class="summary-card__metrics">' +
+      '<div class="summary-card__metric">' +
+        '<div class="summary-card__metric-value">' + escapeHtml(metrics.totalTime) + '</div>' +
+        '<div class="summary-card__metric-label">Total Time</div>' +
+      '</div>' +
+      '<div class="summary-card__metric">' +
+        '<div class="summary-card__metric-value">' + metrics.steps + '</div>' +
+        '<div class="summary-card__metric-label">Steps</div>' +
+      '</div>' +
+      '<div class="summary-card__metric">' +
+        '<div class="summary-card__metric-value">' + escapeHtml(metrics.holdTime) + '</div>' +
+        '<div class="summary-card__metric-label">Hold Time</div>' +
+      '</div>' +
+      '<div class="summary-card__metric">' +
+        '<div class="summary-card__metric-value">' + escapeHtml(metrics.resolution) + '</div>' +
+        '<div class="summary-card__metric-label">Resolution</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="text-align:center;font-size:12px;color:var(--gray-500);margin-bottom:16px;">Customer Effort: ' + escapeHtml(metrics.effort) + '</div>' +
+    '<div class="summary-card__actions">' +
+      '<button class="summary-card__btn" onclick="closeSummary()">Close</button>' +
+      '<button class="summary-card__btn summary-card__btn--primary" onclick="closeSummary(); restartScenario();">Try Again</button>' +
+    '</div>';
+  dom.summaryOverlay.classList.add('visible');
+}
+
+function closeSummary() {
+  dom.summaryOverlay.classList.remove('visible');
+}
+
+function restartScenario() {
+  if (state.currentScenarioId) {
+    selectScenario(state.currentScenarioId);
+  }
+}
+
+function resetUI() {
+  state.playbackGeneration++;
+  clearInterval(state.timerInterval);
+  state.isPlaying = false;
+  state.scenarioComplete = false;
+  state.currentScenarioId = null;
+  state.waitingForKeypress = false;
+  dom.transcript.innerHTML =
+    '<div class="transcript__empty" id="emptyState">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:48px;height:48px;opacity:0.4;">' +
+        '<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>' +
+      '</svg>' +
+      '<div class="transcript__empty-text">Interactive Phone Tree</div>' +
+      '<div class="transcript__empty-sub">Select a customer profile and scenario to start navigating the IVR</div>' +
+    '</div>';
+  dom.callTimer.textContent = '--:--';
+  dom.elapsedTime.textContent = '--:--';
+  dom.btnRestart.style.display = 'none';
+  setKeypadEnabled(false);
+  updateKeypadHint('Select a scenario to begin', '');
+  dom.summaryOverlay.classList.remove('visible');
+  renderScenarioList();
+}
+
+// ===== Init =====
+renderKeypad();
+renderProfileSelector();
+showCallerInfo(CUSTOMER_DB[CALLER_PHONE]);
+renderScenarioList();
+updateThemeIcons();
+</script>
+</body>
+</html>
