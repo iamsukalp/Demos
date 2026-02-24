@@ -31,7 +31,7 @@ except ImportError:
 
 # Import LLM engine (graceful if missing)
 try:
-    from llm_engine import build_session_config, handle_function_call, lookup_customer
+    from llm_engine import build_session_config, build_tts_session_config, handle_function_call, lookup_customer
     LLM_AVAILABLE = True
 except ImportError:
     LLM_AVAILABLE = False
@@ -300,7 +300,8 @@ async def ws_relay(request):
     scenario_id = request.query.get('scenario') or None
     phone = request.query.get('phone') or None
     silence_ms = int(request.query.get('silence', 1000))
-    print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}, silence={silence_ms}ms")
+    mode = request.query.get('mode') or None
+    print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}, silence={silence_ms}ms, mode={mode}")
 
     # Upgrade to WebSocket
     browser_ws = web.WebSocketResponse(max_msg_size=2**24)
@@ -345,16 +346,20 @@ async def ws_relay(request):
             print(f"  [WS] Got session.created")
             await browser_ws.send_str(session_created)
 
-            config = build_session_config(scenario_id, customer_context=customer_context, phone=phone, silence_ms=silence_ms)
+            if mode == 'tts':
+                config = build_tts_session_config()
+            else:
+                config = build_session_config(scenario_id, customer_context=customer_context, phone=phone, silence_ms=silence_ms)
             await openai_ws.send(json.dumps(config))
-            print(f"  [WS] Sent session config")
+            print(f"  [WS] Sent session config (mode={mode})")
 
             session_updated = await openai_ws.recv()
             print(f"  [WS] Got session.updated")
             await browser_ws.send_str(session_updated)
 
-            print(f"  [WS] Sending response.create for greeting")
-            await openai_ws.send(json.dumps({"type": "response.create"}))
+            if mode != 'tts':
+                print(f"  [WS] Sending response.create for greeting")
+                await openai_ws.send(json.dumps({"type": "response.create"}))
 
             async def browser_to_openai():
                 try:

@@ -24,7 +24,7 @@ except ImportError:
 
 # Import LLM engine (graceful if missing)
 try:
-    from llm_engine import build_session_config, handle_function_call, lookup_customer
+    from llm_engine import build_session_config, build_tts_session_config, handle_function_call, lookup_customer
     LLM_AVAILABLE = True
 except ImportError:
     LLM_AVAILABLE = False
@@ -373,6 +373,7 @@ async def relay_handler(browser_ws):
     scenario_id = params.get('scenario', [None])[0]
     phone = params.get('phone', [None])[0]
     silence_ms = int(params.get('silence', [1000])[0])
+    mode = params.get('mode', [None])[0]
 
     # Look up customer from phone number
     customer_context = None
@@ -412,15 +413,19 @@ async def relay_handler(browser_ws):
             await browser_ws.send(session_created)
 
             # Send session config with system prompt and tools
-            config = build_session_config(scenario_id, customer_context=customer_context, phone=phone, silence_ms=silence_ms)
+            if mode == 'tts':
+                config = build_tts_session_config()
+            else:
+                config = build_session_config(scenario_id, customer_context=customer_context, phone=phone, silence_ms=silence_ms)
             await openai_ws.send(json.dumps(config))
 
             # Wait for session.updated confirmation
             session_updated = await openai_ws.recv()
             await browser_ws.send(session_updated)
 
-            # Trigger IRIS's greeting — send response.create so it speaks first
-            await openai_ws.send(json.dumps({"type": "response.create"}))
+            # Trigger IRIS's greeting — send response.create so it speaks first (skip for TTS-only mode)
+            if mode != 'tts':
+                await openai_ws.send(json.dumps({"type": "response.create"}))
 
             # Bidirectional relay
             async def browser_to_openai():

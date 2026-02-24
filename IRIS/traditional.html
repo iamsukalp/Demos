@@ -1253,6 +1253,13 @@ const state = {
   // TTS
   ttsEnabled: true,
   ttsSpeaking: false,
+  // Realtime TTS WebSocket
+  realtimeWs: null,
+  realtimeTtsReady: false,
+  realtimeAudioCtx: null,
+  realtimeNextStartTime: 0,
+  realtimeSpeaking: false,
+  realtimeTtsResolve: null,
 };
 
 // ===== DOM Refs =====
@@ -1427,6 +1434,14 @@ function selectScenario(scenarioId) {
 
   // Cancel any active TTS
   cancelTts();
+
+  // Lazily open Realtime TTS WebSocket on first scenario start
+  if (!state.realtimeWs || state.realtimeWs.readyState !== WebSocket.OPEN) {
+    initRealtimeAudioContext();
+    connectRealtimeTts().catch(function(err) {
+      console.warn('Realtime TTS unavailable, using HTTP fallback:', err);
+    });
+  }
 
   state.currentScenarioId = scenarioId;
   state.scenarioComplete = false;
@@ -1905,7 +1920,7 @@ function renderDtmfSystem(text) {
   scrollToBottom();
 }
 
-// ===== TTS (Text-to-Speech via OpenAI) =====
+// ===== TTS (Text-to-Speech via OpenAI Realtime API) =====
 var _ttsAudioContext = null;
 var _ttsCurrentSource = null;
 
@@ -1916,13 +1931,168 @@ function getTtsAudioContext() {
   return _ttsAudioContext;
 }
 
+// --- Realtime WebSocket TTS ---
+
+function initRealtimeAudioContext() {
+  if (!state.realtimeAudioCtx || state.realtimeAudioCtx.state === 'closed') {
+    state.realtimeAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+  }
+  if (state.realtimeAudioCtx.state === 'suspended') {
+    state.realtimeAudioCtx.resume();
+  }
+  state.realtimeNextStartTime = 0;
+}
+
+function connectRealtimeTts() {
+  return new Promise(function(resolve, reject) {
+    if (state.realtimeWs && state.realtimeWs.readyState === WebSocket.OPEN && state.realtimeTtsReady) {
+      resolve(state.realtimeWs);
+      return;
+    }
+    // Close stale connection
+    if (state.realtimeWs) {
+      try { state.realtimeWs.close(); } catch (e) {}
+      state.realtimeWs = null;
+    }
+
+    var wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var wsUrl = wsProto + '//' + location.host + '/ws?mode=tts';
+    var ws = new WebSocket(wsUrl);
+    state.realtimeWs = ws;
+
+    ws.onclose = function() {
+      state.realtimeWs = null;
+      state.realtimeTtsReady = false;
+      if (state.realtimeTtsResolve) {
+        state.realtimeTtsResolve();
+        state.realtimeTtsResolve = null;
+      }
+    };
+
+    ws.onerror = function() {
+      state.realtimeWs = null;
+      state.realtimeTtsReady = false;
+      reject(new Error('TTS WebSocket failed'));
+    };
+
+    ws.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+      handleRealtimeTtsMessage(data, resolve);
+    };
+  });
+}
+
+function handleRealtimeTtsMessage(data, onReady) {
+  var type = data.type;
+
+  if (type === 'session.updated') {
+    state.realtimeTtsReady = true;
+    if (onReady) onReady(state.realtimeWs);
+    return;
+  }
+
+  if (type === 'error') {
+    var errMsg = (data.error && data.error.message) || JSON.stringify(data.error);
+    console.warn('Realtime TTS error:', errMsg);
+    // Resolve pending promise so scenario doesn't hang
+    if (state.realtimeTtsResolve) {
+      state.realtimeTtsResolve();
+      state.realtimeTtsResolve = null;
+    }
+    return;
+  }
+
+  if (type === 'response.audio.delta' && data.delta) {
+    state.realtimeSpeaking = true;
+    playRealtimeTtsChunk(data.delta);
+    return;
+  }
+
+  if (type === 'response.audio.done' || type === 'response.done') {
+    finishRealtimeTts();
+    return;
+  }
+}
+
+function playRealtimeTtsChunk(base64Data) {
+  if (!state.realtimeAudioCtx) return;
+
+  var binaryStr = atob(base64Data);
+  var len = binaryStr.length;
+  var pcm16 = new Int16Array(len / 2);
+  for (var i = 0; i < len; i += 2) {
+    pcm16[i / 2] = binaryStr.charCodeAt(i) | (binaryStr.charCodeAt(i + 1) << 8);
+  }
+
+  var float32 = new Float32Array(pcm16.length);
+  for (var j = 0; j < pcm16.length; j++) {
+    float32[j] = pcm16[j] / 32768;
+  }
+
+  var ctx = state.realtimeAudioCtx;
+  var buffer = ctx.createBuffer(1, float32.length, 24000);
+  buffer.getChannelData(0).set(float32);
+
+  var source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(ctx.destination);
+
+  var now = ctx.currentTime;
+  var startTime = Math.max(now, state.realtimeNextStartTime);
+  source.start(startTime);
+  state.realtimeNextStartTime = startTime + buffer.duration;
+}
+
+function finishRealtimeTts() {
+  if (!state.realtimeTtsResolve) return;
+
+  var remaining = 0;
+  if (state.realtimeAudioCtx) {
+    remaining = Math.max(0, (state.realtimeNextStartTime - state.realtimeAudioCtx.currentTime) * 1000);
+  }
+
+  var resolveFn = state.realtimeTtsResolve;
+  state.realtimeTtsResolve = null;
+
+  setTimeout(function() {
+    state.realtimeSpeaking = false;
+    state.ttsSpeaking = false;
+    resolveFn();
+  }, remaining + 50);
+}
+
+// --- Cancel TTS (both Realtime and HTTP fallback) ---
+
 function cancelTts() {
+  // Cancel HTTP-based fallback source
   if (_ttsCurrentSource) {
     try { _ttsCurrentSource.stop(); } catch (e) {}
     _ttsCurrentSource = null;
   }
+
+  // Cancel Realtime TTS streaming
+  if (state.realtimeWs && state.realtimeWs.readyState === WebSocket.OPEN && state.realtimeSpeaking) {
+    state.realtimeWs.send(JSON.stringify({ type: 'response.cancel' }));
+  }
+
+  // Close and recreate audio context to stop all queued chunks immediately
+  if (state.realtimeSpeaking && state.realtimeAudioCtx) {
+    state.realtimeAudioCtx.close().catch(function() {});
+    state.realtimeAudioCtx = null;
+    initRealtimeAudioContext();
+  }
+
+  // Resolve any pending TTS promise
+  if (state.realtimeTtsResolve) {
+    state.realtimeTtsResolve();
+    state.realtimeTtsResolve = null;
+  }
+
   state.ttsSpeaking = false;
+  state.realtimeSpeaking = false;
 }
+
+// --- Main TTS function (Realtime WS primary, HTTP fallback) ---
 
 function speakText(text) {
   return new Promise(function(resolve) {
@@ -1931,11 +2101,30 @@ function speakText(text) {
       return;
     }
 
-    // Cancel any ongoing TTS
     cancelTts();
-
     var gen = state.playbackGeneration;
 
+    // Primary: Realtime WebSocket TTS
+    if (state.realtimeWs && state.realtimeWs.readyState === WebSocket.OPEN && state.realtimeTtsReady) {
+      state.realtimeTtsResolve = resolve;
+      state.ttsSpeaking = true;
+      state.realtimeSpeaking = true;
+
+      if (state.realtimeAudioCtx) {
+        state.realtimeNextStartTime = state.realtimeAudioCtx.currentTime;
+      }
+
+      state.realtimeWs.send(JSON.stringify({
+        type: 'response.create',
+        response: {
+          modalities: ['audio', 'text'],
+          instructions: 'Read the following text aloud exactly as written, word for word. Do not add or change anything: ' + text
+        }
+      }));
+      return;
+    }
+
+    // Fallback: HTTP /api/tts
     fetch('/api/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1968,9 +2157,9 @@ function speakText(text) {
       source.start(0);
     })
     .catch(function(err) {
-      console.warn('TTS error:', err);
+      console.warn('TTS fallback error:', err);
       state.ttsSpeaking = false;
-      resolve(); // Silently continue without audio
+      resolve();
     });
   });
 }
@@ -1989,6 +2178,9 @@ async function typewriterEffect(element, text, gen) {
 }
 
 async function renderDtmfMenu(text, gen) {
+  // Strip menu title line (e.g. "Main Menu:\n", "Cards Menu:\n") from display and TTS
+  var displayText = text.replace(/^[^\n]+:\n/, '');
+
   var el = document.createElement('div');
   el.className = 'dtmf-msg dtmf-msg--ivr';
   el.innerHTML = '<div class="dtmf-ivr-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg> IVR System</div>';
@@ -1999,8 +2191,8 @@ async function renderDtmfMenu(text, gen) {
 
   // Run TTS and typewriter in parallel
   await Promise.all([
-    speakText(text),
-    typewriterEffect(textSpan, text, gen)
+    speakText(displayText),
+    typewriterEffect(textSpan, displayText, gen)
   ]);
 }
 
@@ -2176,6 +2368,17 @@ document.addEventListener('click', function initTtsCtx() {
     body: JSON.stringify({ apiKey: savedKey })
   }).catch(function() {});
 })();
+
+// Clean up Realtime TTS WebSocket on page unload
+window.addEventListener('beforeunload', function() {
+  if (state.realtimeWs) {
+    state.realtimeWs.close();
+    state.realtimeWs = null;
+  }
+  if (state.realtimeAudioCtx) {
+    state.realtimeAudioCtx.close().catch(function() {});
+  }
+});
 </script>
 </body>
 </html>

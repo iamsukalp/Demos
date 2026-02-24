@@ -860,6 +860,29 @@ Greet this customer by name. You already know who they are from the phone number
     }
 
 
+def build_tts_session_config():
+    """Build a minimal session.update config for TTS-only mode (Traditional IVR)."""
+    return {
+        "type": "session.update",
+        "session": {
+            "instructions": (
+                "You are an IVR text-to-speech engine. Your ONLY job is to speak the exact text "
+                "the user provides. Do not add any words before, after, or between. Do not say "
+                "'sure', 'okay', 'here you go', or any filler. Do not paraphrase. Read the text "
+                "verbatim, exactly as written, with appropriate intonation for an IVR phone system."
+            ),
+            "voice": "alloy",
+            "modalities": ["text", "audio"],
+            "input_audio_format": "pcm16",
+            "output_audio_format": "pcm16",
+            "turn_detection": None,
+            "tools": [],
+            "tool_choice": "none",
+            "temperature": 0.6,
+        }
+    }
+
+
 # ===== Mock Function Call Handlers =====
 
 def handle_function_call(name, arguments, scenario_id=None, phone=None):
