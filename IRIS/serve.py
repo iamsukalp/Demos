@@ -44,6 +44,25 @@ API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
+# Persistent call history file (shared with root serve.py)
+HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'iris_history.json')
+MAX_HISTORY = 50
+
+
+def load_history():
+    """Load call history from JSON file."""
+    try:
+        with open(HISTORY_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def save_history(history):
+    """Save call history to JSON file."""
+    with open(HISTORY_FILE, 'w') as f:
+        json.dump(history[-MAX_HISTORY:], f)
+
 
 class IrisHandler(http.server.SimpleHTTPRequestHandler):
 
@@ -96,6 +115,10 @@ class IrisHandler(http.server.SimpleHTTPRequestHandler):
             self._handle_tts(data)
             return
 
+        if self.path == '/api/history':
+            self._handle_add_history(data)
+            return
+
         # Response engine endpoints (fallback/scripted mode)
         if not ENGINE_AVAILABLE:
             self._json_error(503, 'Response engine not available')
@@ -111,6 +134,21 @@ class IrisHandler(http.server.SimpleHTTPRequestHandler):
             self._handle_intent_switch(data)
         else:
             self._json_error(404, f'Unknown API endpoint: {self.path}')
+
+    def do_GET(self):
+        """Handle GET requests — API routes then static files."""
+        if self.path == '/api/history':
+            self._handle_get_history()
+            return
+        # Fall through to static file serving
+        super().do_GET()
+
+    def do_DELETE(self):
+        """Handle DELETE requests."""
+        if self.path == '/api/history':
+            self._handle_delete_history()
+            return
+        self._json_error(404, f'Unknown endpoint: {self.path}')
 
     def _handle_config(self, data):
         """Store API key in memory."""
@@ -287,6 +325,25 @@ class IrisHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(audio_data)
         except Exception as e:
             self._json_error(500, f'TTS failed: {str(e)}')
+
+    def _handle_get_history(self):
+        """Return call history."""
+        self._json_response(load_history())
+
+    def _handle_add_history(self, data):
+        """Add a new call history entry."""
+        if not data:
+            self._json_error(400, 'No data provided')
+            return
+        history = load_history()
+        history.append(data)
+        save_history(history)
+        self._json_response({'success': True, 'count': len(history)})
+
+    def _handle_delete_history(self):
+        """Clear all call history."""
+        save_history([])
+        self._json_response({'success': True})
 
     def _json_response(self, data, status=200):
         """Send a JSON response."""
