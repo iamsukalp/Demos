@@ -51,24 +51,6 @@ API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
 OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
 
-# Persistent stats file
-STATS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'iris_stats.json')
-DEFAULT_STATS = {"scenariosRun": 0, "botContained": 0, "agentEscalated": 0, "totalHandleTime": 0}
-
-
-def load_stats():
-    """Load stats from JSON file."""
-    try:
-        with open(STATS_FILE, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return dict(DEFAULT_STATS)
-
-
-def save_stats(stats):
-    """Save stats to JSON file."""
-    with open(STATS_FILE, 'w') as f:
-        json.dump(stats, f)
 
 
 # Persistent call history file
@@ -250,35 +232,6 @@ async def handle_intent_switch(request):
     return web.json_response({'switch': result})
 
 
-async def handle_get_stats(request):
-    """Return shared persistent stats."""
-    return web.json_response(load_stats())
-
-
-async def handle_update_stats(request):
-    """Increment stats atomically (not full overwrite)."""
-    data = await request.json() if request.content_length else {}
-    action = data.get('action')  # 'contained' | 'escalated'
-    handle_time = data.get('handleTime', 0)
-
-    stats = load_stats()
-
-    if action in ('contained', 'escalated'):
-        stats['scenariosRun'] = stats.get('scenariosRun', 0) + 1
-        stats['totalHandleTime'] = stats.get('totalHandleTime', 0) + handle_time
-        if action == 'contained':
-            stats['botContained'] = stats.get('botContained', 0) + 1
-        else:
-            stats['agentEscalated'] = stats.get('agentEscalated', 0) + 1
-
-    save_stats(stats)
-    return web.json_response(stats)
-
-
-async def handle_reset_stats(request):
-    """Reset all stats to zero."""
-    save_stats(dict(DEFAULT_STATS))
-    return web.json_response(dict(DEFAULT_STATS))
 
 
 # ===== Call History Handlers =====
@@ -456,7 +409,7 @@ async def ws_relay(request):
 
 # ===== Security: block sensitive paths =====
 
-BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules', 'iris_stats', 'iris_history')
+BLOCKED_PREFIXES = ('.git', '.venv', '.vercel', '.env', '.claude', '__pycache__', 'node_modules', 'iris_history')
 
 
 async def handle_root(request):
@@ -485,9 +438,6 @@ def create_app():
     app.router.add_post('/api/classify', handle_classify)
     app.router.add_post('/api/entities', handle_entities)
     app.router.add_post('/api/intent-switch', handle_intent_switch)
-    app.router.add_get('/api/stats', handle_get_stats)
-    app.router.add_post('/api/stats', handle_update_stats)
-    app.router.add_delete('/api/stats', handle_reset_stats)
     app.router.add_get('/api/history', handle_get_history)
     app.router.add_post('/api/history', handle_add_history)
     app.router.add_delete('/api/history', handle_delete_history)

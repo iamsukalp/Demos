@@ -864,41 +864,6 @@
     }
     .btn--text:hover:not(:disabled) { color: var(--navy); background: var(--gray-50); }
 
-    /* ===== Footer Metrics ===== */
-    .footer {
-      height: 44px;
-      background: var(--dark);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 32px;
-      flex-shrink: 0;
-    }
-    .metric {
-      font-size: 12px;
-      color: var(--gray-400);
-      font-weight: 500;
-    }
-    .metric__value {
-      color: var(--white);
-      font-weight: 700;
-    }
-    .metric--reset {
-      cursor: pointer;
-      background: none;
-      border: 1px solid var(--gray-600);
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 11px;
-      color: var(--gray-400);
-      transition: all 0.2s;
-      margin-left: 8px;
-    }
-    .metric--reset:hover {
-      border-color: var(--red, #ef4444);
-      color: var(--red, #ef4444);
-    }
-
     /* ===== Compare Mode ===== */
     .btn--compare {
       display: flex; align-items: center; gap: 6px;
@@ -1607,9 +1572,6 @@
       color: #94A3B8;
     }
     html.dark .btn--text:hover:not(:disabled) { color: #F1F5F9; background: #334155; }
-    html.dark .footer {
-      background: #0B1120;
-    }
     html.dark .mic-area {
       background: #1E293B;
       border-top-color: #334155;
@@ -1721,7 +1683,6 @@
     }
 
     /* ===== Settings Modal ===== */
-    /* Mode indicator badge in footer */
     .mode-badge {
       display: inline-flex;
       align-items: center;
@@ -2004,18 +1965,6 @@
 
     </main>
   </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="metric">Bot Contained <span class="metric__value" id="metricContained">0</span></div>
-    <div class="metric">Agent Escalated <span class="metric__value" id="metricEscalated">0</span></div>
-    <div class="metric">Containment Rate <span class="metric__value" id="metricRate">—</span></div>
-    <div class="metric">Avg Handle Time <span class="metric__value" id="metricTime">—</span></div>
-    <button class="metric metric--reset" id="btnResetStats" onclick="resetStats()" title="Reset all metrics">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align:middle;margin-right:3px;"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-      Reset
-    </button>
-  </footer>
 
 <script>
 // ===== SVG Icons =====
@@ -2323,7 +2272,7 @@ const SCENARIOS = {
         },
       },
       { type: 'system', text: 'Connected to Agent Marcus Rivera — Fraud Resolution Team', delay: 2500, state: 'connected-agent', agentName: 'Marcus Rivera' },
-      { type: 'agent', text: "Hi Varun, this is Marcus from the fraud resolution team. I've reviewed the summary from the AI assistant and I can see the two transactions in question. I'm sorry this happened to you. Let me get this sorted out right away.\n\nFirst, I've placed a temporary hold on your card ending in 3156 to prevent any further unauthorized charges.\n\nI'm now filing a formal dispute for both transactions:\n• Dispute #FRD-2026-88421 for ${{disputeAmount1}} at {{disputeMerchant1}}\n• Dispute #FRD-2026-88422 for ${{disputeAmount2}} at {{disputeMerchant2}}\n\nYou'll receive provisional credits for both amounts — ${{disputeTotal}} total — within 24 hours while we investigate.", delay: 1500, thinkingTime: 2500, agentName: 'Marcus Rivera' },
+      { type: 'agent', text: "Hi Varun, this is Marcus from the fraud resolution team. I've reviewed the summary from the AI assistant and I can see the two transactions in question. I'm sorry this happened to you. Let me get this sorted out right away.\n\nFirst, I've placed a temporary hold on your card ending in 5531 to prevent any further unauthorized charges.\n\nI'm now filing a formal dispute for both transactions:\n• Dispute #FRD-2026-88421 for ${{disputeAmount1}} at {{disputeMerchant1}}\n• Dispute #FRD-2026-88422 for ${{disputeAmount2}} at {{disputeMerchant2}}\n\nYou'll receive provisional credits for both amounts — ${{disputeTotal}} total — within 24 hours while we investigate.", delay: 1500, thinkingTime: 2500, agentName: 'Marcus Rivera' },
       { type: 'customer', text: "Oh thank you, that's a relief. How long does the investigation take?", delay: 2500 },
       { type: 'agent', text: "Typically 10 to 15 business days. We'll send you updates by email, and in most cases like this where the transactions are clearly out of pattern, the provisional credit becomes permanent.\n\nI've also flagged your account for enhanced security monitoring. Your replacement card will arrive in 2–3 business days via express shipping, since you're a Platinum member.\n\nIs there anything else I can help you with today?", delay: 1500, thinkingTime: 2200, agentName: 'Marcus Rivera' },
       { type: 'customer', text: "No, that covers everything. I appreciate the help, Marcus.", delay: 2000 },
@@ -2413,7 +2362,7 @@ const SCENARIOS = {
       { type: 'customer', text: "Hi, I just received my new credit card in the mail and I need to activate it.", delay: 2000 },
       { type: 'bot', text: "Of course! I can activate your new card right away. Could you please read me the last four digits of the new card number?", delay: 1500, thinkingTime: 2000 },
       { type: 'customer', text: "Sure, it's 5531.", delay: 1500 },
-      { type: 'bot', text: "Thank you, Varun. I can see your new Visa Platinum card ending in {{newCardLast4}} on your account.\n\nActivating now... Done! Your card ending in {{newCardLast4}} is now active and ready to use.\n\nHere's a quick summary:\n• Card Status: Active\n• Contactless payments: Enabled\n• Online transactions: Enabled\n• Credit limit: $15,000\n• Your old card has been automatically deactivated\n\nWould you also like to set up a new PIN, or is there anything else?", delay: 1800, thinkingTime: 2500 },
+      { type: 'bot', text: "Thank you, Varun. I can see your new Visa Platinum card ending in {{newCardLast4}} on your account.\n\nActivating now... Done! Your card ending in {{newCardLast4}} is now active and ready to use.\n\nHere's a quick summary:\n• Card Status: Active\n• Contactless payments: Enabled\n• Online transactions: Enabled\n• Credit limit: $25,000\n• Your old card has been automatically deactivated\n\nWould you also like to set up a new PIN, or is there anything else?", delay: 1800, thinkingTime: 2500 },
       { type: 'customer', text: "No, I'll set the PIN at the ATM. That's all I needed, thanks!", delay: 2000 },
       { type: 'bot', text: "Sounds good, Varun. You can set your PIN at any First National ATM. Enjoy your new card and have a great day!", delay: 1200, thinkingTime: 1200 },
       { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
@@ -2453,7 +2402,7 @@ const SCENARIOS = {
     agentTeam: 'Credit Underwriting',
     resolution: {
       intent: 'Credit Limit Increase Request',
-      action: 'Credit limit increased from $15,000 to $25,000 after underwriting review',
+      action: 'Credit limit increased from $25,000 to $35,000 after underwriting review',
       botAttempt: 'Collected request details, verified account standing',
       escalationReason: 'Credit limit increases over $5,000 require underwriting agent approval',
       outcome: 'Escalated to Agent',
@@ -2462,24 +2411,24 @@ const SCENARIOS = {
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
       { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
-      { type: 'customer', text: "Hi, I'd like to request a credit limit increase on my Visa card. My current limit is $15,000 and I'd like to get it bumped up to around $25,000. I've had the card for three years and I always pay on time.", delay: 2500 },
-      { type: 'bot', text: "Thank you for being a loyal customer, Varun. I can see your excellent payment history on your Visa Platinum card ending in 5531.\n\nHere's your current card profile:\n• Current Limit: $15,000\n• Average Monthly Spend: $6,200\n• Payment History: 36 months on-time\n• Credit Score on File: 782\n\nSince you're requesting an increase of more than $5,000, this will need a review by our credit underwriting team. Let me connect you with a specialist who can process this for you.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
+      { type: 'customer', text: "Hi, I'd like to request a credit limit increase on my Visa card. My current limit is $25,000 and I'd like to get it bumped up to around $35,000. I've had the card for three years and I always pay on time.", delay: 2500 },
+      { type: 'bot', text: "Thank you for being a loyal customer, Varun. I can see your excellent payment history on your Visa Platinum card ending in 5531.\n\nHere's your current card profile:\n• Current Limit: $25,000\n• Average Monthly Spend: $6,200\n• Payment History: 36 months on-time\n• Credit Score on File: 782\n\nSince you're requesting an increase of more than $5,000, this will need a review by our credit underwriting team. Let me connect you with a specialist who can process this for you.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
       { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
       {
         type: 'transfer-summary',
         delay: 1500,
         data: {
           customer: 'Varun Khator (Platinum)',
-          issue: 'Credit limit increase request ($15K → $25K)',
-          currentLimit: '$15,000',
-          requestedLimit: '$25,000',
+          issue: 'Credit limit increase request ($25K → $35K)',
+          currentLimit: '$25,000',
+          requestedLimit: '$35,000',
           paymentHistory: '36 months on-time, credit score 695',
           botActions: 'Verified account standing, confirmed increase exceeds auto-approval threshold',
           recommendation: 'Strong candidate — excellent payment history and credit score',
         },
       },
       { type: 'system', text: 'Connected to Agent David Park — Credit Underwriting', delay: 2500, state: 'connected-agent', agentName: 'David Park' },
-      { type: 'agent', text: "Hi Varun, this is David Park from the credit underwriting team. I've reviewed your account details from the AI assistantand I have to say, your profile looks excellent.\n\nWith your credit score of 782 and perfect 36-month payment history, I'm happy to approve your request. I'm increasing your credit limit from $15,000 to $25,000 effective immediately.\n\nYou don't need a new card — the updated limit will reflect on your next statement and in your online banking within the hour.\n\nIs there anything else I can help with?", delay: 1500, thinkingTime: 2500, agentName: 'David Park' },
+      { type: 'agent', text: "Hi Varun, this is David Park from the credit underwriting team. I've reviewed your account details from the AI assistantand I have to say, your profile looks excellent.\n\nWith your credit score of 782 and perfect 36-month payment history, I'm happy to approve your request. I'm increasing your credit limit from $25,000 to $35,000 effective immediately.\n\nYou don't need a new card — the updated limit will reflect on your next statement and in your online banking within the hour.\n\nIs there anything else I can help with?", delay: 1500, thinkingTime: 2500, agentName: 'David Park' },
       { type: 'customer', text: "That was fast! No, that's everything. Thank you so much, David.", delay: 2000 },
       { type: 'agent', text: "You're very welcome, Varun. With your track record, it was an easy decision. Enjoy the increased flexibility, and don't hesitate to call if you need anything in the future. Have a great day!", delay: 1200, thinkingTime: 1200, agentName: 'David Park' },
       { type: 'system', text: 'Call ended — Resolved by Agent David Park', delay: 1500, state: 'ended' },
@@ -2493,7 +2442,7 @@ const SCENARIOS = {
     agentTeam: 'Mortgage Services',
     resolution: {
       intent: 'Mortgage Rate Renegotiation',
-      action: 'Rate lock at 5.2% offered, refinancing application initiated, appraisal scheduled',
+      action: 'Rate lock at 4.9% offered, refinancing application initiated, appraisal scheduled',
       botAttempt: 'Retrieved current mortgage details, identified rate difference',
       escalationReason: 'Mortgage modifications require licensed loan officer',
       outcome: 'Escalated to Agent',
@@ -2502,8 +2451,8 @@ const SCENARIOS = {
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
       { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
-      { type: 'customer', text: "Hi, I've been seeing that mortgage rates have come down recently and I'm wondering if I can renegotiate the rate on my current mortgage. I'm paying 6.1% right now and I think I should be able to do better.", delay: 2800 },
-      { type: 'bot', text: "I appreciate you reaching out about this, Varun. Let me pull up your mortgage details.\n\nHere's your current mortgage summary:\n• Mortgage Account: ***4401\n• Current Rate: 6.1% fixed\n• Original Amount: $420,000\n• Current Balance: $385,200\n• Monthly Payment: $2,548.00\n• Remaining Term: 27 years\n\nYou're right that current market rates are lower than your existing rate. Since mortgage rate modifications and refinancing require a detailed review by a licensed loan officer, let me connect you with our mortgage services team.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
+      { type: 'customer', text: "Hi, I've been seeing that mortgage rates have come down recently and I'm wondering if I can renegotiate the rate on my current mortgage. I'm paying 5.8% right now and I think I should be able to do better.", delay: 2800 },
+      { type: 'bot', text: "I appreciate you reaching out about this, Varun. Let me pull up your mortgage details.\n\nHere's your current mortgage summary:\n• Mortgage Account: ***4401\n• Current Rate: 5.8% fixed\n• Original Amount: $350,000\n• Current Balance: $287,000\n• Monthly Payment: $1,815.00\n• Remaining Term: 24 years\n\nYou're right that current market rates are lower than your existing rate. Since mortgage rate modifications and refinancing require a detailed review by a licensed loan officer, let me connect you with our mortgage services team.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
       { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
       {
         type: 'transfer-summary',
@@ -2511,17 +2460,17 @@ const SCENARIOS = {
         data: {
           customer: 'Varun Khator (Platinum)',
           issue: 'Mortgage rate renegotiation request',
-          currentRate: '6.1% fixed, 27 years remaining',
-          currentBalance: '$385,200 (original $420,000)',
-          monthlyPayment: '$2,548.00',
+          currentRate: '5.8% fixed, 24 years remaining',
+          currentBalance: '$287,000 (original $350,000)',
+          monthlyPayment: '$1,815.00',
           botActions: 'Retrieved mortgage details, confirmed rate is above current market',
           recommendation: 'Customer has strong payment history — good candidate for rate reduction',
         },
       },
       { type: 'system', text: 'Connected to Agent Rachel Torres — Mortgage Services', delay: 2500, state: 'connected-agent', agentName: 'Rachel Torres' },
-      { type: 'agent', text: "Hi Varun, this is Rachel Torres from mortgage services. I've reviewed your mortgage details from the AI assistantand your account history.\n\nGood news — based on your excellent payment history and current market conditions, I can offer you a couple of options:\n\n• Option A: Rate reduction to 5.2% fixed — saves you approximately $215/month\n• Option B: Refinance to a 20-year term at 4.9% — slightly higher payment but saves over $78,000 in total interest\n\nBoth options would require a property appraisal, which we can schedule at no cost to you as a Platinum member.\n\nWhich option sounds more interesting to you?", delay: 1800, thinkingTime: 2800, agentName: 'Rachel Torres' },
+      { type: 'agent', text: "Hi Varun, this is Rachel Torres from mortgage services. I've reviewed your mortgage details from the AI assistantand your account history.\n\nGood news — based on your excellent payment history and current market conditions, I can offer you a couple of options:\n\n• Option A: Rate reduction to 4.9% fixed — saves you approximately $175/month\n• Option B: Refinance to a 20-year term at 4.6% — slightly higher payment but saves over $65,000 in total interest\n\nBoth options would require a property appraisal, which we can schedule at no cost to you as a Platinum member.\n\nWhich option sounds more interesting to you?", delay: 1800, thinkingTime: 2800, agentName: 'Rachel Torres' },
       { type: 'customer', text: "Option A sounds great. The lower monthly payment would really help. What do I need to do to get started?", delay: 2500 },
-      { type: 'agent', text: "Wonderful choice. Here's what I'll set up for you today:\n\n• I'm locking in the 5.2% rate for 60 days while we process everything\n• I'll schedule a property appraisal for next week\n• I'm sending you a refinancing application to your email — it's mostly pre-filled\n• Once the appraisal comes back and you submit the application, we should have everything finalized within 3 to 4 weeks\n\nYour new monthly payment will be approximately $2,333 — a savings of $215 per month. Is there anything else you'd like to know?", delay: 1500, thinkingTime: 2200, agentName: 'Rachel Torres' },
+      { type: 'agent', text: "Wonderful choice. Here's what I'll set up for you today:\n\n• I'm locking in the 4.9% rate for 60 days while we process everything\n• I'll schedule a property appraisal for next week\n• I'm sending you a refinancing application to your email — it's mostly pre-filled\n• Once the appraisal comes back and you submit the application, we should have everything finalized within 3 to 4 weeks\n\nYour new monthly payment will be approximately $1,640 — a savings of $175 per month. Is there anything else you'd like to know?", delay: 1500, thinkingTime: 2200, agentName: 'Rachel Torres' },
       { type: 'customer', text: "No, that sounds perfect. Thanks for all the help, Rachel.", delay: 2000 },
       { type: 'agent', text: "My pleasure, Varun. You'll receive the email within the hour and someone from our appraisal team will call to schedule. Congratulations on the rate reduction — have a great day!", delay: 1200, thinkingTime: 1200, agentName: 'Rachel Torres' },
       { type: 'system', text: 'Call ended — Resolved by Agent Rachel Torres', delay: 1500, state: 'ended' },
@@ -2583,7 +2532,7 @@ const DTMF_SCENARIOS = {
       { type: 'keypress', digit: '2', label: 'Cards and Payments', delay: 1500 },
       { type: 'ivr-menu', text: 'Cards Menu:\nPress 1 for Balance and Transactions\nPress 2 for Lost or Stolen Card\nPress 3 for Billing Disputes\nPress 4 for Other Card Services', delay: 5000 },
       { type: 'keypress', digit: '2', label: 'Lost or Stolen Card', delay: 1200 },
-      { type: 'ivr-menu', text: 'Your card ending in 4829 has been blocked. A replacement card will be mailed within 7 to 10 business days. If you need expedited delivery, press 1. Otherwise, press 2 to confirm.', delay: 6000 },
+      { type: 'ivr-menu', text: 'Your card ending in 5531 has been blocked. A replacement card will be mailed within 7 to 10 business days. If you need expedited delivery, press 1. Otherwise, press 2 to confirm.', delay: 6000 },
       { type: 'keypress', digit: '2', label: 'Confirm standard delivery', delay: 1200 },
       { type: 'ivr-menu', text: 'Your request has been processed. Is there anything else we can help you with? Press 1 for yes, press 2 for no.', delay: 4000 },
       { type: 'keypress', digit: '2', label: 'No, done', delay: 1000 },
@@ -2602,7 +2551,7 @@ const DTMF_SCENARIOS = {
       { type: 'keypress', digit: '3', label: 'Loans', delay: 1500 },
       { type: 'ivr-menu', text: 'Loans Menu:\nPress 1 for Personal Loans\nPress 2 for Home Loans\nPress 3 for Auto Loans\nPress 4 for Loan Payments', delay: 4500 },
       { type: 'keypress', digit: '3', label: 'Auto Loans', delay: 1200 },
-      { type: 'ivr-menu', text: 'Your auto loan account ending in 7742.\nCurrent balance: $18,432 dollars and 67 cents.\nMonthly payment: $487 dollars and 23 cents.\nNext payment due: March 15th.\nTo hear prepayment options, press 1. To repeat, press 2. To return to the main menu, press 3.', delay: 7000 },
+      { type: 'ivr-menu', text: 'Your auto loan account ending in 7712.\nCurrent balance: $14,230 dollars and 67 cents.\nMonthly payment: $487 dollars and 23 cents.\nNext payment due: March 15th.\nTo hear prepayment options, press 1. To repeat, press 2. To return to the main menu, press 3.', delay: 7000 },
       { type: 'keypress', digit: '3', label: 'Return to main menu', delay: 1200 },
       { type: 'system', text: 'Call ended', delay: 500 },
     ],
@@ -2625,7 +2574,7 @@ const DTMF_SCENARIOS = {
       { type: 'agent', text: 'Disputes Department, this is Karen. How can I help you today?', label: 'Agent Karen', delay: 2500 },
       { type: 'customer', text: "Hi, I have two charges I don't recognize on my credit card statement.", delay: 2000 },
       { type: 'agent', text: "I can help with that. Can I have your full name and the last four digits of your card?", label: 'Agent Karen', delay: 2500 },
-      { type: 'customer', text: "Varun Patel, card ending in 4829.", delay: 1800 },
+      { type: 'customer', text: "Varun Khator, card ending in 5531.", delay: 1800 },
       { type: 'agent', text: "Thank you. And which transactions are you disputing? I'll need the date, merchant name, and amount for each one.", label: 'Agent Karen', delay: 3000 },
       { type: 'customer', text: "There's a charge from TechVault for $847.53 on January 15th, and another from QuickFuel for $234 on January 18th.", delay: 2500 },
       { type: 'agent', text: "Got it. I've filed a provisional dispute for both transactions. You'll receive dispute forms in the mail within 5 business days. Please sign and return them. The investigation takes 10 business days.", label: 'Agent Karen', delay: 3500 },
@@ -2741,8 +2690,8 @@ const DTMF_SCENARIOS = {
       { type: 'agent', text: 'Thank you for calling EXL Bank, this is Michael. How can I help?', label: 'Agent Michael', delay: 2500 },
       { type: 'customer', text: "Hi Michael, I'd like to request a credit limit increase on my Visa card.", delay: 2000 },
       { type: 'agent', text: "I'd be happy to help with that. Let me pull up your account. Can you verify your full name and date of birth?", label: 'Agent Michael', delay: 2500 },
-      { type: 'customer', text: "Varun Patel, September 15, 1985.", delay: 1500 },
-      { type: 'agent', text: "Thank you, Varun. I can see your current limit is $15,000. Based on your account history, I'll submit a request for an increase to $25,000. However, this requires a credit review which takes 3–5 business days. You'll receive the decision by mail.", label: 'Agent Michael', delay: 4000 },
+      { type: 'customer', text: "Varun Khator, March 15, 1988.", delay: 1500 },
+      { type: 'agent', text: "Thank you, Varun. I can see your current limit is $25,000. Based on your account history, I'll submit a request for an increase to $35,000. However, this requires a credit review which takes 3–5 business days. You'll receive the decision by mail.", label: 'Agent Michael', delay: 4000 },
       { type: 'customer', text: "Can't you tell me right now if I'm approved?", delay: 1500 },
       { type: 'agent', text: "Unfortunately, credit limit increases over $5,000 require underwriting review. I've submitted the request and it will be prioritized. Is there anything else?", label: 'Agent Michael', delay: 3000 },
       { type: 'system', text: 'Call ended — Resolved by Agent Michael', delay: 500 },
@@ -2767,8 +2716,8 @@ const DTMF_SCENARIOS = {
       { type: 'transfer', text: 'Transferring to Mortgage Specialist...', delay: 2500 },
       { type: 'hold', text: 'On Hold — Secondary Transfer', holdSecs: 30, subtext: 'Please hold while we connect you with the next available specialist.', delay: 0 },
       { type: 'agent', text: 'Mortgage Department, this is Sarah Williams. How can I assist you today?', label: 'Specialist Sarah', delay: 2500 },
-      { type: 'customer', text: "Hi Sarah, I'd like to renegotiate my mortgage rate. I've been a customer for 12 years and rates have dropped significantly.", delay: 2500 },
-      { type: 'agent', text: "Let me look at your mortgage details. I can see your current rate is 5.2% on a 30-year fixed. To explore renegotiation options, I'll need to run a full property and credit assessment. This typically takes 2–3 weeks.", label: 'Specialist Sarah', delay: 4000 },
+      { type: 'customer', text: "Hi Sarah, I'd like to renegotiate my mortgage rate. I've been a customer for about 8 years and rates have dropped significantly.", delay: 2500 },
+      { type: 'agent', text: "Let me look at your mortgage details. I can see your current rate is 5.8% on a 30-year fixed. To explore renegotiation options, I'll need to run a full property and credit assessment. This typically takes 2–3 weeks.", label: 'Specialist Sarah', delay: 4000 },
       { type: 'customer', text: "Two to three weeks? Is there any way to expedite this?", delay: 1500 },
       { type: 'agent', text: "I understand your frustration. For priority processing, I can schedule an in-branch consultation within 5 business days. They'll have full access to your file and can discuss rate options in person. Shall I schedule that?", label: 'Specialist Sarah', delay: 3500 },
       { type: 'customer', text: "I suppose that's the best option. Yes, please schedule it.", delay: 1500 },
@@ -2814,7 +2763,6 @@ const state = {
   timerInterval: null,
   skipMode: false,
   abortController: null,
-  stats: { scenariosRun: 0, botContained: 0, agentEscalated: 0, totalHandleTime: 0 },
   callHistory: [],        // loaded from server/localStorage on init
   // Playback generation counter (incremented on each new scenario to invalidate old async flows)
   playbackGeneration: 0,
@@ -2887,10 +2835,6 @@ const dom = {
   callerAccounts: document.getElementById('callerAccounts'),
   btnEnd: document.getElementById('btnEnd'),
   btnRestart: document.getElementById('btnRestart'),
-  metricContained: document.getElementById('metricContained'),
-  metricEscalated: document.getElementById('metricEscalated'),
-  metricRate: document.getElementById('metricRate'),
-  metricTime: document.getElementById('metricTime'),
   callActions: document.getElementById('callActions'),
   micArea: document.getElementById('micArea'),
   micBtn: document.getElementById('micBtn'),
@@ -4043,7 +3987,6 @@ async function playConversationFrom(startIndex) {
     // Scenario complete
     if (state.isPlaying && gen === state.playbackGeneration) {
       renderResolutionCard(scenario);
-      updateStats(scenario.flow === 'contained' ? 'contained' : 'escalated', state.timerSeconds);
     }
   } catch (e) {
     if (e.name === 'AbortError') return;
@@ -4083,7 +4026,9 @@ function renderDynamicMessage(msg, text, entities, isDynamic) {
 }
 
 function updateDynamicMetric() {
-  dom.metricDynamic.textContent = state.dynamicTurns + ' / ' + state.totalCustomerTurns;
+  if (dom.metricDynamic) {
+    dom.metricDynamic.textContent = state.dynamicTurns + ' / ' + state.totalCustomerTurns;
+  }
 }
 
 // ===== Freeform Call =====
@@ -4213,57 +4158,6 @@ async function startFreeformCall() {
     if (e.name === 'AbortError') return;
     throw e;
   }
-}
-
-// ===== Stats =====
-function updateStats(outcome, handleTimeSeconds) {
-  // Always increment — each call is a new event
-  state.stats.scenariosRun++;
-  state.stats.totalHandleTime += handleTimeSeconds;
-  if (outcome === 'contained') {
-    state.stats.botContained++;
-  } else {
-    state.stats.agentEscalated++;
-  }
-  renderStats();
-  // Send incremental update to server (authoritative)
-  fetch('/api/stats', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: outcome, handleTime: handleTimeSeconds }),
-  }).then(r => r.json()).then(serverStats => {
-    state.stats = serverStats;
-    renderStats();
-  }).catch(() => {});
-}
-
-function renderStats() {
-  dom.metricContained.textContent = state.stats.botContained;
-  dom.metricEscalated.textContent = state.stats.agentEscalated;
-
-  if (state.stats.scenariosRun > 0) {
-    const rate = Math.round((state.stats.botContained / state.stats.scenariosRun) * 100);
-    dom.metricRate.textContent = rate + '%';
-    const avg = Math.round(state.stats.totalHandleTime / state.stats.scenariosRun);
-    dom.metricTime.textContent = formatTime(avg);
-  } else {
-    dom.metricRate.textContent = '—';
-    dom.metricTime.textContent = '—';
-  }
-}
-
-function resetStats() {
-  if (!confirm('Reset all metrics to zero?')) return;
-  fetch('/api/stats', { method: 'DELETE' })
-    .then(r => r.json())
-    .then(data => {
-      state.stats = data;
-      renderStats();
-    })
-    .catch(() => {
-      state.stats = { scenariosRun: 0, botContained: 0, agentEscalated: 0, totalHandleTime: 0 };
-      renderStats();
-    });
 }
 
 // ===== Sidebar Tabs =====
@@ -4701,16 +4595,24 @@ async function playAiSideCompare(scenario, scenarioId) {
       if (gen !== state.playbackGeneration) return;
       const msg = { ...messages[i] };
 
-      // Template variable substitution
+      // Template variable substitution (reuse full resolveTemplate for indexed + computed vars)
       if (msg.text) {
-        msg.text = msg.text.replace(/\{\{(\w+)\}\}/g, (_, k) => {
-          const v = vars[k];
-          return Array.isArray(v) ? v[Math.floor(Math.random() * v.length)] : (v || _);
-        });
+        msg.text = resolveTemplate(msg.text, scenarioId);
       }
 
       // Update call state if specified
-      if (msg.state) updateCallState(msg.state);
+      if (msg.state) updateCallState(msg.state, msg.agentName);
+
+      // Transfer summary — resolve templates in data fields
+      if (msg.type === 'transfer-summary') {
+        const resolvedData = {};
+        for (const [key, value] of Object.entries(msg.data)) {
+          resolvedData[key] = resolveTemplate(value, scenarioId);
+        }
+        renderTransferSummary(resolvedData);
+        if (msg.delay) await sleepCompare(msg.delay, gen);
+        continue;
+      }
 
       // Show thinking indicator for bot/agent messages
       if ((msg.type === 'bot' || msg.type === 'agent') && msg.thinkingTime) {
@@ -5621,8 +5523,6 @@ function endAiCall() {
   // Show resolution card if the call completed normally
   if (state.aiEndCallData) {
     renderAiResolutionCard();
-    const aiFlow = state.aiEndCallData.outcome === 'escalated' ? 'escalated' : 'contained';
-    updateStats(aiFlow, state.timerSeconds);
 
     // Save to call history — capture transcript before any cleanup
     const customer = CUSTOMER_DB[CALLER_PHONE];
@@ -5673,12 +5573,6 @@ updateThemeIcons();
 renderProfileSelector();
 document.querySelector('.sidebar').classList.add('open');
 showCallPrompt();
-
-// Restore persistent metrics from server
-fetch('/api/stats').then(r => r.json()).then(data => {
-  state.stats = data;
-  renderStats();
-}).catch(() => {});
 
 // Load call history
 loadHistory();
