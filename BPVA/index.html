@@ -26,8 +26,8 @@
       to { opacity: 1; transform: translateY(0); }
     }
     @keyframes pulse-ring {
-      0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.5); }
-      100% { box-shadow: 0 0 0 12px rgba(79, 70, 229, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(251, 78, 11, 0.5); }
+      100% { box-shadow: 0 0 0 12px rgba(251, 78, 11, 0); }
     }
     @keyframes fade-in {
       from { opacity: 0; }
@@ -67,7 +67,7 @@
     .typing-cursor::after {
       content: '|';
       animation: typing-cursor 0.7s infinite;
-      color: #4F46E5;
+      color: #fb4e0b;
       font-weight: 700;
     }
 
@@ -109,7 +109,7 @@
       <!-- Logo -->
       <div class="flex items-center gap-2">
         <img src="../assets/exl-logo.svg" alt="EXL" class="h-6" />
-        <span class="font-bold text-lg text-gray-900 dark:text-white">Intelli<span class="text-indigo-600">Retrieve</span></span>
+        <span class="font-bold text-lg text-gray-900 dark:text-white">Intelli<span class="text-orange-600">Retrieve</span></span>
       </div>
     </div>
     <div id="view-title" class="hidden sm:block text-sm font-medium text-gray-500 dark:text-gray-400">Knowledge Base Chat</div>
@@ -151,7 +151,7 @@
       <div class="flex-1 overflow-y-auto px-3">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">History</span>
-          <button onclick="newChat()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">+ New Chat</button>
+          <button onclick="newChat()" class="text-xs text-orange-400 hover:text-orange-300 font-medium">+ New Chat</button>
         </div>
         <div id="conv-history" class="space-y-1">
           <!-- Populated by JS -->
@@ -176,8 +176,8 @@
         <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-6">
           <!-- Welcome screen -->
           <div id="welcome-screen" class="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
-            <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center mb-4">
-              <svg class="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/50 rounded-2xl flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to Agent Assist</h2>
             <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md">Ask questions about insurance policies, claims processing, coverage details, and more. Our AI searches through your knowledge base to find accurate answers.</p>
@@ -194,8 +194,8 @@
           <div class="max-w-3xl mx-auto">
             <div id="followup-chips" class="flex flex-wrap gap-2 mb-2 hidden"></div>
             <div class="flex gap-2">
-              <input id="chat-input" type="text" placeholder="Ask a question about insurance claims..." class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm" />
-              <button id="send-btn" onclick="handleSend()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <input id="chat-input" type="text" placeholder="Ask a question about insurance claims..." class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm" />
+              <button id="send-btn" onclick="handleSend()" class="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                 Send
               </button>
@@ -210,9 +210,9 @@
           <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Document Ingestion</h2>
 
           <!-- Upload Zone -->
-          <div id="upload-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors cursor-pointer mb-6" onclick="document.getElementById('file-input').click()">
+          <div id="upload-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-orange-500 dark:hover:border-orange-500 transition-colors cursor-pointer mb-6" onclick="document.getElementById('file-input').click()">
             <svg class="w-10 h-10 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Drag & drop files here, or <span class="text-indigo-600 dark:text-indigo-400">click to upload</span></p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Drag & drop files here, or <span class="text-orange-600 dark:text-orange-400">click to upload</span></p>
             <p class="text-xs text-gray-500 mt-1">Supports PDF, DOCX, TXT (Max 50MB)</p>
           </div>
           <input type="file" id="file-input" class="hidden" accept=".pdf,.docx,.doc,.txt" />
@@ -245,7 +245,7 @@
           <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
             <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Knowledge Base Documents</h3>
-              <span id="doc-count-badge" class="text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full font-medium">8 documents</span>
+              <span id="doc-count-badge" class="text-xs bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 px-2.5 py-1 rounded-full font-medium">8 documents</span>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full">
@@ -358,9 +358,9 @@
       <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-800 flex items-center gap-4">
         <span class="text-xs text-gray-500">Relevance Score:</span>
         <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <div id="modal-relevance-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-500"></div>
+          <div id="modal-relevance-bar" class="h-full bg-orange-600 rounded-full transition-all duration-500"></div>
         </div>
-        <span id="modal-relevance-text" class="text-xs font-semibold text-indigo-600"></span>
+        <span id="modal-relevance-text" class="text-xs font-semibold text-orange-600"></span>
       </div>
     </div>
   </div>
@@ -729,7 +729,7 @@ function renderUserMessage(text) {
   const container = document.getElementById('messages-container');
   const div = document.createElement('div');
   div.className = 'flex justify-end animate-slide-up';
-  div.innerHTML = `<div class="max-w-[75%] bg-indigo-600 text-white px-4 py-2.5 rounded-2xl rounded-br-md text-sm">${escapeHtml(text)}</div>`;
+  div.innerHTML = `<div class="max-w-[75%] bg-orange-600 text-white px-4 py-2.5 rounded-2xl rounded-br-md text-sm">${escapeHtml(text)}</div>`;
   container.appendChild(div);
   scrollChat();
 }
@@ -740,14 +740,14 @@ function renderThinking() {
   div.id = 'thinking-indicator';
   div.className = 'flex gap-3 animate-slide-up';
   div.innerHTML = `
-    <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-      <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
+    <div class="w-8 h-8 bg-orange-100 dark:bg-orange-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+      <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
     </div>
     <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3">
       <div class="flex items-center gap-1.5 mb-1">
-        <div class="w-2 h-2 bg-indigo-500 rounded-full dot-bounce"></div>
-        <div class="w-2 h-2 bg-indigo-500 rounded-full dot-bounce"></div>
-        <div class="w-2 h-2 bg-indigo-500 rounded-full dot-bounce"></div>
+        <div class="w-2 h-2 bg-orange-500 rounded-full dot-bounce"></div>
+        <div class="w-2 h-2 bg-orange-500 rounded-full dot-bounce"></div>
+        <div class="w-2 h-2 bg-orange-500 rounded-full dot-bounce"></div>
       </div>
       <p id="thinking-status" class="text-xs text-gray-500 dark:text-gray-400">Searching knowledge base...</p>
     </div>`;
@@ -806,8 +806,8 @@ function renderBotMessage(match) {
               <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${section.title}</p>
             </div>
             <div class="flex items-center gap-2 ml-3">
-              <span class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">${s.relevance}%</span>
-              <button onclick="openSourceModal('${s.docId}','${s.sectionId}',${s.relevance})" class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">View</button>
+              <span class="text-xs text-orange-600 dark:text-orange-400 font-medium">${s.relevance}%</span>
+              <button onclick="openSourceModal('${s.docId}','${s.sectionId}',${s.relevance})" class="text-xs bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-1 rounded font-medium hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors">View</button>
             </div>
           </div>`;
         }).join('')}
@@ -816,8 +816,8 @@ function renderBotMessage(match) {
   }
 
   div.innerHTML = `
-    <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-      <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
+    <div class="w-8 h-8 bg-orange-100 dark:bg-orange-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+      <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
     </div>
     <div class="max-w-[85%]">
       <div class="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3">
@@ -825,7 +825,7 @@ function renderBotMessage(match) {
         ${match.confidence > 0 ? `
         <div class="meta-area hidden mt-3 flex items-center gap-3">
           <span class="text-xs px-2 py-0.5 rounded-full font-medium ${confidenceClass}">${match.confidence}% confidence</span>
-          ${match.sources && match.sources.length > 0 ? `<button onclick="toggleSources(this)" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Show sources (${match.sources.length})</button>` : ''}
+          ${match.sources && match.sources.length > 0 ? `<button onclick="toggleSources(this)" class="text-xs text-orange-600 dark:text-orange-400 hover:underline font-medium">Show sources (${match.sources.length})</button>` : ''}
         </div>` : ''}
         ${sourcesHtml}
       </div>
@@ -950,7 +950,7 @@ function showFollowUpChips(match) {
   if (chips.length > 0) {
     chips.forEach(text => {
       const chip = document.createElement('button');
-      chip.className = 'text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-indigo-300 transition-colors';
+      chip.className = 'text-xs px-3 py-1.5 rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-orange-300 transition-colors';
       chip.textContent = text;
       chip.onclick = () => handleSend(text);
       container.appendChild(chip);
@@ -1013,8 +1013,8 @@ function loadConversation(convId) {
         const div = document.createElement('div');
         div.className = 'flex gap-3';
         div.innerHTML = `
-          <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
+          <div class="w-8 h-8 bg-orange-100 dark:bg-orange-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 00-.659 1.591v1.278a1.768 1.768 0 01-3.742 0v-1.278a2.25 2.25 0 00-.659-1.591L9 14.5"/></svg>
           </div>
           <div class="max-w-[85%] bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-bl-md px-4 py-3">
             <div class="chat-markdown text-sm text-gray-800 dark:text-gray-200">${marked.parse(msg.text)}</div>
@@ -1118,8 +1118,8 @@ async function handleFileUpload(file) {
 
   // File info
   document.getElementById('pipeline-file-info').innerHTML = `
-    <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
-      <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center">
+      <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
     </div>
     <div>
       <p class="text-sm font-semibold text-gray-900 dark:text-white">${doc.name}</p>
@@ -1164,18 +1164,18 @@ async function handleFileUpload(file) {
   const activateStep = (i) => {
     const icon = document.getElementById(`step-icon-${i}`);
     icon.classList.remove('border-gray-300', 'dark:border-gray-600');
-    icon.classList.add('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-900/30', 'animate-pulse-ring');
+    icon.classList.add('border-orange-500', 'bg-orange-50', 'dark:bg-orange-900/30', 'animate-pulse-ring');
     icon.querySelector('svg').classList.remove('text-gray-400');
-    icon.querySelector('svg').classList.add('text-indigo-600', 'dark:text-indigo-400');
-    document.getElementById(`step-label-${i}`).classList.add('text-indigo-600', 'dark:text-indigo-400');
+    icon.querySelector('svg').classList.add('text-orange-600', 'dark:text-orange-400');
+    document.getElementById(`step-label-${i}`).classList.add('text-orange-600', 'dark:text-orange-400');
   };
 
   const completeStep = (i) => {
     const icon = document.getElementById(`step-icon-${i}`);
-    icon.classList.remove('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-900/30', 'animate-pulse-ring');
+    icon.classList.remove('border-orange-500', 'bg-orange-50', 'dark:bg-orange-900/30', 'animate-pulse-ring');
     icon.classList.add('border-green-500', 'bg-green-50', 'dark:bg-green-900/30');
     icon.innerHTML = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-    document.getElementById(`step-label-${i}`).classList.remove('text-indigo-600', 'dark:text-indigo-400');
+    document.getElementById(`step-label-${i}`).classList.remove('text-orange-600', 'dark:text-orange-400');
     document.getElementById(`step-label-${i}`).classList.add('text-green-600', 'dark:text-green-400');
   };
 
@@ -1252,11 +1252,11 @@ function initCharts() {
       datasets: [{
         label: 'Queries',
         data: [145, 203, 178, 234, 198, 87, 102],
-        borderColor: '#4F46E5',
+        borderColor: '#fb4e0b',
         backgroundColor: 'rgba(79, 70, 229, 0.1)',
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: '#4F46E5',
+        pointBackgroundColor: '#fb4e0b',
         pointRadius: 4
       }]
     },
@@ -1271,7 +1271,7 @@ function initCharts() {
       datasets: [{
         label: 'Queries',
         data: [342, 289, 198, 156, 134, 128],
-        backgroundColor: ['#4F46E5', '#7C3AED', '#2563EB', '#0891B2', '#059669', '#D97706'],
+        backgroundColor: ['#fb4e0b', '#7C3AED', '#2563EB', '#0891B2', '#059669', '#D97706'],
         borderRadius: 6
       }]
     },
@@ -1366,7 +1366,7 @@ function renderStarterChips() {
   const container = document.getElementById('starter-chips');
   STARTER_QUESTIONS.forEach(q => {
     const chip = document.createElement('button');
-    chip.className = 'text-sm px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:border-indigo-300 hover:shadow-sm transition-all';
+    chip.className = 'text-sm px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:border-orange-300 hover:shadow-sm transition-all';
     chip.textContent = q;
     chip.onclick = () => handleSend(q);
     container.appendChild(chip);

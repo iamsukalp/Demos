@@ -36,8 +36,8 @@ const SCENARIOS = [
         {
           label: "Total Deposits",
           data: [38.2, 38.8, 38.5, 38.9, 39.4, 39.8, 40.2, 40.9, 41.3, 41.8, 42.3, 42.8],
-          borderColor: "#137fec",
-          backgroundColor: "rgba(19,127,236,0.08)",
+          borderColor: "#fb4e0b",
+          backgroundColor: "rgba(251,78,11,0.08)",
           fill: true,
           tension: 0.3
         },
@@ -124,7 +124,7 @@ ORDER BY month;`,
         {
           label: "Portfolio Share",
           data: [45, 25, 12, 10, 8],
-          backgroundColor: ["#137fec", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"],
+          backgroundColor: ["#fb4e0b", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"],
           borderWidth: 0,
           hoverOffset: 8
         }
@@ -200,8 +200,8 @@ ORDER BY outstanding_mn DESC;`,
         {
           label: "Gross NPA %",
           data: [2.8, 2.7, 2.6, 2.5, 2.4, 2.3, 2.2, 2.1, 2.1, 2.0, 1.9, 1.9],
-          borderColor: "#137fec",
-          backgroundColor: "rgba(19,127,236,0.08)",
+          borderColor: "#fb4e0b",
+          backgroundColor: "rgba(251,78,11,0.08)",
           fill: true,
           tension: 0.3
         },
@@ -292,7 +292,7 @@ ORDER BY month;`,
         {
           label: "Interest Income",
           data: [1420, 1480, 1540, 1580],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4
         },
         {
@@ -395,7 +395,7 @@ ORDER BY q.quarter;`,
         {
           label: "Revenue ($M)",
           data: [285, 242, 228, 195, 182, 168, 155, 142],
-          backgroundColor: ["#137fec", "#137fec", "#137fec", "#10b981", "#10b981", "#10b981", "#f59e0b", "#f59e0b"],
+          backgroundColor: ["#fb4e0b", "#fb4e0b", "#fb4e0b", "#10b981", "#10b981", "#10b981", "#f59e0b", "#f59e0b"],
           borderRadius: 4
         }
       ],
@@ -473,8 +473,8 @@ LIMIT 8;`,
         {
           label: "Mobile",
           data: [2.9, 3.0, 3.1, 3.2, 3.4, 3.5, 3.6, 3.8, 3.9, 4.0, 4.1, 4.2],
-          borderColor: "#137fec",
-          backgroundColor: "rgba(19,127,236,0.08)",
+          borderColor: "#fb4e0b",
+          backgroundColor: "rgba(251,78,11,0.08)",
           fill: true,
           tension: 0.3
         },
@@ -570,7 +570,7 @@ ORDER BY month;`,
         {
           label: "Risk Distribution",
           data: [42, 28, 18, 8, 4],
-          backgroundColor: ["#10b981", "#137fec", "#f59e0b", "#ef4444", "#7c3aed"],
+          backgroundColor: ["#10b981", "#fb4e0b", "#f59e0b", "#ef4444", "#7c3aed"],
           borderWidth: 0,
           hoverOffset: 8
         }
@@ -657,7 +657,7 @@ ORDER BY
         {
           label: "Fee Income ($M)",
           data: [310, 245, 125, 95, 65, 50],
-          backgroundColor: ["#137fec", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#94a3b8"],
+          backgroundColor: ["#fb4e0b", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#94a3b8"],
           borderRadius: 4
         }
       ],
@@ -734,7 +734,7 @@ ORDER BY fy24_mn DESC;`,
         {
           label: "Digital",
           data: [1800, 1900, 2200, 2400, 2600, 2800, 3000, 3100, 3200, 3400],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4,
           stack: "stack1"
         },
@@ -822,7 +822,7 @@ ORDER BY 1;`,
         {
           label: "HNW",
           data: [23.8, 24.2, 24.8, 25.2],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4
         },
         {
@@ -926,7 +926,7 @@ ORDER BY total_revenue DESC;`,
         {
           label: "New Disbursements",
           data: [1.9, 2.1, 2.6, 2.4],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4
         },
         {
@@ -1030,8 +1030,8 @@ ORDER BY f.quarter;`,
         {
           label: "Blended",
           data: [6.38, 6.42, 6.48, 6.52, 6.56, 6.60, 6.64, 6.68, 6.72, 6.76, 6.78, 6.80],
-          borderColor: "#137fec",
-          backgroundColor: "rgba(19,127,236,0.08)",
+          borderColor: "#fb4e0b",
+          backgroundColor: "rgba(251,78,11,0.08)",
           fill: true,
           tension: 0.3
         },
@@ -1122,7 +1122,7 @@ ORDER BY current_yield DESC;`,
         {
           label: "Provisions ($M)",
           data: [270, 250, 98, 95, 70],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4
         },
         {
@@ -1203,8 +1203,8 @@ ORDER BY provisions_mn DESC;`,
         {
           label: "Total AUM",
           data: [16.0, 16.3, 16.5, 16.8, 17.0, 17.2, 17.5, 17.8, 18.0, 18.1, 18.3, 18.5],
-          borderColor: "#137fec",
-          backgroundColor: "rgba(19,127,236,0.08)",
+          borderColor: "#fb4e0b",
+          backgroundColor: "rgba(251,78,11,0.08)",
           fill: true,
           tension: 0.3
         },
@@ -1294,8 +1294,8 @@ ORDER BY month;`,
         {
           label: "CIR %",
           data: [58, 57.5, 57, 56.5, 56, 55.5, 55, 54.2, 53.5, 53, 52.5, 52],
-          borderColor: "#137fec",
-          backgroundColor: "rgba(19,127,236,0.08)",
+          borderColor: "#fb4e0b",
+          backgroundColor: "rgba(251,78,11,0.08)",
           fill: true,
           tension: 0.3
         },
@@ -1382,7 +1382,7 @@ ORDER BY month;`,
         {
           label: "Allocation",
           data: [40, 25, 15, 12, 8],
-          backgroundColor: ["#137fec", "#10b981", "#f59e0b", "#8b5cf6", "#94a3b8"],
+          backgroundColor: ["#fb4e0b", "#10b981", "#f59e0b", "#8b5cf6", "#94a3b8"],
           borderWidth: 0,
           hoverOffset: 8
         }
@@ -1455,7 +1455,7 @@ ORDER BY value_mn DESC;`,
         {
           label: "LCR",
           data: [128, 133, 138, 142],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4
         },
         {
@@ -1551,7 +1551,7 @@ ORDER BY quarter;`,
         {
           label: "Actual",
           data: [13.2, 14.8, 17.1, 6.8, 142, 118],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4
         },
         {
@@ -1631,7 +1631,7 @@ ORDER BY rm.actual_value - rm.regulatory_minimum DESC;`,
         {
           label: "Actual",
           data: [14.8, 3.45, 1.9, 52, 12, 10.9],
-          backgroundColor: "#137fec",
+          backgroundColor: "#fb4e0b",
           borderRadius: 4
         },
         {
@@ -1804,8 +1804,8 @@ ORDER BY
         {
           label: "Attrition Rate",
           data: [0.42, 0.40, 0.38, 0.37, 0.36, 0.35, 0.34, 0.32, 0.31, 0.30, 0.29, 0.28],
-          borderColor: "#137fec",
-          backgroundColor: "rgba(19,127,236,0.08)",
+          borderColor: "#fb4e0b",
+          backgroundColor: "rgba(251,78,11,0.08)",
           fill: true,
           tension: 0.3
         },
