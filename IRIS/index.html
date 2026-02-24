@@ -1763,6 +1763,82 @@
       border-color: #6EE7B7;
       color: #6EE7B7;
     }
+    /* ===== Settings Panel ===== */
+    .settings-panel {
+      display: none;
+      position: absolute;
+      top: 56px;
+      right: 80px;
+      width: 280px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      padding: 16px;
+      z-index: 1000;
+    }
+    .settings-panel.open { display: block; }
+    .settings-panel__title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray-500);
+      margin-bottom: 12px;
+    }
+    .settings-panel__group { margin-bottom: 12px; }
+    .settings-panel__group:last-child { margin-bottom: 0; }
+    .settings-panel__label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+    }
+    .settings-panel select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      font-size: 13px;
+      background: var(--white);
+      color: var(--navy);
+    }
+    .settings-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--navy);
+    }
+    .settings-toggle input { display: none; }
+    .settings-toggle__slider {
+      width: 36px; height: 20px;
+      background: var(--gray-300);
+      border-radius: 10px;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .settings-toggle__slider::after {
+      content: '';
+      width: 16px; height: 16px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px; left: 2px;
+      transition: transform 0.2s;
+    }
+    .settings-toggle input:checked + .settings-toggle__slider { background: var(--orange); }
+    .settings-toggle input:checked + .settings-toggle__slider::after { transform: translateX(16px); }
+    html.dark .settings-panel { background: #1E293B; border-color: #334155; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    html.dark .settings-panel__title { color: #94A3B8; }
+    html.dark .settings-toggle { color: #F1F5F9; }
+    html.dark .settings-toggle__slider { background: #475569; }
+    html.dark .settings-panel select { background: #0F172A; border-color: #334155; color: #F1F5F9; }
+    html.dark .settings-panel__label { color: #94A3B8; }
   </style>
   <script>
     // Anti-flash: apply dark mode before paint
@@ -1789,6 +1865,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/></svg>
         Compare
       </button>
+      <button class="theme-toggle" id="btnSettings" onclick="toggleSettings()" title="Audio settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
         <svg id="sunIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>
         <svg id="moonIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -1798,6 +1877,42 @@
       </a>
     </div>
   </header>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-panel__title">Audio Settings</div>
+    <div class="settings-panel__group">
+      <label class="settings-toggle">
+        <span>Noise Suppression</span>
+        <input type="checkbox" id="settingNoiseSuppression" checked onchange="saveAudioSettings()">
+        <span class="settings-toggle__slider"></span>
+      </label>
+      <label class="settings-toggle">
+        <span>Echo Cancellation</span>
+        <input type="checkbox" id="settingEchoCancellation" checked onchange="saveAudioSettings()">
+        <span class="settings-toggle__slider"></span>
+      </label>
+      <label class="settings-toggle">
+        <span>Auto Gain Control</span>
+        <input type="checkbox" id="settingAutoGain" checked onchange="saveAudioSettings()">
+        <span class="settings-toggle__slider"></span>
+      </label>
+    </div>
+    <div class="settings-panel__group">
+      <label class="settings-panel__label">Environment</label>
+      <select id="settingEnvironment" onchange="applyEnvironmentPreset()">
+        <option value="default">Default</option>
+        <option value="quiet">Quiet Room</option>
+        <option value="office">Office</option>
+        <option value="noisy">Noisy Environment</option>
+      </select>
+    </div>
+    <div class="settings-panel__group">
+      <label class="settings-panel__label">Silence Detection <span id="silenceValue" style="float:right;font-weight:600;">3.0s</span></label>
+      <input type="range" id="settingSilenceDuration" min="500" max="5000" step="250" value="3000" oninput="updateSilenceLabel(this.value); saveAudioSettings()" style="width:100%;accent-color:var(--accent);">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-top:2px;"><span>0.5s (fast)</span><span>5s (patient)</span></div>
+    </div>
+  </div>
 
 
   <!-- App Layout -->
@@ -3991,6 +4106,29 @@ async function playConversationFrom(startIndex) {
     // Scenario complete
     if (state.isPlaying && gen === state.playbackGeneration) {
       renderResolutionCard(scenario);
+      stopTimer();
+      updateCallState('ended');
+      renderMessage({ type: 'system', text: 'Call ended' });
+
+      // Save to call history
+      const customer = CUSTOMER_DB[CALLER_PHONE];
+      const capturedMessages = scenario.messages
+        .filter(m => m.type === 'bot' || m.type === 'customer' || m.type === 'agent')
+        .map(m => ({
+          role: m.type === 'customer' ? 'customer' : 'bot',
+          text: resolveTemplate(m.text, scenario.id)
+        }));
+      saveCallToHistory({
+        timestamp: new Date().toLocaleString(),
+        customerName: customer ? customer.name : 'Unknown',
+        customerPhone: CALLER_PHONE,
+        duration: formatTime(state.timerSeconds),
+        durationSeconds: state.timerSeconds,
+        intent: scenario.resolution ? scenario.resolution.intent : (scenario.title || 'General Inquiry'),
+        actionsTaken: scenario.resolution ? resolveTemplate(scenario.resolution.action, scenario.id) : '',
+        outcome: scenario.flow || 'contained',
+        messages: capturedMessages,
+      });
     }
   } catch (e) {
     if (e.name === 'AbortError') return;
@@ -4651,6 +4789,26 @@ async function playAiSideCompare(scenario, scenarioId) {
     renderResolutionCard(scenario);
   }
 
+  // Save to call history
+  const customer = CUSTOMER_DB[CALLER_PHONE];
+  const capturedMessages = scenario.messages
+    .filter(m => m.type === 'bot' || m.type === 'customer' || m.type === 'agent')
+    .map(m => ({
+      role: m.type === 'customer' ? 'customer' : 'bot',
+      text: resolveTemplate(m.text, scenarioId)
+    }));
+  saveCallToHistory({
+    timestamp: new Date().toLocaleString(),
+    customerName: customer ? customer.name : 'Unknown',
+    customerPhone: CALLER_PHONE,
+    duration: formatTime(state.aiCompareTimerSeconds),
+    durationSeconds: state.aiCompareTimerSeconds,
+    intent: scenario.resolution ? scenario.resolution.intent : (scenario.title || 'General Inquiry'),
+    actionsTaken: scenario.resolution ? resolveTemplate(scenario.resolution.action, scenarioId) : '',
+    outcome: scenario.flow || 'contained',
+    messages: capturedMessages,
+  });
+
   checkCompareComplete(scenarioId);
 }
 
@@ -4918,7 +5076,7 @@ function connectRealtime(scenarioId) {
   return new Promise((resolve, reject) => {
     // Auto-detect protocol (wss for HTTPS, ws for HTTP) and host for local + deployed
     const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = wsProto + '//' + location.host + '/ws?scenario=' + (scenarioId || '') + '&phone=' + encodeURIComponent(CALLER_PHONE);
+    const wsUrl = wsProto + '//' + location.host + '/ws?scenario=' + (scenarioId || '') + '&phone=' + encodeURIComponent(CALLER_PHONE) + '&silence=' + getSilenceDuration();
     const ws = new WebSocket(wsUrl);
     state.ws = ws;
 
@@ -5252,7 +5410,7 @@ function stopAiAudio() {
 
 async function startMicStreaming() {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: getAudioConstraints() });
     state.aiMicStream = stream;
 
     // AudioContext at 24kHz — resamples mic input automatically
@@ -5572,6 +5730,86 @@ function toggleDarkMode() {
 }
 // Init icons on load
 updateThemeIcons();
+
+// ===== Audio Settings =====
+function toggleSettings() {
+  const panel = document.getElementById('settingsPanel');
+  panel.classList.toggle('open');
+}
+// Close settings panel when clicking outside
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('settingsPanel');
+  const btn = document.getElementById('btnSettings');
+  if (panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
+
+function getAudioConstraints() {
+  return {
+    channelCount: 1,
+    echoCancellation: document.getElementById('settingEchoCancellation').checked,
+    noiseSuppression: document.getElementById('settingNoiseSuppression').checked,
+    autoGainControl: document.getElementById('settingAutoGain').checked,
+  };
+}
+
+function updateSilenceLabel(val) {
+  document.getElementById('silenceValue').textContent = (val / 1000).toFixed(1) + 's';
+}
+
+function getSilenceDuration() {
+  return parseInt(document.getElementById('settingSilenceDuration').value) || 3000;
+}
+
+function saveAudioSettings() {
+  const settings = {
+    noiseSuppression: document.getElementById('settingNoiseSuppression').checked,
+    echoCancellation: document.getElementById('settingEchoCancellation').checked,
+    autoGainControl: document.getElementById('settingAutoGain').checked,
+    environment: document.getElementById('settingEnvironment').value,
+    silenceDuration: getSilenceDuration(),
+  };
+  localStorage.setItem('iris-audio-settings', JSON.stringify(settings));
+}
+
+function loadAudioSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('iris-audio-settings'));
+    if (!saved) return;
+    document.getElementById('settingNoiseSuppression').checked = saved.noiseSuppression !== false;
+    document.getElementById('settingEchoCancellation').checked = saved.echoCancellation !== false;
+    document.getElementById('settingAutoGain').checked = saved.autoGainControl !== false;
+    if (saved.environment) document.getElementById('settingEnvironment').value = saved.environment;
+    if (saved.silenceDuration) {
+      document.getElementById('settingSilenceDuration').value = saved.silenceDuration;
+      updateSilenceLabel(saved.silenceDuration);
+    }
+  } catch (e) {}
+}
+
+function applyEnvironmentPreset() {
+  const env = document.getElementById('settingEnvironment').value;
+  const ns = document.getElementById('settingNoiseSuppression');
+  const ec = document.getElementById('settingEchoCancellation');
+  const ag = document.getElementById('settingAutoGain');
+  switch (env) {
+    case 'quiet':
+      ns.checked = true; ec.checked = true; ag.checked = false;
+      break;
+    case 'office':
+      ns.checked = true; ec.checked = true; ag.checked = true;
+      break;
+    case 'noisy':
+      ns.checked = true; ec.checked = true; ag.checked = true;
+      break;
+    default:
+      ns.checked = true; ec.checked = true; ag.checked = true;
+  }
+  saveAudioSettings();
+}
+
+loadAudioSettings();
 
 // Init profile selector and open sidebar
 renderProfileSelector();

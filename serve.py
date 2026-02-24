@@ -266,7 +266,8 @@ async def ws_relay(request):
 
     scenario_id = request.query.get('scenario') or None
     phone = request.query.get('phone') or None
-    print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}")
+    silence_ms = int(request.query.get('silence', 3000))
+    print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}, silence={silence_ms}ms")
 
     # Upgrade to WebSocket
     browser_ws = web.WebSocketResponse(max_msg_size=2**24)
@@ -311,7 +312,7 @@ async def ws_relay(request):
             print(f"  [WS] Got session.created")
             await browser_ws.send_str(session_created)
 
-            config = build_session_config(scenario_id, customer_context=customer_context, phone=phone)
+            config = build_session_config(scenario_id, customer_context=customer_context, phone=phone, silence_ms=silence_ms)
             await openai_ws.send(json.dumps(config))
             print(f"  [WS] Sent session config")
 

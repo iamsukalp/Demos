@@ -805,7 +805,7 @@ END_CALL_TOOL = {
 
 # ===== Session Config Builder =====
 
-def build_session_config(scenario_id=None, customer_context=None, phone=None):
+def build_session_config(scenario_id=None, customer_context=None, phone=None, silence_ms=3000):
     """Build the session.update config for OpenAI Realtime API."""
     global _active_scenario, _CUST
     _active_scenario = scenario_id
@@ -850,7 +850,7 @@ Greet this customer by name. You already know who they are from the phone number
             "turn_detection": {
                 "type": "server_vad",
                 "threshold": 0.65,
-                "silence_duration_ms": 650,
+                "silence_duration_ms": silence_ms,
                 "prefix_padding_ms": 400
             },
             "tools": tools,

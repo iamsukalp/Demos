@@ -370,6 +370,30 @@
       box-shadow: 0 0 0 3px rgba(251, 78, 11, 0.15);
       animation: hintPulse 1.5s ease-in-out infinite;
     }
+    .keypad__key--valid {
+      border-color: rgba(251, 78, 11, 0.35);
+      box-shadow: 0 0 0 2px rgba(251, 78, 11, 0.08);
+    }
+    .ivr-toast {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: rgba(15, 23, 42, 0.9);
+      color: white;
+      font-size: 12px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .ivr-toast--visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
     .keypad__digit {
       font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1;
     }
@@ -627,6 +651,8 @@
     html.dark .keypad__digit { color: #F1F5F9; }
     html.dark .keypad__letters { color: #64748B; }
     html.dark .keypad__key--correct { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(251, 78, 11, 0.2); }
+    html.dark .keypad__key--valid { border-color: rgba(251, 78, 11, 0.25); box-shadow: 0 0 0 2px rgba(251, 78, 11, 0.1); }
+    html.dark .ivr-toast { background: rgba(30, 41, 59, 0.95); }
     html.dark .keypad-panel__status { border-top-color: #334155; }
     html.dark .keypad-panel__timer-label { color: #64748b; }
     html.dark .btn--restart { background: #1E293B; color: #94A3B8; border-color: #334155; }
@@ -1167,6 +1193,8 @@ const state = {
   waitingForKeypress: false,
   expectedDigit: null,
   expectedLabel: null,
+  validOptions: [],
+  lastMenuText: '',
   timerSeconds: 0,
   timerInterval: null,
   audioCtx: null,
@@ -1382,7 +1410,7 @@ function renderKeypad() {
 function setKeypadEnabled(enabled) {
   dom.keypad.querySelectorAll('.keypad__key').forEach(function(key) {
     key.classList.toggle('keypad__key--disabled', !enabled);
-    key.classList.remove('keypad__key--correct');
+    key.classList.remove('keypad__key--correct', 'keypad__key--valid');
   });
 }
 
@@ -1396,6 +1424,57 @@ function highlightCorrectKey(digit) {
 function updateKeypadHint(text, className) {
   dom.keypadHint.textContent = text;
   dom.keypadHint.className = 'keypad-panel__hint' + (className ? ' ' + className : '');
+}
+
+// ===== Menu Option Parser =====
+function parseMenuOptions(menuText) {
+  var options = [];
+  var seen = {};
+  // Pattern 1: "Press X for/to Y" (standard menus, inline)
+  var r1 = /[Pp]ress\s+(\d+|[*#])\s+(?:for|to)\s+(.+?)(?:[.\n,]|$)/g;
+  var m;
+  while ((m = r1.exec(menuText)) !== null) {
+    if (!seen[m[1]]) { seen[m[1]] = true; options.push({ digit: m[1], label: m[2].trim() }); }
+  }
+  // Pattern 2: "For Y, press X" (language selection menus)
+  var r2 = /[Ff]or\s+(.+?),?\s+[Pp]ress\s+(\d+|[*#])/g;
+  while ((m = r2.exec(menuText)) !== null) {
+    if (!seen[m[2]]) { seen[m[2]] = true; options.push({ digit: m[2], label: m[1].trim() }); }
+  }
+  // Pattern 3: "oprima X" (Spanish option)
+  var r3 = /[Oo]prima\s+(\d+|[*#])/g;
+  while ((m = r3.exec(menuText)) !== null) {
+    if (!seen[m[1]]) { seen[m[1]] = true; options.push({ digit: m[1], label: 'Español' }); }
+  }
+  return options;
+}
+
+function showToast(text) {
+  var existing = document.querySelector('.ivr-toast');
+  if (existing) existing.remove();
+  var el = document.createElement('div');
+  el.className = 'ivr-toast';
+  el.textContent = text;
+  document.querySelector('.transcript-pane').appendChild(el);
+  setTimeout(function() { el.classList.add('ivr-toast--visible'); }, 10);
+  setTimeout(function() {
+    el.classList.remove('ivr-toast--visible');
+    setTimeout(function() { el.remove(); }, 300);
+  }, 2500);
+}
+
+function highlightValidKeys(validOptions, expectedDigit) {
+  dom.keypad.querySelectorAll('.keypad__key').forEach(function(key) {
+    key.classList.remove('keypad__key--correct', 'keypad__key--valid');
+    var keyDigit = key.dataset.digit;
+    var isExpected = keyDigit === expectedDigit.charAt(0);
+    var isValid = validOptions.some(function(o) { return o.digit === keyDigit; });
+    if (isExpected) {
+      key.classList.add('keypad__key--correct');
+    } else if (isValid) {
+      key.classList.add('keypad__key--valid');
+    }
+  });
 }
 
 // ===== DTMF Audio =====
@@ -1428,36 +1507,49 @@ function onKeyPress(digit) {
 
   var expectedFirst = state.expectedDigit.charAt(0);
 
+  // Check if this digit is a valid menu option
+  var validOption = state.validOptions.find(function(o) { return o.digit === digit; });
+
   if (digit === expectedFirst) {
-    // Correct!
-    state.waitingForKeypress = false;
-    setKeypadEnabled(false);
+    // Expected digit — advance along scripted path
+    acceptKeypress(state.expectedDigit, state.expectedLabel);
 
-    // Render keypress in transcript
-    renderDtmfKeypress(state.expectedDigit, state.expectedLabel);
-
-    // Advance past this keypress step
-    var stepDelay = state.steps[state.currentStepIndex].delay || 800;
-    state.currentStepIndex++;
-    state.expectedDigit = null;
-    state.expectedLabel = null;
-    updateKeypadHint('', '');
-
-    // Continue advancing after delay
-    var gen = state.playbackGeneration;
-    setTimeout(function() {
-      if (gen !== state.playbackGeneration) return;
-      advanceSteps(gen);
-    }, stepDelay);
+  } else if (validOption) {
+    // Valid menu option but not the expected one — accept it, continue along scripted path
+    renderDtmfKeypress(digit, validOption.label);
+    showToast('Demo continues along the ' + state.expectedLabel + ' path');
+    acceptKeypress(state.expectedDigit, null, true);
 
   } else {
-    // Wrong digit
-    updateKeypadHint('Invalid selection. Press ' + expectedFirst + ' for ' + state.expectedLabel, 'keypad-panel__hint--error');
+    // Invalid digit — not in the menu
+    updateKeypadHint('Invalid selection — try one of the highlighted keys', 'keypad-panel__hint--error');
     setTimeout(function() {
       if (!state.waitingForKeypress) return;
       updateKeypadHint('Press ' + expectedFirst + ' for ' + state.expectedLabel, 'keypad-panel__hint--waiting');
     }, 1500);
   }
+}
+
+function acceptKeypress(digit, label, skipRender) {
+  state.waitingForKeypress = false;
+  setKeypadEnabled(false);
+
+  if (!skipRender) {
+    renderDtmfKeypress(digit, label);
+  }
+
+  var stepDelay = state.steps[state.currentStepIndex].delay || 800;
+  state.currentStepIndex++;
+  state.expectedDigit = null;
+  state.expectedLabel = null;
+  state.validOptions = [];
+  updateKeypadHint('', '');
+
+  var gen = state.playbackGeneration;
+  setTimeout(function() {
+    if (gen !== state.playbackGeneration) return;
+    advanceSteps(gen);
+  }, stepDelay);
 }
 
 // Keyboard listener
@@ -1505,6 +1597,7 @@ async function advanceSteps(gen) {
           break;
 
         case 'ivr-menu':
+          state.lastMenuText = step.text;
           await renderDtmfMenu(step.text, gen);
           await sleep(step.delay, gen);
           state.currentStepIndex++;
@@ -1514,8 +1607,9 @@ async function advanceSteps(gen) {
             state.waitingForKeypress = true;
             state.expectedDigit = nextStep.digit;
             state.expectedLabel = nextStep.label;
+            state.validOptions = parseMenuOptions(state.lastMenuText);
             setKeypadEnabled(true);
-            highlightCorrectKey(nextStep.digit);
+            highlightValidKeys(state.validOptions, nextStep.digit);
             updateKeypadHint('Press ' + nextStep.digit.charAt(0) + ' for ' + nextStep.label, 'keypad-panel__hint--waiting');
             return; // Wait for user
           }
@@ -1526,8 +1620,9 @@ async function advanceSteps(gen) {
           state.waitingForKeypress = true;
           state.expectedDigit = step.digit;
           state.expectedLabel = step.label;
+          state.validOptions = parseMenuOptions(state.lastMenuText);
           setKeypadEnabled(true);
-          highlightCorrectKey(step.digit);
+          highlightValidKeys(state.validOptions, step.digit);
           updateKeypadHint('Press ' + step.digit.charAt(0) + ' for ' + step.label, 'keypad-panel__hint--waiting');
           return; // Wait for user
 
@@ -1672,7 +1767,11 @@ function onScenarioComplete() {
   var metrics = DTMF_SCENARIOS[state.currentScenarioId] && DTMF_SCENARIOS[state.currentScenarioId].metrics;
   var title = SCENARIO_TITLES[state.currentScenarioId] && SCENARIO_TITLES[state.currentScenarioId].title || '';
   if (metrics) {
-    showSummary(title, metrics);
+    // Use actual elapsed time instead of pre-defined value
+    var actualMetrics = Object.assign({}, metrics, {
+      totalTime: formatTime(state.timerSeconds)
+    });
+    showSummary(title, actualMetrics);
   }
 }
 

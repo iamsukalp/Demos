@@ -273,6 +273,7 @@ async def relay_handler(browser_ws):
     params = parse_qs(parsed.query)
     scenario_id = params.get('scenario', [None])[0]
     phone = params.get('phone', [None])[0]
+    silence_ms = int(params.get('silence', [3000])[0])
 
     # Look up customer from phone number
     customer_context = None
@@ -312,7 +313,7 @@ async def relay_handler(browser_ws):
             await browser_ws.send(session_created)
 
             # Send session config with system prompt and tools
-            config = build_session_config(scenario_id, customer_context=customer_context, phone=phone)
+            config = build_session_config(scenario_id, customer_context=customer_context, phone=phone, silence_ms=silence_ms)
             await openai_ws.send(json.dumps(config))
 
             # Wait for session.updated confirmation
