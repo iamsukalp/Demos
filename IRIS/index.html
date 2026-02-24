@@ -326,6 +326,13 @@
     }
     .history-card__name { font-size: 13px; font-weight: 600; color: var(--navy); }
     .history-card__time { font-size: 11px; color: var(--gray-500); }
+    .history-card__delete {
+      background: none; border: none; cursor: pointer; padding: 2px 4px;
+      color: var(--gray-400); border-radius: 4px; transition: all 0.15s;
+      opacity: 0; line-height: 1;
+    }
+    .history-card:hover .history-card__delete { opacity: 1; }
+    .history-card__delete:hover { color: var(--red, #ef4444); background: #FEF2F2; }
     .history-card__row { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
     .history-card__badge {
       display: inline-block;
@@ -3713,7 +3720,7 @@ function renderHistory() {
     return;
   }
   container.innerHTML = '';
-  state.callHistory.forEach(h => {
+  state.callHistory.forEach((h, idx) => {
     const card = document.createElement('div');
     card.className = 'history-card';
     card.onclick = () => {
@@ -3725,7 +3732,12 @@ function renderHistory() {
     card.innerHTML =
       '<div class="history-card__header">' +
         '<span class="history-card__name">' + escapeHtml(h.customerName || 'Unknown') + '</span>' +
-        '<span class="history-card__time">' + escapeHtml(h.timestamp || '') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:4px;">' +
+          '<span class="history-card__time">' + escapeHtml(h.timestamp || '') + '</span>' +
+          '<button class="history-card__delete" title="Remove from history">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
+          '</button>' +
+        '</div>' +
       '</div>' +
       '<div class="history-card__row">' +
         '<span class="history-card__badge ' + badgeClass + '">' + badgeText + '</span>' +
@@ -3736,6 +3748,11 @@ function renderHistory() {
         '<div><strong>Phone:</strong> ' + escapeHtml(h.customerPhone || '') + '</div>' +
         '<div><strong>Actions:</strong> ' + escapeHtml(h.actionsTaken || 'None') + '</div>' +
       '</div>';
+    // Wire up delete button
+    card.querySelector('.history-card__delete').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteHistoryItem(idx);
+    });
     container.appendChild(card);
   });
 }
@@ -3789,6 +3806,12 @@ function clearHistory() {
   state.callHistory = [];
   localStorage.removeItem('iris-call-history');
   fetch('/api/history', { method: 'DELETE' }).catch(() => {});
+  renderHistory();
+}
+
+function deleteHistoryItem(index) {
+  state.callHistory.splice(index, 1);
+  localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
   renderHistory();
 }
 
