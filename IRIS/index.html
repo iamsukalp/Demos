@@ -1846,11 +1846,14 @@
     if (localStorage.getItem('exl-theme') !== 'light') {
       document.documentElement.classList.add('dark');
     }
-    // Supabase client init
-    var _supabaseClient = window.supabase.createClient(
-      'https://fdwmywxvjlrqutohonln.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkd215d3h2amxycXV0b2hvbmxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDYyMTEsImV4cCI6MjA4NzUyMjIxMX0.TEKnJ8-_MDYSZM1UpVqtcqxBpzcXL4-s09WHZg6icBE'
-    );
+    // Supabase client init (guarded — CDN may fail to load)
+    var _supabaseClient = null;
+    try {
+      _supabaseClient = window.supabase.createClient(
+        'https://fdwmywxvjlrqutohonln.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkd215d3h2amxycXV0b2hvbmxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDYyMTEsImV4cCI6MjA4NzUyMjIxMX0.TEKnJ8-_MDYSZM1UpVqtcqxBpzcXL4-s09WHZg6icBE'
+      );
+    } catch (e) { console.warn('Supabase init failed:', e); }
   </script>
 </head>
 <body>
@@ -4320,6 +4323,14 @@ function switchSidebarTab(tab) {
 // ===== Call History (Supabase) =====
 async function saveCallToHistory(record) {
   console.log('[IVR] saveCallToHistory:', record.customerName, 'messages:', (record.messages || []).length);
+
+  // Optimistic UI update — show immediately, persist in background
+  state.callHistory.unshift(record);
+  if (state.callHistory.length > 50) state.callHistory = state.callHistory.slice(0, 50);
+  renderHistory();
+
+  // Persist to Supabase in background
+  if (!_supabaseClient) return;
   const row = {
     customer_name: record.customerName || 'Unknown',
     customer_phone: record.customerPhone || '',
@@ -4334,12 +4345,8 @@ async function saveCallToHistory(record) {
     const { data, error } = await _supabaseClient.from('iris_history').insert([row]).select();
     if (!error && data && data.length) {
       record.id = data[0].id;
-      record.timestamp = new Date(data[0].created_at).toLocaleString();
     }
   } catch (e) { console.warn('Supabase save failed:', e); }
-  state.callHistory.unshift(record);
-  if (state.callHistory.length > 50) state.callHistory = state.callHistory.slice(0, 50);
-  renderHistory();
 }
 
 function renderHistory() {
@@ -4434,24 +4441,25 @@ function loadHistoryToTranscript(h) {
 
 async function clearHistory() {
   if (!confirm('Clear all call history?')) return;
+  state.callHistory = [];
+  renderHistory();
+  if (!_supabaseClient) return;
   try {
     await _supabaseClient.from('iris_history').delete().gte('created_at', '1970-01-01');
   } catch (e) { console.warn('Supabase clear failed:', e); }
-  state.callHistory = [];
-  renderHistory();
 }
 
 async function deleteHistoryItem(id) {
-  if (id) {
-    try {
-      await _supabaseClient.from('iris_history').delete().eq('id', id);
-    } catch (e) { console.warn('Supabase delete failed:', e); }
-  }
   state.callHistory = state.callHistory.filter(h => h.id !== id);
   renderHistory();
+  if (!_supabaseClient || !id) return;
+  try {
+    await _supabaseClient.from('iris_history').delete().eq('id', id);
+  } catch (e) { console.warn('Supabase delete failed:', e); }
 }
 
 async function loadHistory() {
+  if (!_supabaseClient) { renderHistory(); return; }
   try {
     const { data, error } = await _supabaseClient
       .from('iris_history')
