@@ -92,14 +92,14 @@ def summarize_transcript(transcript, api_key):
         if role == "customer":
             lines.append(f"Customer: {text}")
         elif role == "bot":
-            lines.append(f"IRIS (AI Agent): {text}")
+            lines.append(f"AI Assistant: {text}")
         elif role == "system":
             lines.append(f"[System: {text}]")
     conversation_log = "\n".join(lines)
 
     prompt = (
-        "You are an IVR call center analyst. Below is the transcript of a call between a customer and IRIS, "
-        "an AI IVR agent for EXL Financial Services. Write a concise but detailed summary of the call. "
+        "You are an IVR call center analyst. Below is the transcript of a call between a customer and an AI banking assistant "
+        "for EXL Bank. Write a concise but detailed summary of the call. "
         "Include:\n"
         "- Why the customer called (intent)\n"
         "- Key steps taken during the call\n"

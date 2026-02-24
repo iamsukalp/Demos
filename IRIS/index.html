@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IRIS | Intelligent Realtime IVR System</title>
+  <title>EXL | IVR Call Containment</title>
   <link rel="icon" href="../assets/exl-logo.svg" type="image/svg+xml">
   <style>
     /* ===== CSS Custom Properties ===== */
     :root {
-      --orange: #FF5B35;
-      --orange-light: #FFF0EC;
+      --orange: #fb4e0b;
+      --orange-light: #FEF0EB;
       --navy: #0F172A;
       --dark: #1F2937;
       --gray-700: #374151;
@@ -548,6 +548,15 @@
     }
     .message--bot, .message--agent {
       align-self: flex-start;
+    }
+    .message--fade-in {
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .message--fade-in.message--visible {
+      opacity: 1;
+      transform: translateY(0);
     }
     .message--customer {
       align-self: flex-end;
@@ -1517,8 +1526,7 @@
     <div class="header__brand">
       <img src="../assets/exl-logo.svg" alt="EXL" class="header__brand-logo" style="height:24px" />
       <span class="header__brand-divider"></span>
-      <span class="header__brand-name">IRIS</span>
-      <span style="font-size:10px;color:var(--gray-400);font-weight:400;margin-left:8px;letter-spacing:0.02em;">Intelligent Realtime IVR System</span>
+      <span class="header__brand-name">IVR Call Containment</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
@@ -1917,7 +1925,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "Hi, I need to block my credit card right away. I think someone's been using it without my permission.", delay: 2000 },
       { type: 'bot', text: "I'm sorry to hear that. I can help you block your credit card immediately. For security, can you confirm the last four digits of the card you'd like to block?", delay: 1500, thinkingTime: 2000 },
       { type: 'customer', text: 'It ends in 4829.', delay: 1500 },
@@ -1925,7 +1933,7 @@ const SCENARIOS = {
       { type: 'customer', text: "No, that's everything. Thank you for the quick help.", delay: 2000 },
       { type: 'bot', text: "You're welcome, Varun. Your account security is our priority. Have a great day!", delay: 1200, thinkingTime: 1200 },
       { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
-      { type: 'system', text: 'Call ended — Resolved by IRIS AI', delay: 1000, state: 'ended' },
+      { type: 'system', text: 'Call ended — Resolved by AI Assistant', delay: 1000, state: 'ended' },
     ],
   },
   'loan-balance': {
@@ -1940,7 +1948,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: 'Yeah, I need to check the balance on my auto loan. I want to see how much I still owe.', delay: 2000 },
       { type: 'bot', text: "Of course! I can look that up for you. Let me pull up your auto loan details.\n\nHere's your auto loan summary:\n• Loan Account: ***7712\n• Original Amount: $28,500.00\n• Current Balance: $14,230.67\n• Monthly Payment: $485.00\n• Next Payment Due: March 15, 2026\n• Interest Rate: 4.9% APR\n• Remaining Term: 30 months\n\nYou're right on track with your payments. Is there anything else you'd like to know?", delay: 1500, thinkingTime: 2500 },
       { type: 'customer', text: 'What happens if I want to pay it off early? Are there any penalties?', delay: 2500 },
@@ -1948,7 +1956,7 @@ const SCENARIOS = {
       { type: 'customer', text: "No, I just wanted to know my options. Thanks a lot.", delay: 2000 },
       { type: 'bot', text: "Anytime, Varun. If you decide to make extra payments in the future, just give us a call or log into your online banking. Have a wonderful day!", delay: 1200, thinkingTime: 1200 },
       { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
-      { type: 'system', text: 'Call ended — Resolved by IRIS AI', delay: 1000, state: 'ended' },
+      { type: 'system', text: 'Call ended — Resolved by AI Assistant', delay: 1000, state: 'ended' },
     ],
   },
   'dispute': {
@@ -1967,7 +1975,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "I need to dispute a charge on my account. There's a transaction from two weeks ago that I definitely didn't make, and it looks like it was at a store in a city I've never been to.", delay: 2200 },
       { type: 'bot', text: "I'm sorry to hear about that, Varun. I want to make sure we handle this properly. Let me look into the recent transactions on your account.\n\nCould you tell me the approximate amount or the merchant name so I can identify the specific charge?", delay: 1500, thinkingTime: 2000 },
       { type: 'customer', text: "It was for $847.53 at some electronics store called TechVault in Phoenix. I live in Boston and I haven't traveled anywhere. Also, there's another one for $234.00 at a gas station in Phoenix on the same day. I think both are fraudulent.", delay: 3000 },
@@ -1986,7 +1994,7 @@ const SCENARIOS = {
         },
       },
       { type: 'system', text: 'Connected to Agent Marcus Rivera — Fraud Resolution Team', delay: 2500, state: 'connected-agent', agentName: 'Marcus Rivera' },
-      { type: 'agent', text: "Hi Varun, this is Marcus from the fraud resolution team. I've reviewed the summary from IRIS and I can see the two transactions in question. I'm sorry this happened to you. Let me get this sorted out right away.\n\nFirst, I've placed a temporary hold on your card ending in 3156 to prevent any further unauthorized charges.\n\nI'm now filing a formal dispute for both transactions:\n• Dispute #FRD-2026-88421 for ${{disputeAmount1}} at {{disputeMerchant1}}\n• Dispute #FRD-2026-88422 for ${{disputeAmount2}} at {{disputeMerchant2}}\n\nYou'll receive provisional credits for both amounts — ${{disputeTotal}} total — within 24 hours while we investigate.", delay: 1500, thinkingTime: 2500, agentName: 'Marcus Rivera' },
+      { type: 'agent', text: "Hi Varun, this is Marcus from the fraud resolution team. I've reviewed the summary from the AI assistant and I can see the two transactions in question. I'm sorry this happened to you. Let me get this sorted out right away.\n\nFirst, I've placed a temporary hold on your card ending in 3156 to prevent any further unauthorized charges.\n\nI'm now filing a formal dispute for both transactions:\n• Dispute #FRD-2026-88421 for ${{disputeAmount1}} at {{disputeMerchant1}}\n• Dispute #FRD-2026-88422 for ${{disputeAmount2}} at {{disputeMerchant2}}\n\nYou'll receive provisional credits for both amounts — ${{disputeTotal}} total — within 24 hours while we investigate.", delay: 1500, thinkingTime: 2500, agentName: 'Marcus Rivera' },
       { type: 'customer', text: "Oh thank you, that's a relief. How long does the investigation take?", delay: 2500 },
       { type: 'agent', text: "Typically 10 to 15 business days. We'll send you updates by email, and in most cases like this where the transactions are clearly out of pattern, the provisional credit becomes permanent.\n\nI've also flagged your account for enhanced security monitoring. Your replacement card will arrive in 2–3 business days via express shipping, since you're a Platinum member.\n\nIs there anything else I can help you with today?", delay: 1500, thinkingTime: 2200, agentName: 'Marcus Rivera' },
       { type: 'customer', text: "No, that covers everything. I appreciate the help, Marcus.", delay: 2000 },
@@ -2010,7 +2018,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "Hi, I have kind of a complicated situation. My wife and I are going through a divorce and I need to figure out what to do with our joint accounts. We have a joint checking, a joint savings, and a joint mortgage. I need to separate everything.", delay: 3000 },
       { type: 'bot', text: "I understand, Varun. I'm sorry to hear you're going through this. I want to make sure I understand your request correctly. You'd like to:\n\n• Separate your joint checking account\n• Separate your joint savings account\n• Address the joint mortgage arrangement\n\nIs that correct?", delay: 1500, thinkingTime: 2200 },
       { type: 'customer', text: "Yes, and also we have a joint credit card and there are some automatic payments set up from the joint checking that need to be split between us too. My lawyer said I should get everything separated as soon as possible.", delay: 3000 },
@@ -2029,7 +2037,7 @@ const SCENARIOS = {
         },
       },
       { type: 'system', text: 'Connected to Agent Sandra Kim — Relationship Management', delay: 2500, state: 'connected-agent', agentName: 'Sandra Kim' },
-      { type: 'agent', text: "Hello Varun, this is Sandra Kim, a relationship manager here at First National. I've reviewed the information from IRISabout your situation. I understand this is a difficult time, and I want to help make the financial side as smooth as possible.\n\nI can see all four joint accounts on your profile. Here's what I'd recommend:\n\nFor your checking and savings, we can open individual accounts for you today and set up the transfers. However, to remove a joint account holder, we'll need written consent from both parties, or a court order.\n\nDo you have any documentation from your attorney that authorizes changes to the accounts?", delay: 1500, thinkingTime: 2500, agentName: 'Sandra Kim' },
+      { type: 'agent', text: "Hello Varun, this is Sandra Kim, a relationship manager here at EXL Bank. I've reviewed the information from the AI assistantabout your situation. I understand this is a difficult time, and I want to help make the financial side as smooth as possible.\n\nI can see all four joint accounts on your profile. Here's what I'd recommend:\n\nFor your checking and savings, we can open individual accounts for you today and set up the transfers. However, to remove a joint account holder, we'll need written consent from both parties, or a court order.\n\nDo you have any documentation from your attorney that authorizes changes to the accounts?", delay: 1500, thinkingTime: 2500, agentName: 'Sandra Kim' },
       { type: 'customer', text: "My lawyer is sending over the paperwork this week. Can we at least get started on setting up my individual accounts today?", delay: 2500 },
       { type: 'agent', text: "Absolutely. Let's get your individual checking and savings accounts opened right now. I'll set them up with the same features as your current joint accounts.\n\nI'm also scheduling a follow-up appointment for next week so that once we receive the legal documentation, we can proceed with the joint account separation and discuss the mortgage and credit card options in detail.\n\nI'll send you a confirmation email with everything we've discussed today and the checklist of documents we'll need. Does Thursday or Friday work better for the follow-up call?", delay: 1500, thinkingTime: 2200, agentName: 'Sandra Kim' },
       { type: 'customer', text: 'Thursday works great. Thank you for being so thorough, Sandra.', delay: 2000 },
@@ -2049,15 +2057,15 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "Hi, I'm locked out of my online banking. I've tried my password a few times and now the account is blocked. I need to reset it.", delay: 2200 },
       { type: 'bot', text: "I understand, Varun. It looks like your online banking access was temporarily locked after multiple login attempts. I can help you reset your password right now.\n\nFor security, I'll send a one-time password reset link to your registered email address on file. Can you confirm — is your email still varun.k@email.com?", delay: 1500, thinkingTime: 2000 },
       { type: 'customer', text: "Yes, that's correct.", delay: 1500 },
-      { type: 'bot', text: "I've just sent the reset link to varun.k@email.com. Here's what to do:\n\n• Check your inbox (and spam folder) for an email from First National Bank\n• Click the \"Reset Password\" link — it's valid for 15 minutes\n• Create a new password (at least 12 characters, with a mix of letters, numbers, and symbols)\n• Once reset, your account will be unlocked automatically\n\nThe link has been sent. Is there anything else I can help with?", delay: 1800, thinkingTime: 2500 },
+      { type: 'bot', text: "I've just sent the reset link to varun.k@email.com. Here's what to do:\n\n• Check your inbox (and spam folder) for an email from EXL Bank\n• Click the \"Reset Password\" link — it's valid for 15 minutes\n• Create a new password (at least 12 characters, with a mix of letters, numbers, and symbols)\n• Once reset, your account will be unlocked automatically\n\nThe link has been sent. Is there anything else I can help with?", delay: 1800, thinkingTime: 2500 },
       { type: 'customer', text: "No, that's all I needed. Thanks for the quick help.", delay: 2000 },
       { type: 'bot', text: "You're welcome, Varun. If you have any trouble with the reset link, just call us back. Have a great day!", delay: 1200, thinkingTime: 1200 },
       { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
-      { type: 'system', text: 'Call ended — Resolved by IRIS AI', delay: 1000, state: 'ended' },
+      { type: 'system', text: 'Call ended — Resolved by AI Assistant', delay: 1000, state: 'ended' },
     ],
   },
   'activate-card': {
@@ -2072,7 +2080,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "Hi, I just received my new credit card in the mail and I need to activate it.", delay: 2000 },
       { type: 'bot', text: "Of course! I can activate your new card right away. Could you please read me the last four digits of the new card number?", delay: 1500, thinkingTime: 2000 },
       { type: 'customer', text: "Sure, it's 5531.", delay: 1500 },
@@ -2080,7 +2088,7 @@ const SCENARIOS = {
       { type: 'customer', text: "No, I'll set the PIN at the ATM. That's all I needed, thanks!", delay: 2000 },
       { type: 'bot', text: "Sounds good, Varun. You can set your PIN at any First National ATM. Enjoy your new card and have a great day!", delay: 1200, thinkingTime: 1200 },
       { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
-      { type: 'system', text: 'Call ended — Resolved by IRIS AI', delay: 1000, state: 'ended' },
+      { type: 'system', text: 'Call ended — Resolved by AI Assistant', delay: 1000, state: 'ended' },
     ],
   },
   'transfer-funds': {
@@ -2095,7 +2103,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "I need to transfer some money from my checking account to my savings. Can you help me with that?", delay: 2000 },
       { type: 'bot', text: "Absolutely! I can help you transfer funds between your accounts. I can see you have:\n\n• Checking Account (***4829) — Balance: $8,342.15\n• Savings Account (***7712) — Balance: $22,580.00\n\nHow much would you like to transfer from checking to savings?", delay: 1500, thinkingTime: 2200 },
       { type: 'customer', text: "Let's do $2,500 please.", delay: 1500 },
@@ -2105,7 +2113,7 @@ const SCENARIOS = {
       { type: 'customer', text: "No, that's perfect. Thank you!", delay: 2000 },
       { type: 'bot', text: "You're welcome, Varun. Have a wonderful day!", delay: 1200, thinkingTime: 1200 },
       { type: 'system', text: 'Customer request fulfilled', delay: 1500 },
-      { type: 'system', text: 'Call ended — Resolved by IRIS AI', delay: 1000, state: 'ended' },
+      { type: 'system', text: 'Call ended — Resolved by AI Assistant', delay: 1000, state: 'ended' },
     ],
   },
   'credit-limit': {
@@ -2124,7 +2132,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "Hi, I'd like to request a credit limit increase on my Visa card. My current limit is $15,000 and I'd like to get it bumped up to around $25,000. I've had the card for three years and I always pay on time.", delay: 2500 },
       { type: 'bot', text: "Thank you for being a loyal customer, Varun. I can see your excellent payment history on your Visa Platinum card ending in 5531.\n\nHere's your current card profile:\n• Current Limit: $15,000\n• Average Monthly Spend: $6,200\n• Payment History: 36 months on-time\n• Credit Score on File: 782\n\nSince you're requesting an increase of more than $5,000, this will need a review by our credit underwriting team. Let me connect you with a specialist who can process this for you.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
       { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
@@ -2142,7 +2150,7 @@ const SCENARIOS = {
         },
       },
       { type: 'system', text: 'Connected to Agent David Park — Credit Underwriting', delay: 2500, state: 'connected-agent', agentName: 'David Park' },
-      { type: 'agent', text: "Hi Varun, this is David Park from the credit underwriting team. I've reviewed your account details from IRISand I have to say, your profile looks excellent.\n\nWith your credit score of 782 and perfect 36-month payment history, I'm happy to approve your request. I'm increasing your credit limit from $15,000 to $25,000 effective immediately.\n\nYou don't need a new card — the updated limit will reflect on your next statement and in your online banking within the hour.\n\nIs there anything else I can help with?", delay: 1500, thinkingTime: 2500, agentName: 'David Park' },
+      { type: 'agent', text: "Hi Varun, this is David Park from the credit underwriting team. I've reviewed your account details from the AI assistantand I have to say, your profile looks excellent.\n\nWith your credit score of 782 and perfect 36-month payment history, I'm happy to approve your request. I'm increasing your credit limit from $15,000 to $25,000 effective immediately.\n\nYou don't need a new card — the updated limit will reflect on your next statement and in your online banking within the hour.\n\nIs there anything else I can help with?", delay: 1500, thinkingTime: 2500, agentName: 'David Park' },
       { type: 'customer', text: "That was fast! No, that's everything. Thank you so much, David.", delay: 2000 },
       { type: 'agent', text: "You're very welcome, Varun. With your track record, it was an easy decision. Enjoy the increased flexibility, and don't hesitate to call if you need anything in the future. Have a great day!", delay: 1200, thinkingTime: 1200, agentName: 'David Park' },
       { type: 'system', text: 'Call ended — Resolved by Agent David Park', delay: 1500, state: 'ended' },
@@ -2164,7 +2172,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "Hi, I've been seeing that mortgage rates have come down recently and I'm wondering if I can renegotiate the rate on my current mortgage. I'm paying 6.1% right now and I think I should be able to do better.", delay: 2800 },
       { type: 'bot', text: "I appreciate you reaching out about this, Varun. Let me pull up your mortgage details.\n\nHere's your current mortgage summary:\n• Mortgage Account: ***4401\n• Current Rate: 6.1% fixed\n• Original Amount: $420,000\n• Current Balance: $385,200\n• Monthly Payment: $2,548.00\n• Remaining Term: 27 years\n\nYou're right that current market rates are lower than your existing rate. Since mortgage rate modifications and refinancing require a detailed review by a licensed loan officer, let me connect you with our mortgage services team.\n\nOne moment please.", delay: 1800, thinkingTime: 2500 },
       { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
@@ -2182,7 +2190,7 @@ const SCENARIOS = {
         },
       },
       { type: 'system', text: 'Connected to Agent Rachel Torres — Mortgage Services', delay: 2500, state: 'connected-agent', agentName: 'Rachel Torres' },
-      { type: 'agent', text: "Hi Varun, this is Rachel Torres from mortgage services. I've reviewed your mortgage details from IRISand your account history.\n\nGood news — based on your excellent payment history and current market conditions, I can offer you a couple of options:\n\n• Option A: Rate reduction to 5.2% fixed — saves you approximately $215/month\n• Option B: Refinance to a 20-year term at 4.9% — slightly higher payment but saves over $78,000 in total interest\n\nBoth options would require a property appraisal, which we can schedule at no cost to you as a Platinum member.\n\nWhich option sounds more interesting to you?", delay: 1800, thinkingTime: 2800, agentName: 'Rachel Torres' },
+      { type: 'agent', text: "Hi Varun, this is Rachel Torres from mortgage services. I've reviewed your mortgage details from the AI assistantand your account history.\n\nGood news — based on your excellent payment history and current market conditions, I can offer you a couple of options:\n\n• Option A: Rate reduction to 5.2% fixed — saves you approximately $215/month\n• Option B: Refinance to a 20-year term at 4.9% — slightly higher payment but saves over $78,000 in total interest\n\nBoth options would require a property appraisal, which we can schedule at no cost to you as a Platinum member.\n\nWhich option sounds more interesting to you?", delay: 1800, thinkingTime: 2800, agentName: 'Rachel Torres' },
       { type: 'customer', text: "Option A sounds great. The lower monthly payment would really help. What do I need to do to get started?", delay: 2500 },
       { type: 'agent', text: "Wonderful choice. Here's what I'll set up for you today:\n\n• I'm locking in the 5.2% rate for 60 days while we process everything\n• I'll schedule a property appraisal for next week\n• I'm sending you a refinancing application to your email — it's mostly pre-filled\n• Once the appraisal comes back and you submit the application, we should have everything finalized within 3 to 4 weeks\n\nYour new monthly payment will be approximately $2,333 — a savings of $215 per month. Is there anything else you'd like to know?", delay: 1500, thinkingTime: 2200, agentName: 'Rachel Torres' },
       { type: 'customer', text: "No, that sounds perfect. Thanks for all the help, Rachel.", delay: 2000 },
@@ -2206,7 +2214,7 @@ const SCENARIOS = {
     messages: [
       { type: 'system', text: 'Initiating call...', delay: 500, state: 'ringing' },
       { type: 'system', text: 'Call connected', delay: 2000, state: 'connected-bot' },
-      { type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
+      { type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?', delay: 800, thinkingTime: 1500 },
       { type: 'customer', text: "I need to send a wire transfer to India. It's $12,000 to my parents' bank account. I've done this once before through the branch but I was hoping I could do it over the phone this time.", delay: 2800 },
       { type: 'bot', text: "I can certainly help you get started with an international wire transfer, Varun. I see you have a previous wire on file to HDFC Bank, India.\n\nSince international wire transfers require identity verification and compliance review, I'll need to connect you with our international payments team. They'll be able to process this quickly, especially since you have a prior transfer on record.\n\nLet me transfer you now.", delay: 1500, thinkingTime: 2200 },
       { type: 'system', text: 'Transferring to live agent...', delay: 1500, state: 'transferring' },
@@ -2392,7 +2400,7 @@ function updateCallState(newState, agentName) {
       dot.classList.add('status-dot--green');
       bar.classList.add('state--connected');
       text.textContent = 'Connected';
-      handler.innerHTML = ICONS.bot + '<span>IRIS AI</span>';
+      handler.innerHTML = ICONS.bot + '<span>AI Assistant</span>';
       startTimer();
       break;
     case 'transferring':
@@ -2707,7 +2715,7 @@ function renderMessage(msg) {
   } else if (msg.type === 'bot') {
     el.className = 'message message--bot';
     el.innerHTML =
-      '<div class="message__label">' + ICONS.bot + ' IRIS AI</div>' +
+      '<div class="message__label">' + ICONS.bot + ' AI Assistant</div>' +
       '<div class="message__bubble">' + escapeHtml(msg.text) + '</div>';
   } else if (msg.type === 'customer') {
     el.className = 'message message--customer';
@@ -2864,7 +2872,7 @@ async function fetchAiSummary(summaryElId) {
       '<div class="resolution-card__summary-label">AI Summary</div>' +
       '<div class="resolution-card__summary-text">' + escapeHtml(data.summary || 'No summary available.') + '</div>';
   } catch (e) {
-    console.error('[IRIS] AI summary failed:', e);
+    console.error('[IVR] AI summary failed:', e);
     placeholder.innerHTML =
       '<div class="resolution-card__summary-label">AI Summary</div>' +
       '<div class="resolution-card__summary-text" style="color:var(--gray-500)">Summary unavailable.</div>';
@@ -2881,7 +2889,7 @@ function showTypingIndicator(type, agentName) {
   if (type === 'agent') {
     label = ICONS.agent + ' Agent: ' + escapeHtml(agentName || 'Live Agent');
   } else {
-    label = ICONS.bot + ' IRIS AI';
+    label = ICONS.bot + ' AI Assistant';
   }
 
   el.innerHTML =
@@ -3474,7 +3482,7 @@ function renderDynamicMessage(msg, text, entities, isDynamic) {
   const icon = msg.type === 'agent' ? ICONS.agent : ICONS.bot;
   const label = msg.type === 'agent'
     ? ' Agent: ' + escapeHtml(msg.agentName || 'Live Agent')
-    : ' IRIS AI';
+    : ' AI Assistant';
   const badge = isDynamic
     ? '<span class="message__dynamic-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Dynamic</span>'
     : '';
@@ -3575,7 +3583,7 @@ async function startFreeformCall() {
       if (gen !== state.playbackGeneration) return;
       removeTypingIndicator();
     }
-    renderMessage({ type: 'bot', text: 'Thank you for calling First National Bank. This is IRIS, your AI assistant. How can I help you today?' });
+    renderMessage({ type: 'bot', text: 'Thank you for calling EXL Bank. This is your AI banking assistant. How can I help you today?' });
 
     // Wait for voice input
     const transcript = await waitForVoiceInput();
@@ -3685,7 +3693,7 @@ function switchSidebarTab(tab) {
 
 // ===== Call History =====
 function saveCallToHistory(record) {
-  console.log('[IRIS] saveCallToHistory:', record.customerName, 'messages:', (record.messages || []).length);
+  console.log('[IVR] saveCallToHistory:', record.customerName, 'messages:', (record.messages || []).length);
   state.callHistory.unshift(record);
   if (state.callHistory.length > 20) state.callHistory = state.callHistory.slice(0, 20);
   localStorage.setItem('iris-call-history', JSON.stringify(state.callHistory));
@@ -3720,7 +3728,7 @@ function renderHistory() {
         '<div class="history-card__transcript-title">Conversation</div>' +
         h.messages.map(m => {
           const isCustomer = m.role === 'customer' || m.role === 'user';
-          const label = isCustomer ? 'Customer' : 'IRIS';
+          const label = isCustomer ? 'Customer' : 'AI Assistant';
           const cls = isCustomer ? 'history-msg--customer' : 'history-msg--bot';
           return '<div class="history-msg ' + cls + '">' +
             '<span class="history-msg__label">' + label + '</span>' +
@@ -3863,7 +3871,7 @@ function selectScenario(scenarioId) {
 
   // AI mode: show call prompt (caller info shown after user clicks Call)
   if (state.aiMode && state.aiConfigured) {
-    console.log('[IRIS] AI mode — showing call prompt for', scenarioId);
+    console.log('[IVR] AI mode — showing call prompt for', scenarioId);
     hideCallerInfo();
     showAiCallPrompt(scenario);
     return;
@@ -4105,7 +4113,7 @@ function handleRealtimeMessage(data) {
   // IRISaudio playback
   if (type === 'response.audio.delta') {
     if (data.delta && !state.aiMuted) {
-      console.log('[IRIS] Audio chunk received, length:', data.delta.length);
+      console.log('[IVR] Audio chunk received, length:', data.delta.length);
       playAudioChunk(data.delta);
     }
     return;
@@ -4123,7 +4131,7 @@ function handleRealtimeMessage(data) {
   // IRIStranscript (word by word)
   if (type === 'response.audio_transcript.delta') {
     const el = document.getElementById('aiListeningStatus');
-    if (el) el.textContent = '— IRIS is speaking...';
+    if (el) el.textContent = '— AI is speaking...';
     appendIrisTranscript(data.delta || '');
     return;
   }
@@ -4177,7 +4185,7 @@ function handleRealtimeMessage(data) {
   }
 
   // Log all other events for debugging
-  console.log('[IRIS] Event:', type);
+  console.log('[IVR] Event:', type);
 }
 
 // ── Message ordering helpers ──
@@ -4227,13 +4235,16 @@ function flushIrisTranscript() {
 function appendIrisTranscript(delta) {
   irisTranscriptBuffer += delta;
   if (!irisTranscriptMsgEl) {
-    // Create a new bot message bubble
+    // Create a new bot message bubble with fade-in delay for natural pacing
     irisTranscriptMsgEl = document.createElement('div');
-    irisTranscriptMsgEl.className = 'message message--bot';
+    irisTranscriptMsgEl.className = 'message message--bot message--fade-in';
     irisTranscriptMsgEl.innerHTML =
-      '<div class="message__label">' + ICONS.bot + ' IRIS AI</div>' +
+      '<div class="message__label">' + ICONS.bot + ' AI Assistant</div>' +
       '<div class="message__bubble"></div>';
     dom.transcript.appendChild(irisTranscriptMsgEl);
+    // Trigger fade-in after a brief pause
+    const el = irisTranscriptMsgEl;
+    requestAnimationFrame(() => { el.classList.add('message--visible'); });
   }
   // Batch DOM updates to next animation frame instead of every delta
   irisTranscriptDirty = true;
@@ -4269,7 +4280,7 @@ async function initAiAudioContext() {
   if (state.aiAudioContext.state === 'suspended') {
     await state.aiAudioContext.resume();
   }
-  console.log('[IRIS] AudioContext state:', state.aiAudioContext.state, 'sampleRate:', state.aiAudioContext.sampleRate);
+  console.log('[IVR] AudioContext state:', state.aiAudioContext.state, 'sampleRate:', state.aiAudioContext.sampleRate);
   state.aiNextStartTime = 0;
   state.aiAudioQueue = [];
 }
@@ -4380,7 +4391,7 @@ let ringtoneContext = null;
 let ringtoneInterval = null;
 
 function startRingtone() {
-  console.log('[IRIS] Starting ringtone');
+  console.log('[IVR] Starting ringtone');
   ringtoneContext = new (window.AudioContext || window.webkitAudioContext)();
 
   function playRingBurst() {
@@ -4432,7 +4443,7 @@ function stopRingtone() {
 // ===== AI Call Prompt & Initiation =====
 
 function showAiCallPrompt(scenario) {
-  console.log('[IRIS] showAiCallPrompt:', scenario.id);
+  console.log('[IVR] showAiCallPrompt:', scenario.id);
   if (dom.emptyState) dom.emptyState.style.display = 'none';
   dom.transcript.querySelectorAll('.message, .transfer-card, .resolution-card, .ai-call-prompt').forEach(el => el.remove());
 
@@ -4455,7 +4466,7 @@ function showAiCallPrompt(scenario) {
 }
 
 async function initiateAiCall(scenarioId) {
-  console.log('[IRIS] initiateAiCall:', scenarioId);
+  console.log('[IVR] initiateAiCall:', scenarioId);
   const scenario = SCENARIOS[scenarioId];
   if (!scenario) return;
 
@@ -4593,7 +4604,7 @@ function endAiCall() {
     const capturedMessages = (state.aiTranscript || [])
       .filter(m => m && m.role && m.role !== 'system' && m.text)
       .map(m => ({ role: m.role, text: m.text }));
-    console.log('[IRIS] Saving history — transcript entries:', state.aiTranscript.length, 'messages kept:', capturedMessages.length);
+    console.log('[IVR] Saving history — transcript entries:', state.aiTranscript.length, 'messages kept:', capturedMessages.length);
     saveCallToHistory({
       timestamp: new Date().toLocaleString(),
       customerName: customer ? customer.name : 'Unknown',

@@ -1,7 +1,7 @@
 """
 EXL Server
 =================
-Single-port server: static files + IRIS IVR API endpoints + WebSocket relay.
+Single-port server: static files + IVR Call Containment API endpoints + WebSocket relay.
 Works locally (python serve.py) and on Render / any PaaS that exposes one port.
 
 Uses aiohttp for combined HTTP + WebSocket on a single port.
@@ -18,18 +18,18 @@ import aiohttp
 # Set working directory to this file's location (Demos root)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# Add IRIS to Python path for its modules
+# Add IVR module to Python path
 IRIS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'IRIS')
 sys.path.insert(0, IRIS_DIR)
 
-# Import IRIS response engine (graceful if missing)
+# Import response engine (graceful if missing)
 try:
     from response_engine import get_response, extract_entities, classify_yes_no, detect_intent_switch
     ENGINE_AVAILABLE = True
 except ImportError:
     ENGINE_AVAILABLE = False
 
-# Import IRIS LLM engine (graceful if missing)
+# Import LLM engine (graceful if missing)
 try:
     from llm_engine import build_session_config, handle_function_call, lookup_customer
     LLM_AVAILABLE = True
@@ -163,14 +163,14 @@ async def handle_summarize(request):
         if role == 'customer':
             lines.append(f"Customer: {text}")
         elif role == 'bot':
-            lines.append(f"IRIS (AI Agent): {text}")
+            lines.append(f"AI Assistant: {text}")
         elif role == 'system':
             lines.append(f"[System: {text}]")
     conversation_log = '\n'.join(lines)
 
     prompt = (
-        "You are an IVR call center analyst. Below is the transcript of a call between a customer and IRIS, "
-        "an AI IVR agent for EXL Financial Services. Write a concise but detailed summary of the call. "
+        "You are an IVR call center analyst. Below is the transcript of a call between a customer and an AI banking assistant "
+        "for EXL Bank. Write a concise but detailed summary of the call. "
         "Include:\n"
         "- Why the customer called (intent)\n"
         "- Key steps taken during the call\n"
@@ -505,7 +505,7 @@ def create_app():
 
 
 if __name__ == '__main__':
-    engine_status = "with IRIS response engine" if ENGINE_AVAILABLE else "static only"
+    engine_status = "with response engine" if ENGINE_AVAILABLE else "static only"
     llm_status = "LLM engine ready" if LLM_AVAILABLE else "LLM engine unavailable"
     ws_status = "WebSocket relay ready" if WS_AVAILABLE else "WebSocket unavailable (pip install websockets)"
     print(f"EXL Suite starting on port {PORT} ({engine_status}, {llm_status})")
