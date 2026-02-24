@@ -3218,7 +3218,7 @@ function drawWaveform() {
       const x = i * (barWidth + 2);
       const y = (canvas.height - barHeight) / 2;
 
-      ctx.fillStyle = value > 128 ? '#FF5B35' : '#D1D5DB';
+      ctx.fillStyle = value > 128 ? '#fb4e0b' : '#D1D5DB';
       ctx.beginPath();
       ctx.roundRect(x, y, barWidth, Math.max(barHeight, 3), 2);
       ctx.fill();
@@ -3253,7 +3253,7 @@ function drawSimulatedWaveform() {
       const x = i * (barWidth + 2);
       const y = (canvas.height - barHeight) / 2;
 
-      ctx.fillStyle = current[i] > 0.35 ? '#FF5B35' : '#F9A08C';
+      ctx.fillStyle = current[i] > 0.35 ? '#fb4e0b' : '#fdac8e';
       ctx.beginPath();
       ctx.roundRect(x, y, barWidth, Math.max(barHeight, 3), 2);
       ctx.fill();
