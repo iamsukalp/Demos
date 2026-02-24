@@ -716,20 +716,11 @@
     html.dark .summary-card__btn:hover { border-color: #475569; }
     html.dark .summary-card__btn--primary { background: var(--orange); color: white; border-color: var(--orange); }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     // Anti-flash: apply dark mode before paint
     if (localStorage.getItem('exl-theme') !== 'light') {
       document.documentElement.classList.add('dark');
     }
-    // Supabase client init (guarded — CDN may fail to load)
-    var _supabaseClient = null;
-    try {
-      _supabaseClient = window.supabase.createClient(
-        'https://fdwmywxvjlrqutohonln.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkd215d3h2amxycXV0b2hvbmxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDYyMTEsImV4cCI6MjA4NzUyMjIxMX0.TEKnJ8-_MDYSZM1UpVqtcqxBpzcXL4-s09WHZg6icBE'
-      );
-    } catch (e) { console.warn('Supabase init failed:', e); }
   </script>
 </head>
 <body>
@@ -2287,24 +2278,6 @@ function onScenarioComplete() {
     showSummary(title, actualMetrics);
   }
 
-  // Save to call history (Supabase)
-  var customer = CUSTOMER_DB[CALLER_PHONE];
-  var capturedMessages = state.steps
-    .filter(function(s) { return s.type === 'ivr-menu' || s.type === 'agent' || s.type === 'customer'; })
-    .map(function(s) {
-      return { role: s.type === 'customer' ? 'customer' : 'bot', text: s.text };
-    });
-  saveCallToHistory({
-    timestamp: new Date().toLocaleString(),
-    customerName: customer ? customer.name : 'Unknown',
-    customerPhone: CALLER_PHONE,
-    duration: formatTime(state.timerSeconds),
-    durationSeconds: state.timerSeconds,
-    intent: title || 'General Inquiry',
-    actionsTaken: metrics ? metrics.resolution : '',
-    outcome: scenarioInfo.flow || 'contained',
-    messages: capturedMessages,
-  });
 }
 
 function showSummary(title, metrics) {
@@ -2397,25 +2370,6 @@ document.addEventListener('click', function initTtsCtx() {
     body: JSON.stringify({ apiKey: savedKey })
   }).catch(function() {});
 })();
-
-// ===== Call History (Supabase) =====
-function saveCallToHistory(record) {
-  // Persist to Supabase in background
-  if (!_supabaseClient) return;
-  var row = {
-    customer_name: record.customerName || 'Unknown',
-    customer_phone: record.customerPhone || '',
-    duration: record.duration || '--:--',
-    duration_seconds: record.durationSeconds || 0,
-    intent: record.intent || 'General',
-    actions_taken: record.actionsTaken || '',
-    outcome: record.outcome || 'contained',
-    messages: record.messages || [],
-  };
-  _supabaseClient.from('iris_history').insert([row]).then(function(res) {
-    if (res.error) console.warn('Supabase save failed:', res.error.message);
-  }).catch(function(e) { console.warn('Supabase save failed:', e); });
-}
 
 // Clean up Realtime TTS WebSocket on page unload
 window.addEventListener('beforeunload', function() {
