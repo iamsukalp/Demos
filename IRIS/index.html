@@ -899,6 +899,252 @@
       color: var(--red, #ef4444);
     }
 
+    /* ===== Compare Mode ===== */
+    .btn--compare {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 8px;
+      border: 1px solid var(--gray-200); background: white;
+      color: var(--gray-600); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn--compare:hover { border-color: var(--orange); color: var(--orange); }
+    .btn--compare.active {
+      background: var(--orange); color: white; border-color: var(--orange);
+    }
+    .btn--compare svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Split pane layout */
+    .dtmf-pane { display: none; }
+    .ai-pane {
+      display: contents; /* transparent wrapper in normal mode */
+    }
+    .ai-pane__header { display: none; }
+    .comparison-summary { display: none; }
+
+    .app.compare-mode .main {
+      display: flex; flex-direction: row; flex-wrap: wrap; gap: 0; overflow: hidden;
+      position: relative;
+    }
+    .app.compare-mode .comparison-summary {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+    }
+    .app.compare-mode .dtmf-pane {
+      display: flex; flex-direction: column;
+      width: 50%; min-width: 0;
+      border-right: 1px solid var(--gray-200);
+      position: relative;
+    }
+    .app.compare-mode .ai-pane {
+      display: flex; flex-direction: column;
+      width: 50%; min-width: 0;
+    }
+    .app.compare-mode .ai-pane__header { display: flex; }
+    .app.compare-mode .call-status,
+    .app.compare-mode .call-actions,
+    .app.compare-mode .mic-area { display: none !important; }
+
+    /* Pane headers */
+    .dtmf-pane__header, .ai-pane__header {
+      align-items: center; gap: 8px;
+      padding: 10px 16px; font-size: 13px; font-weight: 600;
+      border-bottom: 1px solid var(--gray-200);
+      flex-shrink: 0;
+    }
+    .dtmf-pane__header {
+      background: #f8f9fa; color: #6b7280;
+    }
+    .dtmf-pane__header svg { color: #9ca3af; }
+    .ai-pane__header {
+      background: #fff7ed; color: var(--orange);
+    }
+    .ai-pane__header svg { color: var(--orange); }
+
+    .dtmf-pane__timer {
+      margin-left: auto; font-family: 'SF Mono', 'Cascadia Code', monospace;
+      font-size: 12px; color: #9ca3af; font-weight: 500;
+    }
+    .ai-pane__timer {
+      margin-left: auto; font-family: 'SF Mono', 'Cascadia Code', monospace;
+      font-size: 12px; color: var(--orange); font-weight: 500;
+    }
+    .ai-pane__done-badge {
+      margin-left: auto; display: none; align-items: center; gap: 4px;
+      font-size: 12px; color: #16a34a; font-weight: 600;
+    }
+    .ai-pane__done-badge svg { color: #16a34a; }
+
+    /* DTMF transcript area */
+    .dtmf-pane__transcript {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* DTMF empty state */
+    .dtmf-pane__empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex: 1; color: #9ca3af; text-align: center; gap: 8px; padding: 40px;
+    }
+    .dtmf-pane__empty svg { width: 40px; height: 40px; opacity: 0.4; }
+    .dtmf-pane__empty-text { font-size: 14px; font-weight: 500; }
+
+    /* DTMF message base */
+    .dtmf-msg {
+      animation: messageIn 0.3s ease-out;
+      max-width: 90%;
+    }
+
+    /* System message (centered, italic) */
+    .dtmf-msg--system {
+      align-self: center; text-align: center;
+      font-size: 12px; color: #9ca3af; font-style: italic;
+      padding: 4px 12px;
+    }
+
+    /* IVR menu prompt (robotic monospace) */
+    .dtmf-msg--ivr {
+      align-self: flex-start;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      border-radius: 12px 12px 12px 2px;
+      padding: 12px 16px;
+      font-family: 'SF Mono', 'Cascadia Code', 'Courier New', monospace;
+      font-size: 13px; color: #475569; line-height: 1.6;
+    }
+    .dtmf-msg--ivr .dtmf-ivr-icon {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; color: #94a3b8; margin-bottom: 6px; font-family: inherit;
+    }
+
+    /* Keypress (right-aligned with badge) */
+    .dtmf-msg--keypress {
+      align-self: flex-end;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .dtmf-key-badge {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+      border: 2px solid #94a3b8;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'SF Mono', monospace; font-size: 16px; font-weight: 700;
+      color: #334155; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    .dtmf-key-label {
+      font-size: 12px; color: #64748b; font-style: italic;
+    }
+
+    /* Hold indicator */
+    .dtmf-msg--hold {
+      align-self: center; text-align: center;
+      background: #fef3c7; border: 1px solid #fde68a;
+      border-radius: 12px; padding: 16px 24px;
+    }
+    .dtmf-hold-icon {
+      font-size: 20px; animation: pulse 1.5s infinite;
+    }
+    .dtmf-hold-text {
+      font-size: 14px; font-weight: 600; color: #92400e; margin-top: 4px;
+    }
+    .dtmf-hold-subtext {
+      font-size: 12px; color: #b45309; margin-top: 2px; font-style: italic;
+    }
+    .dtmf-hold-timer {
+      font-family: 'SF Mono', monospace; font-size: 16px;
+      color: #92400e; margin-top: 6px; font-weight: 600;
+    }
+    @keyframes holdPulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    .dtmf-hold-icon { animation: holdPulse 1.5s ease-in-out infinite; }
+
+    /* Agent message (blue-gray bubble) */
+    .dtmf-msg--agent {
+      align-self: flex-start;
+      background: #e8edf2; border-radius: 12px 12px 12px 2px;
+      padding: 10px 14px; font-size: 13px; color: #334155; line-height: 1.5;
+      max-width: 85%;
+    }
+    .dtmf-msg--agent .dtmf-agent-label {
+      font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px;
+    }
+
+    /* Customer message (in DTMF pane) */
+    .dtmf-msg--customer {
+      align-self: flex-end;
+      background: #dbeafe; border-radius: 12px 12px 2px 12px;
+      padding: 10px 14px; font-size: 13px; color: #1e3a5f; line-height: 1.5;
+      max-width: 85%;
+    }
+
+    /* Transfer message */
+    .dtmf-msg--transfer {
+      align-self: center; text-align: center;
+      font-size: 12px; color: #6b7280; font-style: italic;
+      padding: 8px 16px; background: #f3f4f6;
+      border-radius: 20px; display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Comparison summary bar */
+    .comparison-summary {
+      flex-shrink: 0; padding: 16px 24px;
+      background: white; border-top: 2px solid var(--gray-200);
+      animation: messageIn 0.4s ease-out;
+      width: 100%; flex-basis: 100%;
+    }
+    .comparison-summary__grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .comparison-summary__metric {
+      text-align: center; padding: 8px;
+    }
+    .comparison-summary__label {
+      font-size: 11px; color: #94a3b8; text-transform: uppercase;
+      font-weight: 600; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .comparison-summary__values {
+      display: flex; justify-content: center; gap: 24px;
+    }
+    .comparison-summary__val {
+      font-size: 18px; font-weight: 700; font-family: 'SF Mono', monospace;
+    }
+    .comparison-summary__val--bad { color: #dc2626; }
+    .comparison-summary__val--good { color: #16a34a; }
+    .comparison-summary__val-label {
+      font-size: 10px; color: #94a3b8; margin-top: 2px;
+    }
+
+    /* Compare scenario picker */
+    .compare-scenarios {
+      padding: 12px 16px;
+    }
+    .compare-scenarios__title {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--gray-500); margin-bottom: 8px;
+    }
+    .compare-scenario-btn {
+      display: block; width: 100%; text-align: left;
+      padding: 8px 12px; margin-bottom: 6px;
+      background: var(--gray-50, #f8fafc); border: 1px solid var(--gray-200);
+      border-radius: 8px; cursor: pointer; font-size: 13px;
+      color: var(--navy); transition: all 0.15s;
+    }
+    .compare-scenario-btn:hover {
+      border-color: var(--orange); background: #fff7ed; color: var(--orange);
+    }
+    .compare-scenario-btn.active {
+      border-color: var(--orange); background: var(--orange); color: white;
+    }
+    html.dark .compare-scenario-btn {
+      background: #1e293b; border-color: #334155; color: #cbd5e1;
+    }
+    html.dark .compare-scenario-btn:hover {
+      border-color: var(--orange); background: rgba(251,78,11,0.1); color: var(--orange);
+    }
+    html.dark .compare-scenario-btn.active {
+      background: var(--orange); color: white; border-color: var(--orange);
+    }
+
     /* ===== Animations ===== */
     @keyframes messageIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -1410,6 +1656,43 @@
     html.dark .transcript::-webkit-scrollbar-thumb:hover { background: #64748B; }
     html.dark .sidebar::-webkit-scrollbar-thumb { background: #475569; }
 
+    /* Dark mode — Compare Mode */
+    html.dark .btn--compare {
+      background: #1E293B; color: #94A3B8; border-color: #334155;
+    }
+    html.dark .btn--compare:hover { border-color: var(--orange); color: var(--orange); }
+    html.dark .btn--compare.active {
+      background: var(--orange); color: white; border-color: var(--orange);
+    }
+    html.dark .app.compare-mode .dtmf-pane { border-right-color: #334155; }
+    html.dark .dtmf-pane__header { background: #1a1f2e; color: #6b7280; }
+    html.dark .dtmf-pane__header, html.dark .ai-pane__header { border-bottom-color: #334155; }
+    html.dark .ai-pane__header { background: rgba(251,78,11,0.08); }
+    html.dark .dtmf-pane__timer { color: #64748b; }
+    html.dark .dtmf-pane__transcript { background: #0F172A; }
+    html.dark .dtmf-msg--system { color: #64748b; }
+    html.dark .dtmf-msg--ivr {
+      background: #1e293b; border-color: #334155; color: #94a3b8;
+    }
+    html.dark .dtmf-msg--ivr .dtmf-ivr-icon { color: #64748b; }
+    html.dark .dtmf-key-badge {
+      background: linear-gradient(135deg, #334155, #475569);
+      border-color: #64748b; color: #e2e8f0;
+    }
+    html.dark .dtmf-key-label { color: #94a3b8; }
+    html.dark .dtmf-msg--hold {
+      background: rgba(254, 243, 199, 0.08); border-color: rgba(253, 230, 138, 0.15);
+    }
+    html.dark .dtmf-hold-text { color: #fbbf24; }
+    html.dark .dtmf-hold-subtext { color: #f59e0b; }
+    html.dark .dtmf-hold-timer { color: #fbbf24; }
+    html.dark .dtmf-msg--agent { background: #1e293b; color: #cbd5e1; }
+    html.dark .dtmf-msg--agent .dtmf-agent-label { color: #94a3b8; }
+    html.dark .dtmf-msg--customer { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+    html.dark .dtmf-msg--transfer { background: #1e293b; color: #64748b; }
+    html.dark .comparison-summary { background: #1E293B; border-top-color: #334155; }
+    html.dark .comparison-summary__label { color: #64748b; }
+
     /* Dark mode toggle button */
     .theme-toggle {
       width: 36px;
@@ -1536,6 +1819,10 @@
       <span class="header__brand-name">IVR Call Containment</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
+      <button class="btn--compare" id="btnCompare" onclick="toggleCompareMode()" title="Compare with traditional IVR">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/></svg>
+        Compare
+      </button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" title="Toggle dark mode">
         <svg id="sunIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-width="2"/></svg>
         <svg id="moonIcon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -1597,6 +1884,8 @@
         </div>
         <div class="caller-info__accounts" id="callerAccounts"></div>
       </div>
+      <!-- Scenario picker (compare mode only) -->
+      <div class="compare-scenarios" id="compareScenarios" style="display:none;"></div>
       </div><!-- /panelProfiles -->
 
       <!-- History Panel -->
@@ -1616,69 +1905,102 @@
 
     <!-- Main Content -->
     <main class="main">
-      <!-- Call Status Bar -->
-      <div class="call-status" id="callStatus">
-        <div class="call-status__left">
-          <div class="status-dot status-dot--gray" id="statusDot"></div>
-          <span class="call-status__text" id="statusText">Select a customer profile to begin</span>
-        </div>
-        <span class="call-status__timer" id="callTimer">--:--</span>
-        <div class="call-status__handler" id="callHandler">
-          <span>—</span>
-        </div>
-      </div>
 
-      <!-- Transcript -->
-      <div class="transcript" id="transcript">
-        <div class="transcript__empty" id="emptyState">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          <div class="transcript__empty-text">Ready</div>
-          <div class="transcript__empty-sub">Speak freely or select a scenario from the sidebar</div>
-          <button class="btn btn--start-call" id="btnStartCall" onclick="startFreeformCall()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Start Call
-          </button>
+      <!-- DTMF Pane (Compare Mode only) -->
+      <div class="dtmf-pane" id="dtmfPane">
+        <div class="dtmf-pane__header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M12 18h.01"/></svg>
+          Traditional IVR (DTMF)
+          <span class="dtmf-pane__timer" id="dtmfTimer">--:--</span>
         </div>
-      </div>
-
-      <!-- AI Call Indicator -->
-      <div class="ai-call-indicator" id="aiCallIndicator">
-        <span class="ai-call-indicator__pulse"></span>
-        <span>AI Voice Call Active</span>
-        <span id="aiListeningStatus" style="opacity:0.7;font-weight:400;font-size:12px;">— Listening...</span>
-        <button class="ai-mute-btn" id="btnMute" onclick="toggleMute()">Mute</button>
-      </div>
-
-      <!-- Action Bar -->
-      <div class="call-actions" id="callActions">
-        <button class="btn btn--danger" id="btnEnd" disabled onclick="endCall()">End Call</button>
-        <button class="btn btn--secondary" id="btnRestart" disabled onclick="restartScenario()">Restart</button>
-      </div>
-
-      <!-- Voice Recording Area -->
-      <div class="mic-area" id="micArea">
-        <div class="mic-area__prompt" id="micPrompt">Speak or type your response</div>
-        <div class="mic-area__text-row">
-          <input type="text" class="mic-area__text-input" id="textInput" placeholder="Type your response here..." autocomplete="off" />
-          <button class="mic-area__send-btn" id="btnSendText" onclick="submitTextInput()" title="Send">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
-        <div class="mic-area__or-divider">or</div>
-        <div class="mic-area__controls">
-          <button class="mic-btn" id="micBtn" onclick="toggleRecording()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          </button>
-          <canvas class="waveform-canvas" id="waveformCanvas" width="240" height="56"></canvas>
-          <div class="mic-area__status">
-            <div class="mic-area__status-text idle" id="micStatusText">Ready</div>
-            <div class="mic-area__live-text" id="micLiveText"></div>
+        <div class="dtmf-pane__transcript" id="dtmfTranscript">
+          <div class="dtmf-pane__empty" id="dtmfEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M12 18h.01"/></svg>
+            <div class="dtmf-pane__empty-text">Select a scenario to compare</div>
           </div>
         </div>
-        <div class="mic-area__actions">
-          <button class="btn btn--secondary" id="btnDoneRecording" onclick="finishRecording()" style="display:none">Done Speaking</button>
-        </div>
       </div>
+
+      <!-- AI Pane (wraps existing content) -->
+      <div class="ai-pane" id="aiPane">
+        <div class="ai-pane__header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 7 7v4a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          AI IVR (EXL)
+          <span class="ai-pane__timer" id="aiPaneTimer"></span>
+          <span class="ai-pane__done-badge" id="aiDoneBadge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Resolved
+          </span>
+        </div>
+
+        <!-- Call Status Bar -->
+        <div class="call-status" id="callStatus">
+          <div class="call-status__left">
+            <div class="status-dot status-dot--gray" id="statusDot"></div>
+            <span class="call-status__text" id="statusText">Select a customer profile to begin</span>
+          </div>
+          <span class="call-status__timer" id="callTimer">--:--</span>
+          <div class="call-status__handler" id="callHandler">
+            <span>—</span>
+          </div>
+        </div>
+
+        <!-- Transcript -->
+        <div class="transcript" id="transcript">
+          <div class="transcript__empty" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <div class="transcript__empty-text">Ready</div>
+            <div class="transcript__empty-sub">Speak freely or select a scenario from the sidebar</div>
+            <button class="btn btn--start-call" id="btnStartCall" onclick="startFreeformCall()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Start Call
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Call Indicator -->
+        <div class="ai-call-indicator" id="aiCallIndicator">
+          <span class="ai-call-indicator__pulse"></span>
+          <span>AI Voice Call Active</span>
+          <span id="aiListeningStatus" style="opacity:0.7;font-weight:400;font-size:12px;">— Listening...</span>
+          <button class="ai-mute-btn" id="btnMute" onclick="toggleMute()">Mute</button>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="call-actions" id="callActions">
+          <button class="btn btn--danger" id="btnEnd" disabled onclick="endCall()">End Call</button>
+          <button class="btn btn--secondary" id="btnRestart" disabled onclick="restartScenario()">Restart</button>
+        </div>
+
+        <!-- Voice Recording Area -->
+        <div class="mic-area" id="micArea">
+          <div class="mic-area__prompt" id="micPrompt">Speak or type your response</div>
+          <div class="mic-area__text-row">
+            <input type="text" class="mic-area__text-input" id="textInput" placeholder="Type your response here..." autocomplete="off" />
+            <button class="mic-area__send-btn" id="btnSendText" onclick="submitTextInput()" title="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+          <div class="mic-area__or-divider">or</div>
+          <div class="mic-area__controls">
+            <button class="mic-btn" id="micBtn" onclick="toggleRecording()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <canvas class="waveform-canvas" id="waveformCanvas" width="240" height="56"></canvas>
+            <div class="mic-area__status">
+              <div class="mic-area__status-text idle" id="micStatusText">Ready</div>
+              <div class="mic-area__live-text" id="micLiveText"></div>
+            </div>
+          </div>
+          <div class="mic-area__actions">
+            <button class="btn btn--secondary" id="btnDoneRecording" onclick="finishRecording()" style="display:none">Done Speaking</button>
+          </div>
+        </div>
+      </div><!-- /ai-pane -->
+
+      <!-- Comparison Summary (shown when both sides complete) -->
+      <div class="comparison-summary" id="comparisonSummary"></div>
+
     </main>
   </div>
 
@@ -2248,6 +2570,263 @@ const SCENARIOS = {
   },
 };
 
+// ===== DTMF IVR Scenarios (Traditional Phone Tree) =====
+const DTMF_SCENARIOS = {
+  'block-card': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'Cards and Payments', delay: 1500 },
+      { type: 'ivr-menu', text: 'Cards Menu:\nPress 1 for Balance and Transactions\nPress 2 for Lost or Stolen Card\nPress 3 for Billing Disputes\nPress 4 for Other Card Services', delay: 5000 },
+      { type: 'keypress', digit: '2', label: 'Lost or Stolen Card', delay: 1200 },
+      { type: 'ivr-menu', text: 'Please enter your 16-digit card number followed by the pound sign.', delay: 3500 },
+      { type: 'keypress', digit: '****···#', label: 'Entering card number', delay: 2500 },
+      { type: 'ivr-menu', text: 'For security, please enter the last 4 digits of your Social Security Number.', delay: 3500 },
+      { type: 'keypress', digit: '****', label: 'SSN verification', delay: 1800 },
+      { type: 'system', text: 'Verifying identity...', delay: 2000 },
+      { type: 'ivr-menu', text: 'Your card ending in 4829 has been blocked. A replacement card will be mailed within 7 to 10 business days. If you need expedited delivery, press 1. Otherwise, press 2 to confirm.', delay: 6000 },
+      { type: 'keypress', digit: '2', label: 'Confirm standard delivery', delay: 1200 },
+      { type: 'ivr-menu', text: 'Your request has been processed. Is there anything else we can help you with? Press 1 for yes, press 2 for no.', delay: 4000 },
+      { type: 'keypress', digit: '2', label: 'No, done', delay: 1000 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '1:48', steps: 17, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+
+  'loan-balance': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '3', label: 'Loans', delay: 1500 },
+      { type: 'ivr-menu', text: 'Loans Menu:\nPress 1 for Personal Loans\nPress 2 for Home Loans\nPress 3 for Auto Loans\nPress 4 for Loan Payments', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Auto Loans', delay: 1200 },
+      { type: 'ivr-menu', text: 'Please enter your loan account number followed by the pound sign.', delay: 3000 },
+      { type: 'keypress', digit: '****···#', label: 'Entering account number', delay: 2500 },
+      { type: 'ivr-menu', text: 'For security, please enter your date of birth as a 6-digit number. Month, day, year.', delay: 3500 },
+      { type: 'keypress', digit: '091985', label: 'Date of birth', delay: 1800 },
+      { type: 'system', text: 'Retrieving loan information...', delay: 2500 },
+      { type: 'ivr-menu', text: 'Your auto loan account ending in 7742.\nCurrent balance: $18,432 dollars and 67 cents.\nMonthly payment: $487 dollars and 23 cents.\nNext payment due: March 15th.\nTo hear prepayment options, press 1. To repeat, press 2. To return to the main menu, press 3.', delay: 7000 },
+      { type: 'keypress', digit: '3', label: 'Return to main menu', delay: 1200 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '1:52', steps: 16, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+
+  'dispute': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'Cards and Payments', delay: 1500 },
+      { type: 'ivr-menu', text: 'Cards Menu:\nPress 1 for Balance and Transactions\nPress 2 for Lost or Stolen Card\nPress 3 for Billing Disputes\nPress 4 for Other Card Services', delay: 5000 },
+      { type: 'keypress', digit: '3', label: 'Billing Disputes', delay: 1200 },
+      { type: 'ivr-menu', text: 'For transaction disputes, you will need to speak with a specialist. Please hold while we connect you. Your estimated wait time is... 12 minutes.', delay: 4500 },
+      { type: 'hold', text: 'On Hold — Waiting for Disputes Department', holdSecs: 45, subtext: 'Your call is important to us. Please continue to hold.', delay: 0 },
+      { type: 'transfer', text: 'Transferring to Disputes Specialist...', delay: 2500 },
+      { type: 'agent', text: 'Disputes Department, this is Karen. How can I help you today?', label: 'Agent Karen', delay: 2500 },
+      { type: 'customer', text: "Hi, I have two charges I don't recognize on my credit card statement.", delay: 2000 },
+      { type: 'agent', text: "I can help with that. Can I have your full name and the last four digits of your card?", label: 'Agent Karen', delay: 2500 },
+      { type: 'customer', text: "Varun Patel, card ending in 4829.", delay: 1800 },
+      { type: 'agent', text: "Thank you. And which transactions are you disputing? I'll need the date, merchant name, and amount for each one.", label: 'Agent Karen', delay: 3000 },
+      { type: 'customer', text: "There's a charge from TechVault for $847.53 on January 15th, and another from QuickFuel for $234 on January 18th.", delay: 2500 },
+      { type: 'agent', text: "Got it. I've filed a provisional dispute for both transactions. You'll receive dispute forms in the mail within 5 business days. Please sign and return them. The investigation takes 10 business days.", label: 'Agent Karen', delay: 3500 },
+      { type: 'customer', text: "Ten business days? And I have to mail forms back? Can't this be done online?", delay: 2000 },
+      { type: 'agent', text: "I understand the frustration. Unfortunately, our dispute process requires signed documentation. You'll receive provisional credit within 3 business days while we investigate.", label: 'Agent Karen', delay: 3000 },
+      { type: 'system', text: 'Call ended — Resolved by Agent Karen', delay: 500 },
+    ],
+    metrics: { totalTime: '3:15', steps: 21, holdTime: '1:30', resolution: 'Agent handled', effort: 'High' },
+  },
+
+  'restructure': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '1', label: 'Account Information', delay: 1500 },
+      { type: 'ivr-menu', text: 'Account Menu:\nPress 1 for Balance Inquiry\nPress 2 for Recent Transactions\nPress 3 for Account Services\nPress 4 to return to Main Menu', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Account Services', delay: 1200 },
+      { type: 'ivr-menu', text: 'Account Services:\nPress 1 for Address Change\nPress 2 for Statement Requests\nPress 3 for Account Closure\nPress 0 to speak with a representative', delay: 4500 },
+      { type: 'keypress', digit: '0', label: 'Speak with representative', delay: 1200 },
+      { type: 'ivr-menu', text: 'All of our representatives are currently assisting other callers. Your estimated wait time is... 18 minutes. Please remain on the line.', delay: 4000 },
+      { type: 'hold', text: 'On Hold — Waiting for Account Services', holdSecs: 60, subtext: 'Did you know you can manage your accounts online at exlbank.com?', delay: 0 },
+      { type: 'agent', text: 'Thank you for holding. This is David from Account Services. How can I assist you?', label: 'Agent David', delay: 2500 },
+      { type: 'customer', text: "Hi David. I'm going through a divorce and need to separate our joint checking and savings accounts.", delay: 2500 },
+      { type: 'agent', text: "I'm sorry to hear that. Joint account restructuring requires some documentation. I'll need to transfer you to our specialized account management team who handles these cases.", label: 'Agent David', delay: 3000 },
+      { type: 'transfer', text: 'Transferring to Account Management...', delay: 2000 },
+      { type: 'hold', text: 'On Hold — Waiting for Account Management', holdSecs: 35, subtext: 'Your call is important to us. A specialist will be with you shortly.', delay: 0 },
+      { type: 'agent', text: "Account Management, this is Priya. I understand you need help with joint account restructuring?", label: 'Specialist Priya', delay: 2500 },
+      { type: 'customer', text: "Yes, I need to split our joint checking and savings into individual accounts.", delay: 2000 },
+      { type: 'agent', text: "I can help with that. However, this process requires both account holders to be present on the call, or you'll need to visit a branch with proper legal documentation — a signed separation agreement or court order. We can start the process today if you can schedule a branch appointment.", label: 'Specialist Priya', delay: 4000 },
+      { type: 'customer', text: "So I can't do this over the phone today?", delay: 1500 },
+      { type: 'agent', text: "Unfortunately not completely. I can note your account and schedule a priority appointment at your nearest branch. The restructuring typically takes 3–5 business days once all paperwork is submitted.", label: 'Specialist Priya', delay: 3500 },
+      { type: 'system', text: 'Call ended — Resolved by Specialist Priya', delay: 500 },
+    ],
+    metrics: { totalTime: '3:45', steps: 23, holdTime: '2:05', resolution: 'Agent handled', effort: 'Very High' },
+  },
+
+  'reset-password': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '4', label: 'Other Services', delay: 1500 },
+      { type: 'ivr-menu', text: 'Other Services:\nPress 1 for Online Banking Support\nPress 2 for Branch Locations\nPress 3 for Wire Transfers\nPress 4 for General Inquiries', delay: 4500 },
+      { type: 'keypress', digit: '1', label: 'Online Banking Support', delay: 1200 },
+      { type: 'ivr-menu', text: 'Online Banking:\nPress 1 for Password Reset\nPress 2 for Username Recovery\nPress 3 for Technical Issues\nPress 4 for Mobile App Support', delay: 4500 },
+      { type: 'keypress', digit: '1', label: 'Password Reset', delay: 1200 },
+      { type: 'ivr-menu', text: 'To reset your password, please enter your account number or Social Security Number followed by the pound sign.', delay: 3500 },
+      { type: 'keypress', digit: '****···#', label: 'Entering account info', delay: 2000 },
+      { type: 'ivr-menu', text: 'We will send a temporary password to your registered email address. Please allow up to 15 minutes. Press 1 to confirm, press 2 to send to a different email.', delay: 4500 },
+      { type: 'keypress', digit: '1', label: 'Confirm — send to registered email', delay: 1200 },
+      { type: 'system', text: 'Temporary password sent', delay: 1500 },
+      { type: 'ivr-menu', text: 'A temporary password has been sent. You will be required to change it upon first login. Is there anything else? Press 1 for yes, press 2 for no.', delay: 4500 },
+      { type: 'keypress', digit: '2', label: 'No, done', delay: 1000 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '1:42', steps: 18, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+
+  'activate-card': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank card activation line...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank Card Activation. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Please enter your 16-digit card number followed by the pound sign.', delay: 3000 },
+      { type: 'keypress', digit: '****···#', label: 'Entering card number', delay: 2500 },
+      { type: 'ivr-menu', text: 'For verification, please enter the last 4 digits of your Social Security Number.', delay: 3000 },
+      { type: 'keypress', digit: '****', label: 'SSN verification', delay: 1500 },
+      { type: 'ivr-menu', text: 'Please enter your 5-digit billing zip code.', delay: 2500 },
+      { type: 'keypress', digit: '10001', label: 'Zip code', delay: 1500 },
+      { type: 'system', text: 'Verifying information...', delay: 2500 },
+      { type: 'ivr-menu', text: 'Your new Visa card ending in 5531 has been activated. You may begin using it immediately. Would you like to set up a PIN? Press 1 for yes, press 2 for no.', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'No PIN setup', delay: 1200 },
+      { type: 'ivr-menu', text: 'Thank you. Your card is now active. Goodbye.', delay: 2500 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '1:25', steps: 15, holdTime: '0:00', resolution: 'Automated', effort: 'Medium' },
+  },
+
+  'transfer-funds': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '1', label: 'Account Information', delay: 1500 },
+      { type: 'ivr-menu', text: 'Account Menu:\nPress 1 for Balance Inquiry\nPress 2 for Recent Transactions\nPress 3 for Account Services\nPress 4 to return to Main Menu', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Account Services', delay: 1200 },
+      { type: 'ivr-menu', text: 'Account Services:\nPress 1 for Address Change\nPress 2 for Transfers\nPress 3 for Account Closure\nPress 0 to speak with a representative', delay: 4500 },
+      { type: 'keypress', digit: '2', label: 'Transfers', delay: 1200 },
+      { type: 'ivr-menu', text: 'Please enter the account number you wish to transfer FROM, followed by the pound sign.', delay: 3500 },
+      { type: 'keypress', digit: '****···#', label: 'Source account', delay: 2000 },
+      { type: 'ivr-menu', text: 'Please enter the account number you wish to transfer TO, followed by the pound sign.', delay: 3500 },
+      { type: 'keypress', digit: '****···#', label: 'Destination account', delay: 2000 },
+      { type: 'ivr-menu', text: 'Enter the transfer amount in dollars and cents. For example, for $2,500.00 enter 250000 followed by the pound sign.', delay: 4500 },
+      { type: 'keypress', digit: '250000#', label: '$2,500.00', delay: 2000 },
+      { type: 'system', text: 'Processing transfer...', delay: 2500 },
+      { type: 'ivr-menu', text: 'Transfer of $2,500 from Checking to Savings has been completed. Confirmation number: TXN-2026-88341. Is there anything else? Press 1 for yes, press 2 for no.', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'No, done', delay: 1000 },
+      { type: 'system', text: 'Call ended', delay: 500 },
+    ],
+    metrics: { totalTime: '2:05', steps: 20, holdTime: '0:00', resolution: 'Automated', effort: 'High' },
+  },
+
+  'credit-limit': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '2', label: 'Cards and Payments', delay: 1500 },
+      { type: 'ivr-menu', text: 'Cards Menu:\nPress 1 for Balance and Transactions\nPress 2 for Lost or Stolen Card\nPress 3 for Billing Disputes\nPress 4 for Other Card Services', delay: 5000 },
+      { type: 'keypress', digit: '4', label: 'Other Card Services', delay: 1200 },
+      { type: 'ivr-menu', text: 'Other Card Services:\nPress 1 for Rewards Points\nPress 2 for Card Replacement\nPress 3 for Account Upgrade\nPress 0 to speak with a representative', delay: 4500 },
+      { type: 'ivr-menu', text: 'Sorry, I didn\'t get that. Press 1 for Rewards Points, Press 2 for Card Replacement, Press 3 for Account Upgrade, Press 0 for a representative.', delay: 4500 },
+      { type: 'keypress', digit: '0', label: 'Speak with representative', delay: 1200 },
+      { type: 'ivr-menu', text: 'All representatives are currently busy. Your estimated wait time is... 15 minutes. Please hold.', delay: 3500 },
+      { type: 'hold', text: 'On Hold — Waiting for Card Services', holdSecs: 50, subtext: 'Thank you for your patience. Your call will be answered in the order it was received.', delay: 0 },
+      { type: 'agent', text: 'Thank you for calling EXL Bank, this is Michael. How can I help?', label: 'Agent Michael', delay: 2500 },
+      { type: 'customer', text: "Hi Michael, I'd like to request a credit limit increase on my Visa card.", delay: 2000 },
+      { type: 'agent', text: "I'd be happy to help with that. Let me pull up your account. Can you verify your full name and date of birth?", label: 'Agent Michael', delay: 2500 },
+      { type: 'customer', text: "Varun Patel, September 15, 1985.", delay: 1500 },
+      { type: 'agent', text: "Thank you, Varun. I can see your current limit is $15,000. Based on your account history, I'll submit a request for an increase to $25,000. However, this requires a credit review which takes 3–5 business days. You'll receive the decision by mail.", label: 'Agent Michael', delay: 4000 },
+      { type: 'customer', text: "Can't you tell me right now if I'm approved?", delay: 1500 },
+      { type: 'agent', text: "Unfortunately, credit limit increases over $5,000 require underwriting review. I've submitted the request and it will be prioritized. Is there anything else?", label: 'Agent Michael', delay: 3000 },
+      { type: 'system', text: 'Call ended — Resolved by Agent Michael', delay: 500 },
+    ],
+    metrics: { totalTime: '3:10', steps: 21, holdTime: '1:40', resolution: 'Agent handled', effort: 'High' },
+  },
+
+  'mortgage-rate': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '3', label: 'Loans', delay: 1500 },
+      { type: 'ivr-menu', text: 'Loans Menu:\nPress 1 for Personal Loans\nPress 2 for Home Loans\nPress 3 for Auto Loans\nPress 4 for Loan Payments', delay: 4500 },
+      { type: 'keypress', digit: '2', label: 'Home Loans', delay: 1200 },
+      { type: 'ivr-menu', text: 'Home Loans:\nPress 1 for New Mortgage Application\nPress 2 for Existing Mortgage Services\nPress 3 for Refinancing\nPress 0 to speak with a specialist', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Refinancing', delay: 1200 },
+      { type: 'ivr-menu', text: 'For refinancing and rate renegotiation, you will need to speak with a mortgage specialist. Please hold while we transfer you. Estimated wait time is... 22 minutes.', delay: 5000 },
+      { type: 'hold', text: 'On Hold — Waiting for Mortgage Department', holdSecs: 75, subtext: 'All mortgage specialists are currently assisting other clients. We appreciate your patience.', delay: 0 },
+      { type: 'transfer', text: 'Transferring to Mortgage Specialist...', delay: 2500 },
+      { type: 'hold', text: 'On Hold — Secondary Transfer', holdSecs: 30, subtext: 'Please hold while we connect you with the next available specialist.', delay: 0 },
+      { type: 'agent', text: 'Mortgage Department, this is Sarah Williams. How can I assist you today?', label: 'Specialist Sarah', delay: 2500 },
+      { type: 'customer', text: "Hi Sarah, I'd like to renegotiate my mortgage rate. I've been a customer for 12 years and rates have dropped significantly.", delay: 2500 },
+      { type: 'agent', text: "Let me look at your mortgage details. I can see your current rate is 5.2% on a 30-year fixed. To explore renegotiation options, I'll need to run a full property and credit assessment. This typically takes 2–3 weeks.", label: 'Specialist Sarah', delay: 4000 },
+      { type: 'customer', text: "Two to three weeks? Is there any way to expedite this?", delay: 1500 },
+      { type: 'agent', text: "I understand your frustration. For priority processing, I can schedule an in-branch consultation within 5 business days. They'll have full access to your file and can discuss rate options in person. Shall I schedule that?", label: 'Specialist Sarah', delay: 3500 },
+      { type: 'customer', text: "I suppose that's the best option. Yes, please schedule it.", delay: 1500 },
+      { type: 'agent', text: "Done. You have an appointment at the downtown branch on March 3rd at 2 PM. Please bring your most recent pay stubs and tax return. Is there anything else?", label: 'Specialist Sarah', delay: 3000 },
+      { type: 'system', text: 'Call ended — Resolved by Specialist Sarah', delay: 500 },
+    ],
+    metrics: { totalTime: '4:10', steps: 22, holdTime: '2:45', resolution: 'Agent handled', effort: 'Very High' },
+  },
+
+  'wire-transfer': {
+    steps: [
+      { type: 'system', text: 'Dialing EXL Bank customer service...', delay: 1500 },
+      { type: 'system', text: 'Connected', delay: 1000 },
+      { type: 'ivr-menu', text: 'Welcome to EXL Bank. For English, press 1. Para español, oprima 2.', delay: 3500 },
+      { type: 'keypress', digit: '1', label: 'English', delay: 1200 },
+      { type: 'ivr-menu', text: 'Main Menu:\nPress 1 for Account Information\nPress 2 for Cards and Payments\nPress 3 for Loans\nPress 4 for Other Services\nPress 0 to speak with a representative', delay: 5500 },
+      { type: 'keypress', digit: '4', label: 'Other Services', delay: 1500 },
+      { type: 'ivr-menu', text: 'Other Services:\nPress 1 for Online Banking Support\nPress 2 for Branch Locations\nPress 3 for Wire Transfers\nPress 4 for General Inquiries', delay: 4500 },
+      { type: 'keypress', digit: '3', label: 'Wire Transfers', delay: 1200 },
+      { type: 'ivr-menu', text: 'Wire Transfers:\nPress 1 for Domestic Wire\nPress 2 for International Wire\nPress 3 for Wire Transfer Status', delay: 4000 },
+      { type: 'keypress', digit: '2', label: 'International Wire', delay: 1200 },
+      { type: 'ivr-menu', text: 'International wire transfers must be processed by a specialist. Please hold while we connect you. Estimated wait time is... 20 minutes.', delay: 4500 },
+      { type: 'hold', text: 'On Hold — Waiting for International Payments', holdSecs: 65, subtext: 'For faster service, international wires can be initiated online at exlbank.com.', delay: 0 },
+      { type: 'agent', text: 'International Payments, this is James. How can I assist you today?', label: 'Agent James', delay: 2500 },
+      { type: 'customer', text: "Hi James, I need to send $12,000 to my parents' account at HDFC Bank in India.", delay: 2000 },
+      { type: 'agent', text: "I can help with that. I'll need to verify some details. Can I have your account number and the beneficiary's full banking details — SWIFT code, account number, and branch address?", label: 'Agent James', delay: 3500 },
+      { type: 'customer', text: "My checking account ends in 4829. For the beneficiary, the SWIFT code is HDFCINBB, and I have the account details here...", delay: 2500 },
+      { type: 'agent', text: "Thank you. Let me enter those details. The current exchange rate is approximately 1 USD to 83.5 INR. The wire fee is $35, which is waived for Platinum members. The transfer should arrive within 1–2 business days. Shall I proceed?", label: 'Agent James', delay: 4000 },
+      { type: 'customer', text: "Yes, please go ahead.", delay: 1200 },
+      { type: 'agent', text: "The wire has been initiated. Confirmation number WIR-2026-44210. You'll receive an email confirmation shortly. Anything else I can help with?", label: 'Agent James', delay: 3000 },
+      { type: 'system', text: 'Call ended — Resolved by Agent James', delay: 500 },
+    ],
+    metrics: { totalTime: '3:30', steps: 20, holdTime: '2:00', resolution: 'Agent handled', effort: 'High' },
+  },
+};
+
 // ===== App State =====
 const state = {
   currentScenario: null,
@@ -2297,6 +2876,16 @@ const state = {
   aiAudioQueue: [],
   aiNextStartTime: 0,
   aiCurrentResponseId: null,
+  // Compare mode
+  compareMode: false,
+  dtmfPlaying: false,
+  dtmfPlaybackGeneration: 0,
+  dtmfTimerSeconds: 0,
+  dtmfTimerInterval: null,
+  dtmfComplete: false,
+  aiComplete: false,
+  aiCompareTimerSeconds: 0,
+  aiCompareTimerInterval: null,
 };
 
 // ===== DOM References =====
@@ -2339,6 +2928,16 @@ const dom = {
   // AI mode elements
   aiCallIndicator: document.getElementById('aiCallIndicator'),
   btnMute: document.getElementById('btnMute'),
+  // Compare mode elements
+  btnCompare: document.getElementById('btnCompare'),
+  dtmfPane: document.getElementById('dtmfPane'),
+  dtmfTranscript: document.getElementById('dtmfTranscript'),
+  dtmfTimer: document.getElementById('dtmfTimer'),
+  dtmfEmpty: document.getElementById('dtmfEmpty'),
+  aiPane: document.getElementById('aiPane'),
+  aiPaneTimer: document.getElementById('aiPaneTimer'),
+  aiDoneBadge: document.getElementById('aiDoneBadge'),
+  comparisonSummary: document.getElementById('comparisonSummary'),
 };
 
 // ===== Utility =====
@@ -2471,6 +3070,7 @@ function selectProfile(phone) {
 }
 
 function showCallPrompt() {
+  if (state.compareMode) return; // No call prompt in compare mode
   dom.transcript.querySelectorAll('.message, .transfer-card, .resolution-card, .ai-call-prompt').forEach(function(el) { el.remove(); });
   if (dom.emptyState) dom.emptyState.style.display = 'none';
   var customer = CUSTOMER_DB[CALLER_PHONE];
@@ -3847,6 +4447,20 @@ function loadHistory() {
 
 // ===== Scenario Selection =====
 function selectScenario(scenarioId) {
+  // Compare mode: start side-by-side playback
+  if (state.compareMode) {
+    if (state.isPlaying || state.dtmfPlaying) {
+      stopCurrentScenario();
+      stopDtmfPlayback();
+    }
+    startComparePlayback(scenarioId);
+    // Highlight active card
+    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+    const card = document.querySelector('[data-scenario="' + scenarioId + '"]');
+    if (card) card.classList.add('active');
+    return;
+  }
+
   // Stop any running scenario
   if (state.isPlaying) {
     stopCurrentScenario();
@@ -3897,6 +4511,7 @@ function selectScenario(scenarioId) {
 function stopCurrentScenario() {
   stopRingtone();
   state.isPlaying = false;
+  if (state.compareMode) stopDtmfPlayback();
   if (state.abortController) {
     state.abortController.abort();
     state.abortController = null;
@@ -3937,6 +4552,19 @@ function restartScenario() {
   if (state.isPlaying) {
     stopCurrentScenario();
   }
+  // Stop DTMF if in compare mode
+  if (state.compareMode) {
+    stopDtmfPlayback();
+    state.dtmfComplete = false;
+    state.aiComplete = false;
+    dom.dtmfTranscript.innerHTML = '';
+    dom.comparisonSummary.style.display = 'none';
+    dom.comparisonSummary.innerHTML = '';
+    dom.aiDoneBadge.style.display = 'none';
+    dom.aiPaneTimer.textContent = '';
+    dom.aiPaneTimer.style.display = '';
+    dom.dtmfTimer.textContent = '--:--';
+  }
   // Reset state to idle
   state.currentScenario = null;
   state.skipMode = false;
@@ -3962,11 +4590,418 @@ function restartScenario() {
   dom.btnRestart.disabled = true;
   // Re-enable profile selection
   setProfilesDisabled(false);
-  // Show call prompt for current profile
+  // Show call prompt for current profile or compare empty states
+  if (state.compareMode) {
+    renderCompareEmptyStates();
+  } else {
+    showCallPrompt();
+  }
+}
+
+// ===== Compare Mode =====
+function toggleCompareMode() {
+  if (state.compareMode) {
+    exitCompareMode();
+  } else {
+    enterCompareMode();
+  }
+}
+
+function enterCompareMode() {
+  // Don't allow compare mode during live AI calls
+  if (state.aiMode && state.ws) return;
+  state.compareMode = true;
+  document.querySelector('.app').classList.add('compare-mode');
+  dom.btnCompare.classList.add('active');
+  dom.btnCompare.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Exit Compare';
+  // Stop any running scenario
+  if (state.isPlaying) stopCurrentScenario();
+  // Clear both panes
+  dom.transcript.innerHTML = '';
+  dom.dtmfTranscript.innerHTML = '';
+  dom.comparisonSummary.style.display = 'none';
+  dom.comparisonSummary.innerHTML = '';
+  dom.aiDoneBadge.style.display = 'none';
+  dom.aiPaneTimer.textContent = '';
+  dom.dtmfTimer.textContent = '--:--';
+  // Show empty states
+  renderCompareEmptyStates();
+  // Show scenario picker in sidebar
+  showCompareScenarios();
+  // Reset state
+  state.dtmfComplete = false;
+  state.aiComplete = false;
+  state.currentScenario = null;
+  updateCallState('idle');
+}
+
+function exitCompareMode() {
+  state.compareMode = false;
+  stopDtmfPlayback();
+  if (state.isPlaying) stopCurrentScenario();
+  document.querySelector('.app').classList.remove('compare-mode');
+  dom.btnCompare.classList.remove('active');
+  dom.btnCompare.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="8" height="18" rx="1"/><rect x="14" y="3" width="8" height="18" rx="1"/></svg> Compare';
+  dom.transcript.innerHTML = '';
+  dom.comparisonSummary.style.display = 'none';
+  dom.comparisonSummary.innerHTML = '';
+  // Hide scenario picker
+  var cs = document.getElementById('compareScenarios');
+  if (cs) cs.style.display = 'none';
+  state.dtmfComplete = false;
+  state.aiComplete = false;
+  state.currentScenario = null;
+  updateCallState('idle');
   showCallPrompt();
 }
 
+function renderCompareEmptyStates() {
+  dom.dtmfTranscript.innerHTML = '<div class="dtmf-pane__empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M12 18h.01"/></svg><div class="dtmf-pane__empty-text">Select a scenario to compare</div></div>';
+  dom.transcript.innerHTML = '<div class="transcript__empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7v4a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg><div class="transcript__empty-text">AI IVR</div><div class="transcript__empty-sub">Select a scenario from the sidebar</div></div>';
+}
 
+function showCompareScenarios() {
+  var el = document.getElementById('compareScenarios');
+  if (!el) return;
+  var html = '<div class="compare-scenarios__title">Select a Scenario</div>';
+  for (var id in SCENARIOS) {
+    var s = SCENARIOS[id];
+    var flowLabel = s.flow === 'contained' ? '🤖' : '👤';
+    html += '<button class="compare-scenario-btn" data-scenario="' + id + '" onclick="selectScenario(\'' + id + '\')">' + flowLabel + ' ' + s.title + '</button>';
+  }
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+// ===== Compare Playback Orchestrator =====
+function startComparePlayback(scenarioId) {
+  const scenario = SCENARIOS[scenarioId];
+  const dtmfScenario = DTMF_SCENARIOS[scenarioId];
+  if (!scenario || !dtmfScenario) return;
+
+  state.currentScenario = scenario;
+  state.dtmfComplete = false;
+  state.aiComplete = false;
+  state.playbackGeneration++;
+  state.dtmfPlaybackGeneration++;
+
+  // Clear panes
+  dom.transcript.innerHTML = '';
+  dom.dtmfTranscript.innerHTML = '';
+  dom.comparisonSummary.style.display = 'none';
+  dom.comparisonSummary.innerHTML = '';
+  dom.aiDoneBadge.style.display = 'none';
+
+  // Show caller info
+  showCallerInfo(CUSTOMER_DB[CALLER_PHONE]);
+
+  // Start both playbacks simultaneously
+  playAiSideCompare(scenario, scenarioId);
+  playDtmfScenario(dtmfScenario, scenarioId);
+}
+
+// ===== AI Side (Compare Mode) =====
+async function playAiSideCompare(scenario, scenarioId) {
+  const gen = state.playbackGeneration;
+  state.isPlaying = true;
+  state.abortController = new AbortController();
+
+  // Start AI-side timer
+  state.aiCompareTimerSeconds = 0;
+  clearInterval(state.aiCompareTimerInterval);
+  state.aiCompareTimerInterval = setInterval(() => {
+    if (gen !== state.playbackGeneration) { clearInterval(state.aiCompareTimerInterval); return; }
+    state.aiCompareTimerSeconds++;
+    dom.aiPaneTimer.textContent = formatTime(state.aiCompareTimerSeconds);
+  }, 1000);
+
+  const messages = scenario.messages;
+  const vars = ENTITY_DEFAULTS[scenarioId] || {};
+
+  try {
+    for (let i = 0; i < messages.length; i++) {
+      if (gen !== state.playbackGeneration) return;
+      const msg = { ...messages[i] };
+
+      // Template variable substitution
+      if (msg.text) {
+        msg.text = msg.text.replace(/\{\{(\w+)\}\}/g, (_, k) => {
+          const v = vars[k];
+          return Array.isArray(v) ? v[Math.floor(Math.random() * v.length)] : (v || _);
+        });
+      }
+
+      // Update call state if specified
+      if (msg.state) updateCallState(msg.state);
+
+      // Show thinking indicator for bot/agent messages
+      if ((msg.type === 'bot' || msg.type === 'agent') && msg.thinkingTime) {
+        showTypingIndicator(msg.type, msg.agentName);
+        await sleepCompare(msg.thinkingTime, gen);
+        if (gen !== state.playbackGeneration) return;
+        removeTypingIndicator();
+      }
+
+      // Render the message
+      renderMessage(msg);
+
+      // Wait for the message delay
+      if (msg.delay) {
+        await sleepCompare(msg.delay, gen);
+      }
+    }
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    throw e;
+  }
+
+  // AI side done
+  clearInterval(state.aiCompareTimerInterval);
+  state.isPlaying = false;
+  state.aiComplete = true;
+  dom.aiDoneBadge.style.display = 'flex';
+  dom.aiPaneTimer.style.display = 'none';
+
+  // Render resolution card
+  if (scenario.resolution) {
+    renderResolutionCard(scenario);
+  }
+
+  checkCompareComplete(scenarioId);
+}
+
+function sleepCompare(ms, gen) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (gen !== state.playbackGeneration) {
+        reject(new DOMException('Aborted', 'AbortError'));
+      } else {
+        resolve();
+      }
+    }, ms);
+  });
+}
+
+// ===== DTMF Side Playback =====
+async function playDtmfScenario(dtmfScenario, scenarioId) {
+  const gen = state.dtmfPlaybackGeneration;
+  state.dtmfPlaying = true;
+
+  // Clear empty state
+  dom.dtmfTranscript.innerHTML = '';
+
+  // Start DTMF timer
+  state.dtmfTimerSeconds = 0;
+  clearInterval(state.dtmfTimerInterval);
+  state.dtmfTimerInterval = setInterval(() => {
+    if (gen !== state.dtmfPlaybackGeneration) { clearInterval(state.dtmfTimerInterval); return; }
+    state.dtmfTimerSeconds++;
+    dom.dtmfTimer.textContent = formatTime(state.dtmfTimerSeconds);
+  }, 1000);
+
+  const steps = dtmfScenario.steps;
+
+  try {
+    for (let i = 0; i < steps.length; i++) {
+      if (gen !== state.dtmfPlaybackGeneration) return;
+      const step = steps[i];
+
+      switch (step.type) {
+        case 'system':
+          renderDtmfSystem(step.text);
+          await sleepDtmf(step.delay, gen);
+          break;
+        case 'ivr-menu':
+          await renderDtmfMenu(step.text, gen);
+          await sleepDtmf(step.delay, gen);
+          break;
+        case 'keypress':
+          renderDtmfKeypress(step.digit, step.label);
+          await sleepDtmf(step.delay, gen);
+          break;
+        case 'hold':
+          await renderDtmfHold(step.text, step.holdSecs, step.subtext, gen);
+          break;
+        case 'agent':
+          renderDtmfAgent(step.text, step.label);
+          await sleepDtmf(step.delay, gen);
+          break;
+        case 'customer':
+          renderDtmfCustomer(step.text);
+          await sleepDtmf(step.delay, gen);
+          break;
+        case 'transfer':
+          renderDtmfTransfer(step.text);
+          await sleepDtmf(step.delay, gen);
+          break;
+      }
+    }
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    throw e;
+  }
+
+  // DTMF done
+  clearInterval(state.dtmfTimerInterval);
+  state.dtmfPlaying = false;
+  state.dtmfComplete = true;
+  checkCompareComplete(scenarioId);
+}
+
+function sleepDtmf(ms, gen) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (gen !== state.dtmfPlaybackGeneration) {
+        reject(new DOMException('Aborted', 'AbortError'));
+      } else {
+        resolve();
+      }
+    }, ms);
+  });
+}
+
+function stopDtmfPlayback() {
+  state.dtmfPlaybackGeneration++;
+  state.dtmfPlaying = false;
+  clearInterval(state.dtmfTimerInterval);
+  clearInterval(state.aiCompareTimerInterval);
+}
+
+// ===== DTMF Rendering Functions =====
+function scrollDtmfToBottom() {
+  dom.dtmfTranscript.scrollTop = dom.dtmfTranscript.scrollHeight;
+}
+
+function renderDtmfSystem(text) {
+  const el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--system';
+  el.textContent = text;
+  dom.dtmfTranscript.appendChild(el);
+  scrollDtmfToBottom();
+}
+
+async function renderDtmfMenu(text, gen) {
+  const el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--ivr';
+  el.innerHTML = '<div class="dtmf-ivr-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg> IVR System</div>';
+  const textSpan = document.createElement('div');
+  el.appendChild(textSpan);
+  dom.dtmfTranscript.appendChild(el);
+  scrollDtmfToBottom();
+
+  // Typewriter effect
+  const chars = text.split('');
+  let output = '';
+  for (let i = 0; i < chars.length; i++) {
+    if (gen !== state.dtmfPlaybackGeneration) return;
+    output += chars[i];
+    textSpan.textContent = output;
+    scrollDtmfToBottom();
+    // Slower at newlines and periods
+    const charDelay = chars[i] === '\n' ? 80 : (chars[i] === '.' ? 60 : 25);
+    await sleepDtmf(charDelay, gen);
+  }
+}
+
+function renderDtmfKeypress(digit, label) {
+  const el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--keypress';
+  el.innerHTML = '<span class="dtmf-key-label">' + label + '</span><div class="dtmf-key-badge">' + digit.substring(0, 2) + '</div>';
+  dom.dtmfTranscript.appendChild(el);
+  scrollDtmfToBottom();
+}
+
+async function renderDtmfHold(text, holdSecs, subtext, gen) {
+  const el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--hold';
+  el.innerHTML =
+    '<div class="dtmf-hold-icon">🎵</div>' +
+    '<div class="dtmf-hold-text">' + text + '</div>' +
+    '<div class="dtmf-hold-subtext">' + (subtext || 'Your call is important to us...') + '</div>' +
+    '<div class="dtmf-hold-timer" id="holdCountdown">0:00</div>';
+  dom.dtmfTranscript.appendChild(el);
+  scrollDtmfToBottom();
+
+  const countdownEl = el.querySelector('.dtmf-hold-timer');
+  let elapsed = 0;
+  // Accelerated: 1 real second = 3 hold seconds
+  const acceleration = 3;
+  const intervalMs = 333; // tick every 333ms to advance 1 hold-second
+
+  while (elapsed < holdSecs) {
+    if (gen !== state.dtmfPlaybackGeneration) return;
+    await sleepDtmf(intervalMs, gen);
+    elapsed++;
+    const m = Math.floor(elapsed / 60);
+    const s = (elapsed % 60).toString().padStart(2, '0');
+    countdownEl.textContent = m + ':' + s;
+    scrollDtmfToBottom();
+  }
+}
+
+function renderDtmfAgent(text, label) {
+  const el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--agent';
+  el.innerHTML = '<div class="dtmf-agent-label">👤 ' + (label || 'Agent') + '</div>' + text;
+  dom.dtmfTranscript.appendChild(el);
+  scrollDtmfToBottom();
+}
+
+function renderDtmfCustomer(text) {
+  const el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--customer';
+  el.textContent = text;
+  dom.dtmfTranscript.appendChild(el);
+  scrollDtmfToBottom();
+}
+
+function renderDtmfTransfer(text) {
+  const el = document.createElement('div');
+  el.className = 'dtmf-msg dtmf-msg--transfer';
+  el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 004 4h12"/></svg> ' + text;
+  dom.dtmfTranscript.appendChild(el);
+  scrollDtmfToBottom();
+}
+
+// ===== Comparison Summary =====
+function checkCompareComplete(scenarioId) {
+  if (!state.dtmfComplete || !state.aiComplete) return;
+  const dtmfMetrics = DTMF_SCENARIOS[scenarioId]?.metrics;
+  if (!dtmfMetrics) return;
+  renderComparisonSummary(dtmfMetrics, scenarioId);
+}
+
+function renderComparisonSummary(dtmfMetrics, scenarioId) {
+  const scenario = SCENARIOS[scenarioId];
+  const aiTime = formatTime(state.aiCompareTimerSeconds);
+  const aiResolution = scenario.flow === 'contained' ? 'Bot contained' : 'Agent resolved';
+
+  dom.comparisonSummary.style.display = 'block';
+  dom.comparisonSummary.innerHTML =
+    '<div class="comparison-summary__grid">' +
+      '<div class="comparison-summary__metric">' +
+        '<div class="comparison-summary__label">Total Time</div>' +
+        '<div class="comparison-summary__values">' +
+          '<div><div class="comparison-summary__val comparison-summary__val--bad">' + dtmfMetrics.totalTime + '</div><div class="comparison-summary__val-label">Traditional</div></div>' +
+          '<div><div class="comparison-summary__val comparison-summary__val--good">' + aiTime + '</div><div class="comparison-summary__val-label">AI IVR</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="comparison-summary__metric">' +
+        '<div class="comparison-summary__label">Hold Time</div>' +
+        '<div class="comparison-summary__values">' +
+          '<div><div class="comparison-summary__val comparison-summary__val--bad">' + dtmfMetrics.holdTime + '</div><div class="comparison-summary__val-label">Traditional</div></div>' +
+          '<div><div class="comparison-summary__val comparison-summary__val--good">None</div><div class="comparison-summary__val-label">AI IVR</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="comparison-summary__metric">' +
+        '<div class="comparison-summary__label">Resolution</div>' +
+        '<div class="comparison-summary__values">' +
+          '<div><div class="comparison-summary__val comparison-summary__val--bad">' + dtmfMetrics.resolution + '</div><div class="comparison-summary__val-label">Traditional</div></div>' +
+          '<div><div class="comparison-summary__val comparison-summary__val--good">' + aiResolution + '</div><div class="comparison-summary__val-label">AI IVR</div></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
 
 function updateModeBadge(isAi) {
   // Mode badge removed from UI
@@ -4520,6 +5555,9 @@ async function initiateAiCall(scenarioId) {
 // ===== AI Call Flow =====
 
 async function startAiCall(scenarioId) {
+  // Disable compare button during live calls
+  dom.btnCompare.disabled = true;
+  dom.btnCompare.style.opacity = '0.5';
   // Reset state
   state.aiMuted = false;
   state.aiEnding = null;
@@ -4569,6 +5607,9 @@ async function startAiCall(scenarioId) {
 }
 
 function endAiCall() {
+  // Re-enable compare button
+  dom.btnCompare.disabled = false;
+  dom.btnCompare.style.opacity = '';
   stopRingtone();
 
   // Close WebSocket
