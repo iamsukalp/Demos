@@ -36,6 +36,12 @@ try:
 except ImportError:
     LLM_AVAILABLE = False
 
+# Import guardrails PII scrubber (graceful if missing)
+try:
+    from guardrails import scrub_pii
+except ImportError:
+    scrub_pii = None
+
 # WebSocket client library for OpenAI relay
 try:
     import websockets
@@ -381,6 +387,27 @@ async def ws_relay(request):
                                 }
                             }))
                             await openai_ws.send(json.dumps({"type": "response.create"}))
+
+                        # PII scrub on transcript text before forwarding
+                        if scrub_pii and evt_type in (
+                            'response.audio_transcript.delta',
+                            'response.audio_transcript.done',
+                            'conversation.item.input_audio_transcription.completed',
+                        ):
+                            scrubbed = False
+                            if 'delta' in data and isinstance(data['delta'], str):
+                                cleaned = scrub_pii(data['delta'])
+                                if cleaned != data['delta']:
+                                    data['delta'] = cleaned
+                                    scrubbed = True
+                            if 'transcript' in data and isinstance(data['transcript'], str):
+                                cleaned = scrub_pii(data['transcript'])
+                                if cleaned != data['transcript']:
+                                    data['transcript'] = cleaned
+                                    scrubbed = True
+                            if scrubbed:
+                                message = json.dumps(data)
+                                print(f"  [PII] Scrubbed transcript in {evt_type}")
 
                         await browser_ws.send_str(message)
 
