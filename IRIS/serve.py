@@ -355,6 +355,7 @@ async def relay_handler(browser_ws):
     scenario_id = params.get('scenario', [None])[0]
     phone = params.get('phone', [None])[0]
     silence_ms = int(params.get('silence', [1000])[0])
+    disconnect_timeout = max(3, min(15, int(params.get('disconnect_timeout', [5])[0])))
     mode = params.get('mode', [None])[0]
 
     # Look up customer from phone number
@@ -421,7 +422,7 @@ async def relay_handler(browser_ws):
             async def openai_to_browser():
                 """Forward messages from OpenAI to browser, intercept function calls."""
                 # Silence timer: detect when user doesn't respond after AI speaks
-                SILENCE_TIMEOUT_S = 5
+                SILENCE_TIMEOUT_S = disconnect_timeout
                 MAX_SILENCE_PROMPTS = 2
                 silence_timer_task = None
                 silence_prompt_count = 0

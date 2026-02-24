@@ -1921,6 +1921,11 @@
       <input type="range" id="settingSilenceDuration" min="500" max="5000" step="250" value="1000" oninput="updateSilenceLabel(this.value); saveAudioSettings()" style="width:100%;accent-color:var(--accent);">
       <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-top:2px;"><span>0.5s (fast)</span><span>5s (patient)</span></div>
     </div>
+    <div class="settings-panel__group">
+      <label class="settings-panel__label">No Response Timeout <span id="disconnectTimeoutValue" style="float:right;font-weight:600;">5s</span></label>
+      <input type="range" id="settingDisconnectTimeout" min="3" max="15" step="1" value="5" oninput="updateDisconnectTimeoutLabel(this.value); saveAudioSettings()" style="width:100%;accent-color:var(--accent);">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-500);margin-top:2px;"><span>3s (quick)</span><span>15s (patient)</span></div>
+    </div>
   </div>
 
 
@@ -5101,7 +5106,7 @@ function connectRealtime(scenarioId) {
   return new Promise((resolve, reject) => {
     // Auto-detect protocol (wss for HTTPS, ws for HTTP) and host for local + deployed
     const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = wsProto + '//' + location.host + '/ws?scenario=' + (scenarioId || '') + '&phone=' + encodeURIComponent(CALLER_PHONE) + '&silence=' + getSilenceDuration();
+    const wsUrl = wsProto + '//' + location.host + '/ws?scenario=' + (scenarioId || '') + '&phone=' + encodeURIComponent(CALLER_PHONE) + '&silence=' + getSilenceDuration() + '&disconnect_timeout=' + getDisconnectTimeout();
     const ws = new WebSocket(wsUrl);
     state.ws = ws;
 
@@ -5789,6 +5794,14 @@ function getSilenceDuration() {
   return parseInt(document.getElementById('settingSilenceDuration').value) || 1000;
 }
 
+function updateDisconnectTimeoutLabel(val) {
+  document.getElementById('disconnectTimeoutValue').textContent = val + 's';
+}
+
+function getDisconnectTimeout() {
+  return parseInt(document.getElementById('settingDisconnectTimeout').value) || 5;
+}
+
 function saveAudioSettings() {
   const settings = {
     noiseSuppression: document.getElementById('settingNoiseSuppression').checked,
@@ -5796,6 +5809,7 @@ function saveAudioSettings() {
     autoGainControl: document.getElementById('settingAutoGain').checked,
     environment: document.getElementById('settingEnvironment').value,
     silenceDuration: getSilenceDuration(),
+    disconnectTimeout: getDisconnectTimeout(),
   };
   localStorage.setItem('iris-audio-settings', JSON.stringify(settings));
 }
@@ -5811,6 +5825,10 @@ function loadAudioSettings() {
     if (saved.silenceDuration) {
       document.getElementById('settingSilenceDuration').value = saved.silenceDuration;
       updateSilenceLabel(saved.silenceDuration);
+    }
+    if (saved.disconnectTimeout) {
+      document.getElementById('settingDisconnectTimeout').value = saved.disconnectTimeout;
+      updateDisconnectTimeoutLabel(saved.disconnectTimeout);
     }
   } catch (e) {}
 }

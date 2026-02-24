@@ -282,8 +282,9 @@ async def ws_relay(request):
     scenario_id = request.query.get('scenario') or None
     phone = request.query.get('phone') or None
     silence_ms = int(request.query.get('silence', 1000))
+    disconnect_timeout = max(3, min(15, int(request.query.get('disconnect_timeout', 5))))
     mode = request.query.get('mode') or None
-    print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}, silence={silence_ms}ms, mode={mode}")
+    print(f"  [WS] Browser connected — scenario={scenario_id}, phone={phone}, silence={silence_ms}ms, disconnect_timeout={disconnect_timeout}s, mode={mode}")
 
     # Upgrade to WebSocket
     browser_ws = web.WebSocketResponse(max_msg_size=2**24)
@@ -356,7 +357,7 @@ async def ws_relay(request):
             async def openai_to_browser():
                 msg_count = 0
                 # Silence timer: detect when user doesn't respond after AI speaks
-                SILENCE_TIMEOUT_S = 5
+                SILENCE_TIMEOUT_S = disconnect_timeout
                 MAX_SILENCE_PROMPTS = 2
                 silence_timer_task = None
                 silence_prompt_count = 0
