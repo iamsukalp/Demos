@@ -922,7 +922,7 @@
     .comparison-summary { display: none; }
 
     .app.compare-mode .main {
-      display: flex; flex-direction: row; flex-wrap: wrap; gap: 0; overflow: hidden;
+      display: flex; flex-direction: row; gap: 0; overflow: hidden;
       position: relative;
     }
     .app.compare-mode .comparison-summary {
@@ -930,13 +930,14 @@
     }
     .app.compare-mode .dtmf-pane {
       display: flex; flex-direction: column;
-      width: 50%; min-width: 0;
+      width: 50%; min-width: 0; height: 100%;
       border-right: 1px solid var(--gray-200);
-      position: relative;
+      overflow: hidden;
     }
     .app.compare-mode .ai-pane {
       display: flex; flex-direction: column;
-      width: 50%; min-width: 0;
+      width: 50%; min-width: 0; height: 100%;
+      overflow: hidden;
     }
     .app.compare-mode .ai-pane__header { display: flex; }
     .app.compare-mode .call-status,
