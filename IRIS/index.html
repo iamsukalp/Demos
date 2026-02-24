@@ -3722,21 +3722,6 @@ function renderHistory() {
     };
     const badgeClass = h.outcome === 'contained' ? 'history-card__badge--contained' : 'history-card__badge--escalated';
     const badgeText = h.outcome === 'contained' ? 'Contained' : 'Escalated';
-    let messagesHtml = '';
-    if (h.messages && h.messages.length > 0) {
-      messagesHtml = '<div class="history-card__transcript">' +
-        '<div class="history-card__transcript-title">Conversation</div>' +
-        h.messages.map(m => {
-          const isCustomer = m.role === 'customer' || m.role === 'user';
-          const label = isCustomer ? 'Customer' : 'AI Assistant';
-          const cls = isCustomer ? 'history-msg--customer' : 'history-msg--bot';
-          return '<div class="history-msg ' + cls + '">' +
-            '<span class="history-msg__label">' + label + '</span>' +
-            '<span class="history-msg__text">' + escapeHtml(m.text || '') + '</span>' +
-          '</div>';
-        }).join('') +
-      '</div>';
-    }
     card.innerHTML =
       '<div class="history-card__header">' +
         '<span class="history-card__name">' + escapeHtml(h.customerName || 'Unknown') + '</span>' +
@@ -3750,7 +3735,6 @@ function renderHistory() {
       '<div class="history-card__details">' +
         '<div><strong>Phone:</strong> ' + escapeHtml(h.customerPhone || '') + '</div>' +
         '<div><strong>Actions:</strong> ' + escapeHtml(h.actionsTaken || 'None') + '</div>' +
-        messagesHtml +
       '</div>';
     container.appendChild(card);
   });
